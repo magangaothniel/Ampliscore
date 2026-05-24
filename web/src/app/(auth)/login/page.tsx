@@ -48,7 +48,7 @@ export default function LoginPage() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: "https://ampliscore.vercel.app/auth/callback",
       },
     });
   };
@@ -64,9 +64,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-medium text-[#1E1040]">Welcome back</h1>
           <p className="text-sm text-purple-900/50 mt-1">Log in to your account</p>
         </div>
-
         <div className="bg-white rounded-2xl border border-purple-100 p-8">
-          {/* Google Sign In */}
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading}
@@ -80,29 +78,23 @@ export default function LoginPage() {
             </svg>
             {googleLoading ? "Redirecting..." : "Continue with Google"}
           </button>
-
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-purple-100" />
             <span className="text-xs text-purple-900/30">or</span>
             <div className="flex-1 h-px bg-purple-100" />
           </div>
-
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Email</label>
-              <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@university.edu" required
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-              />
+                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
             </div>
             <div>
               <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Password</label>
-              <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••" required
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-              />
+                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
             </div>
             {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100">{error}</div>}
             <button type="submit" disabled={loading}
@@ -110,7 +102,6 @@ export default function LoginPage() {
               {loading ? "Logging in..." : "Log in"}
             </button>
           </form>
-
           <p className="text-center text-sm text-purple-900/50 mt-6">
             Don't have an account?{" "}
             <Link href="/register" className="text-purple-600 font-medium hover:underline">Sign up free</Link>
