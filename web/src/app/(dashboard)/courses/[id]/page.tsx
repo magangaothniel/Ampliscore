@@ -6,22 +6,6 @@ import { createClient } from "@/lib/supabase";
 import { getLetterGrade, getGradeColor } from "@/lib/utils";
 import AIGradePredictor from "@/components/AIGradePredictor";
 
-function Logo() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-      <rect width="36" height="36" rx="10" fill="#EDE9FE"/>
-      <circle cx="18" cy="18" r="9" fill="none" stroke="#7C3AED" strokeWidth="2"/>
-      <circle cx="18" cy="18" r="5" fill="#DDD6FE"/>
-      <circle cx="18" cy="18" r="2.5" fill="#7C3AED"/>
-      <line x1="18" y1="9" x2="18" y2="12" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="18" y1="24" x2="18" y2="27" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="9" y1="18" x2="12" y2="18" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="24" y1="18" x2="27" y2="18" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="13" y1="13" x2="15.5" y2="15.5" stroke="#7C3AED" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  );
-}
-
 export default function CourseDetailPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -134,19 +118,6 @@ export default function CourseDetailPage() {
 
   return (
     <main className="min-h-screen bg-[#F5F3FF]">
-      <nav className="bg-white border-b border-purple-100 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Logo />
-          <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="text-sm text-purple-900/50 hover:text-purple-600">Dashboard</Link>
-          <Link href="/courses" className="text-sm font-medium text-purple-600">Courses</Link>
-          <Link href="/professors" className="text-sm text-purple-900/50 hover:text-purple-600">Professors</Link>
-          <Link href="/gpa" className="text-sm text-purple-900/50 hover:text-purple-600">GPA Planner</Link>
-        </div>
-        <Link href="/courses" className="text-sm text-purple-600 hover:underline">← Back</Link>
-      </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Course Header */}
