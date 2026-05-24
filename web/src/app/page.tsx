@@ -110,7 +110,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-purple-100 bg-white py-6 text-center text-sm text-purple-400">
-        © 2025 Ampliscore · Know where you stand
+        © 2026 Ampliscore · Know where you stand
       </footer>
     </main>
   );

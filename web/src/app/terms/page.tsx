@@ -58,7 +58,7 @@ export default function TermsPage() {
         </div>
       </div>
       <footer className="border-t border-purple-100 bg-white py-6 text-center text-sm text-purple-400 mt-8">
-        © 2025 Ampliscore · <Link href="/privacy" className="hover:text-purple-600">Privacy Policy</Link>
+        © 2026 Ampliscore · <Link href="/privacy" className="hover:text-purple-600">Privacy Policy</Link>
       </footer>
     </main>
   );
