@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import NavBar from "@/components/NavBar";
+import GuidedTour from "@/components/GuidedTour";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<any>(null);
@@ -20,6 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-[#F5F3FF]">
       <NavBar profile={profile} />
+      <GuidedTour profile={profile} />
       {children}
     </div>
   );
