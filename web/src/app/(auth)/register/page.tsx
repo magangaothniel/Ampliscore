@@ -46,7 +46,7 @@ export default function RegisterPage() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://ampliscore.vercel.app/auth/callback" },
+      options: { redirectTo: "https://ampliscore.vercel.app/auth/confirm" },
     });
   };
 
