@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { getLetterGrade, getGradeColor } from "@/lib/utils";
+import AIGradePredictor from "@/components/AIGradePredictor";
 
 function Logo() {
   return (
@@ -29,6 +30,7 @@ export default function CourseDetailPage() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState("");
+  const [isPro, setIsPro] = useState(false);
   const [showCatModal, setShowCatModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [catForm, setCatForm] = useState({ name: "", weight: "" });
@@ -42,6 +44,8 @@ export default function CourseDetailPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
     setUserId(user.id);
+    const { data: profileData } = await supabase.from("profiles").select("is_pro").eq("id", user.id).single();
+    setIsPro(profileData?.is_pro || false);
     const { data: courseData } = await supabase.from("courses").select("*").eq("id", id).single();
     const { data: catData } = await supabase.from("grade_categories").select("*").eq("course_id", id);
     const { data: assignData } = await supabase.from("assignments").select("*").eq("course_id", id).order("created_at", { ascending: false });
@@ -264,7 +268,12 @@ export default function CourseDetailPage() {
         </div>
       </div>
 
-      {/* Add Category Modal */}
+      {/* AI Grade Predictor */}
+      <div className="mt-6 px-4 md:px-0 max-w-2xl mx-auto">
+        <AIGradePredictor course={course} categories={categories} assignments={assignments} isPro={isPro} />
+      </div>
+
+            {/* Add Category Modal */}
       {showCatModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
