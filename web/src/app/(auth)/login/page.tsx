@@ -103,7 +103,8 @@ export default function LoginPage() {
             </button>
           </form>
           <p className="text-center text-sm text-purple-900/50 mt-6">
-            Don't have an account?{" "}
+            <Link href="/reset-password" className="text-purple-600 hover:underline text-sm block text-center mb-4">Forgot password?</Link>
+          Don't have an account?{" "}
             <Link href="/register" className="text-purple-600 font-medium hover:underline">Sign up free</Link>
           </p>
         </div>
