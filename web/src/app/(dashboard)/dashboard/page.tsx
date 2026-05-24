@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { getLetterGrade, getGradeColor, calculateGPA } from "@/lib/utils";
 import Link from "next/link";
-import NavBar from "@/components/NavBar";
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -34,7 +33,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#F5F3FF]">
-      <NavBar profile={profile} />
+      
 
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8">
         {/* Pro upgrade banner */}
