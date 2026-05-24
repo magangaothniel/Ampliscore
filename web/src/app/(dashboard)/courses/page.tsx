@@ -22,39 +22,42 @@ function Logo() {
 }
 
 const COLORS = ["#7C3AED","#10B981","#3B82F6","#F59E0B","#EF4444","#EC4899","#8B5CF6","#14B8A6"];
+const FREE_LIMIT = 4;
 
 export default function CoursesPage() {
   const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string>("");
   const [form, setForm] = useState({
     name: "", code: "", professor: "", credits: "3",
-    semester: "Fall", year: "2025", color: "#7C3AED",
+    semester: "Fall", year: "2026", color: "#7C3AED",
   });
 
-  useEffect(() => {
-    fetchCourses();
-  }, []);
+  useEffect(() => { fetchCourses(); }, []);
 
   const fetchCourses = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
     setUserId(user.id);
-    const { data } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
+    const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+    setProfile(profileData);
+    const { data } = await supabase.from("courses").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
     setCourses(data || []);
     setLoading(false);
   };
 
+  const isPro = profile?.is_pro;
+  const atLimit = !isPro && courses.length >= FREE_LIMIT;
+  const nearLimit = !isPro && courses.length === FREE_LIMIT - 1;
+
   const handleAddCourse = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (atLimit) return;
     setSaving(true);
     const supabase = createClient();
     const { error } = await supabase.from("courses").insert({
@@ -70,7 +73,7 @@ export default function CoursesPage() {
     });
     if (!error) {
       setShowModal(false);
-      setForm({ name: "", code: "", professor: "", credits: "3", semester: "Fall", year: "2025", color: "#7C3AED" });
+      setForm({ name: "", code: "", professor: "", credits: "3", semester: "Fall", year: "2026", color: "#7C3AED" });
       fetchCourses();
     }
     setSaving(false);
@@ -91,41 +94,84 @@ export default function CoursesPage() {
 
   return (
     <main className="min-h-screen bg-[#F5F3FF]">
-      {/* Nav */}
       <nav className="bg-white border-b border-purple-100 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <Link href="/dashboard" className="flex items-center gap-3">
           <Logo />
           <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
-        </div>
+        </Link>
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="text-sm text-purple-900/50 hover:text-purple-600">Dashboard</Link>
           <Link href="/courses" className="text-sm font-medium text-purple-600">Courses</Link>
           <Link href="/professors" className="text-sm text-purple-900/50 hover:text-purple-600">Professors</Link>
           <Link href="/gpa" className="text-sm text-purple-900/50 hover:text-purple-600">GPA Planner</Link>
+          {!isPro && (
+            <Link href="/upgrade" className="text-sm bg-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+              ⚡ Upgrade
+            </Link>
+          )}
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
-        >
-          + Add course
-        </button>
+        <Link href="/profile" className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium hover:bg-purple-700 transition-colors">
+          {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
+        </Link>
       </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl font-medium text-[#1E1040]">My courses</h1>
-          <p className="text-sm text-purple-900/50 mt-1">{courses.length} course{courses.length !== 1 ? "s" : ""} this semester</p>
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-medium text-[#1E1040]">My courses</h1>
+            <p className="text-sm text-purple-900/50 mt-1">{courses.length} course{courses.length !== 1 ? "s" : ""} this semester</p>
+          </div>
+          {atLimit ? (
+            <Link href="/upgrade" className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
+              ⚡ Upgrade to add more
+            </Link>
+          ) : (
+            <button onClick={() => setShowModal(true)} className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
+              + Add course
+            </button>
+          )}
         </div>
+
+        {/* Free tier usage bar */}
+        {!isPro && (
+          <div className="bg-white rounded-2xl border border-purple-100 p-4 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-[#1E1040] font-medium">Free plan · Course slots</span>
+              <span className={`text-sm font-medium ${atLimit ? "text-red-500" : nearLimit ? "text-amber-500" : "text-purple-600"}`}>
+                {courses.length} / {FREE_LIMIT} used
+              </span>
+            </div>
+            <div className="w-full bg-purple-50 rounded-full h-2 mb-2">
+              <div
+                className="h-2 rounded-full transition-all"
+                style={{
+                  width: `${(courses.length / FREE_LIMIT) * 100}%`,
+                  background: atLimit ? "#EF4444" : nearLimit ? "#F59E0B" : "#7C3AED"
+                }}
+              />
+            </div>
+            {atLimit ? (
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-red-500">You've reached the free limit.</p>
+                <Link href="/upgrade" className="text-xs text-purple-600 font-medium hover:underline">Upgrade for unlimited →</Link>
+              </div>
+            ) : nearLimit ? (
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-amber-500">1 slot remaining on free plan.</p>
+                <Link href="/upgrade" className="text-xs text-purple-600 font-medium hover:underline">Upgrade for unlimited →</Link>
+              </div>
+            ) : (
+              <p className="text-xs text-purple-900/40">{FREE_LIMIT - courses.length} slots remaining · <Link href="/upgrade" className="text-purple-600 hover:underline">Upgrade for unlimited</Link></p>
+            )}
+          </div>
+        )}
 
         {courses.length === 0 ? (
           <div className="bg-white rounded-2xl border border-purple-100 py-20 text-center">
             <div className="text-5xl mb-4">📚</div>
             <h2 className="text-lg font-medium text-[#1E1040] mb-2">No courses yet</h2>
             <p className="text-sm text-purple-900/50 mb-6">Add your first course to start tracking your grades</p>
-            <button
-              onClick={() => setShowModal(true)}
-              className="bg-purple-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
-            >
+            <button onClick={() => setShowModal(true)} className="bg-purple-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
               Add your first course
             </button>
           </div>
@@ -143,14 +189,8 @@ export default function CoursesPage() {
                         <p className="text-xs text-purple-900/40">{course.code} · {course.semester} {course.year}</p>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDelete(course.id)}
-                      className="text-purple-900/20 hover:text-red-400 transition-colors text-lg leading-none"
-                    >
-                      ×
-                    </button>
+                    <button onClick={() => handleDelete(course.id)} className="text-purple-900/20 hover:text-red-400 transition-colors text-lg leading-none">×</button>
                   </div>
-
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <div className="text-xs text-purple-900/40 mb-0.5">Professor</div>
@@ -161,38 +201,58 @@ export default function CoursesPage() {
                       <div className="text-sm text-[#1E1040]">{course.credits} cr</div>
                     </div>
                     <div className="text-right">
-                      <div className={`text-2xl font-medium ${getGradeColor(grade)}`}>{grade}%</div>
-                      <div className="text-xs text-purple-900/40">{getLetterGrade(grade)}</div>
+                      {grade > 0 ? (
+                        <>
+                          <div className={`text-2xl font-medium ${getGradeColor(grade)}`}>{grade}%</div>
+                          <div className="text-xs text-purple-900/40">{getLetterGrade(grade)}</div>
+                        </>
+                      ) : (
+                        <div className="text-sm text-purple-900/30">N/A</div>
+                      )}
                     </div>
                   </div>
-
                   <div className="w-full bg-purple-50 rounded-full h-2 mb-4">
-                    <div
-                      className="h-2 rounded-full transition-all"
-                      style={{
-                        width: `${grade}%`,
-                        background: grade >= 70 ? "#10B981" : grade >= 60 ? "#F59E0B" : "#EF4444"
-                      }}
-                    />
+                    <div className="h-2 rounded-full transition-all" style={{
+                      width: `${grade}%`,
+                      background: grade >= 70 ? "#10B981" : grade >= 60 ? "#F59E0B" : "#EF4444"
+                    }} />
                   </div>
-
                   <div className="flex gap-2">
-                    <Link
-                      href={`/courses/${course.id}`}
-                      className="flex-1 text-center bg-purple-50 text-purple-700 py-2 rounded-xl text-xs font-medium hover:bg-purple-100 transition-colors"
-                    >
+                    <Link href={`/courses/${course.id}`} className="flex-1 text-center bg-purple-50 text-purple-700 py-2 rounded-xl text-xs font-medium hover:bg-purple-100 transition-colors">
                       View grades
                     </Link>
-                    <Link
-                      href={`/courses/${course.id}`}
-                      className="flex-1 text-center bg-purple-600 text-white py-2 rounded-xl text-xs font-medium hover:bg-purple-700 transition-colors"
-                    >
+                    <Link href={`/courses/${course.id}`} className="flex-1 text-center bg-purple-600 text-white py-2 rounded-xl text-xs font-medium hover:bg-purple-700 transition-colors">
                       Add grades
                     </Link>
                   </div>
                 </div>
               );
             })}
+
+            {/* Locked course slots for free users */}
+            {!isPro && Array.from({ length: Math.max(0, FREE_LIMIT - courses.length) }).map((_, i) => (
+              <div key={`empty-${i}`} className="bg-white/50 rounded-2xl border border-dashed border-purple-200 p-5 flex items-center justify-center min-h-[200px]">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">📚</div>
+                  <div className="text-sm text-purple-900/40">Empty slot</div>
+                  <button onClick={() => setShowModal(true)} className="text-xs text-purple-600 hover:underline mt-1 block">+ Add course</button>
+                </div>
+              </div>
+            ))}
+
+            {/* Upgrade card shown when at limit */}
+            {atLimit && (
+              <Link href="/upgrade" className="bg-purple-50 rounded-2xl border border-dashed border-purple-300 p-5 flex items-center justify-center min-h-[200px] hover:bg-purple-100 transition-colors">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">⚡</div>
+                  <div className="text-sm font-medium text-purple-700 mb-1">Want more courses?</div>
+                  <div className="text-xs text-purple-500 mb-3">Upgrade to Pro for unlimited</div>
+                  <div className="bg-purple-600 text-white px-4 py-2 rounded-xl text-xs font-medium">
+                    Upgrade — $4.99/mo
+                  </div>
+                </div>
+              </Link>
+            )}
           </div>
         )}
       </div>
@@ -208,65 +268,40 @@ export default function CoursesPage() {
             <form onSubmit={handleAddCourse} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Course name *</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g. Calculus II"
-                  required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-                />
+                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Calculus II" required
+                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Course code</label>
-                  <input
-                    type="text"
-                    value={form.code}
-                    onChange={(e) => setForm({ ...form, code: e.target.value })}
-                    placeholder="e.g. MATH 201"
-                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-                  />
+                  <input type="text" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="e.g. MATH 201"
+                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Credits</label>
-                  <select
-                    value={form.credits}
-                    onChange={(e) => setForm({ ...form, credits: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-                  >
+                  <select value={form.credits} onChange={(e) => setForm({ ...form, credits: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
                     {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Professor</label>
-                <input
-                  type="text"
-                  value={form.professor}
-                  onChange={(e) => setForm({ ...form, professor: e.target.value })}
-                  placeholder="e.g. Dr. Smith"
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-                />
+                <input type="text" value={form.professor} onChange={(e) => setForm({ ...form, professor: e.target.value })} placeholder="e.g. Dr. Smith"
+                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Semester</label>
-                  <select
-                    value={form.semester}
-                    onChange={(e) => setForm({ ...form, semester: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-                  >
+                  <select value={form.semester} onChange={(e) => setForm({ ...form, semester: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
                     {["Fall","Spring","Summer","Winter"].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Year</label>
-                  <select
-                    value={form.year}
-                    onChange={(e) => setForm({ ...form, year: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
-                  >
+                  <select value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
                     {["2024","2025","2026"].map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
                 </div>
@@ -275,33 +310,15 @@ export default function CoursesPage() {
                 <label className="block text-sm font-medium text-[#1E1040] mb-2">Color</label>
                 <div className="flex gap-2">
                   {COLORS.map(c => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setForm({ ...form, color: c })}
+                    <button key={c} type="button" onClick={() => setForm({ ...form, color: c })}
                       className="w-7 h-7 rounded-full border-2 transition-all"
-                      style={{
-                        background: c,
-                        borderColor: form.color === c ? "#1E1040" : "transparent",
-                        transform: form.color === c ? "scale(1.2)" : "scale(1)"
-                      }}
-                    />
+                      style={{ background: c, borderColor: form.color === c ? "#1E1040" : "transparent", transform: form.color === c ? "scale(1.2)" : "scale(1)" }} />
                   ))}
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
-                >
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50">
                   {saving ? "Adding..." : "Add course"}
                 </button>
               </div>
