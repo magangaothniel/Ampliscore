@@ -6,520 +6,120 @@
 <title>Beta Tester Application — Ampliscore</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --purple: #7C3AED;
-    --purple-dark: #5B21B6;
-    --purple-light: #A78BFA;
-    --lavender: #F5F3FF;
-    --lavender-mid: #EDE9FE;
-    --white: #FFFFFF;
-    --ink: #1E1333;
-    --muted: #6B7280;
-    --border: #DDD6FE;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--lavender);
-    color: var(--ink);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* BG decoration */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 60% 50% at 80% 10%, rgba(124,58,237,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(167,139,250,0.10) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrap {
-    position: relative;
-    z-index: 1;
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 3rem 1.5rem 5rem;
-  }
-
-  /* Header */
-  .header {
-    text-align: center;
-    margin-bottom: 3rem;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
-    text-decoration: none;
-  }
-
-  .logo-mark {
-    width: 36px; height: 36px;
-    background: var(--purple);
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-  }
-
-  .logo-mark svg { width: 20px; height: 20px; fill: white; }
-
-  .logo-text {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.25rem;
-    color: var(--ink);
-  }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: var(--purple);
-    color: white;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.3rem 0.85rem;
-    border-radius: 100px;
-    margin-bottom: 1.25rem;
-  }
-
-  .badge-dot {
-    width: 6px; height: 6px;
-    background: #A78BFA;
-    border-radius: 50%;
-    animation: pulse 2s ease infinite;
-  }
-
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: clamp(2rem, 5vw, 2.75rem);
-    line-height: 1.1;
-    color: var(--ink);
-    margin-bottom: 1rem;
-  }
-
-  h1 em {
-    font-style: normal;
-    color: var(--purple);
-  }
-
-  .subtitle {
-    font-size: 1.05rem;
-    color: var(--muted);
-    line-height: 1.65;
-    max-width: 480px;
-    margin: 0 auto 1.75rem;
-  }
-
-  /* Perks strip */
-  .perks {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    margin-bottom: 0;
-  }
-
-  .perk {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 0.35rem 0.85rem;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: var(--purple-dark);
-  }
-
-  .perk svg { width: 14px; height: 14px; flex-shrink: 0; }
-
-  /* Card */
-  .card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2.5rem 2.25rem;
-    box-shadow: 0 4px 32px rgba(124,58,237,0.07);
-    animation: fadeUp 0.7s 0.15s ease both;
-    margin-top: 2rem;
-  }
-
-  .section-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--purple);
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  .field-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  @media (max-width: 520px) {
-    .field-row { grid-template-columns: 1fr; }
-    .card { padding: 1.75rem 1.25rem; }
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    margin-bottom: 1rem;
-  }
-
-  .field:last-child { margin-bottom: 0; }
-
-  label {
-    font-size: 0.84rem;
-    font-weight: 500;
-    color: var(--ink);
-  }
-
-  label span { color: var(--purple); margin-left: 2px; }
-
-  input, select, textarea {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.92rem;
-    color: var(--ink);
-    background: var(--lavender);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 0.65rem 0.9rem;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-    width: 100%;
-    -webkit-appearance: none;
-  }
-
-  input::placeholder, textarea::placeholder { color: #C4B5FD; }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--purple);
-    background: var(--white);
-    box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
-  }
-
-  select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%237C3AED'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 18px;
-    padding-right: 2.5rem;
-    cursor: pointer;
-  }
-
-  textarea { resize: vertical; min-height: 90px; }
-
-  /* Checkboxes */
-  .check-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.6rem;
-    margin-top: 0.25rem;
-  }
-
-  @media (max-width: 400px) { .check-grid { grid-template-columns: 1fr; } }
-
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    background: var(--lavender);
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    padding: 0.55rem 0.75rem;
-    cursor: pointer;
-    transition: border-color 0.18s, background 0.18s;
-    font-size: 0.84rem;
-    font-weight: 400;
-    color: var(--ink);
-    user-select: none;
-  }
-
-  .check-item:has(input:checked) {
-    border-color: var(--purple);
-    background: #EDE9FE;
-    font-weight: 500;
-    color: var(--purple-dark);
-  }
-
-  .check-item input[type="checkbox"] {
-    width: 16px; height: 16px;
-    flex-shrink: 0;
-    accent-color: var(--purple);
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 0;
-    background: var(--white);
-  }
-
-  /* Star rating */
-  .star-row {
-    display: flex;
-    gap: 0.4rem;
-    margin-top: 0.25rem;
-  }
-
-  .star-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: #DDD6FE;
-    transition: color 0.15s, transform 0.1s;
-    padding: 0 2px;
-    line-height: 1;
-  }
-
-  .star-btn:hover, .star-btn.active { color: #F59E0B; transform: scale(1.15); }
-
-  /* CTA */
-  .cta-area {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .btn-submit {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    color: white;
-    background: var(--purple);
-    border: none;
-    border-radius: 12px;
-    padding: 0.9rem 2.5rem;
-    cursor: pointer;
-    width: 100%;
-    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-    box-shadow: 0 4px 18px rgba(124,58,237,0.28);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-submit::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
-    pointer-events: none;
-  }
-
-  .btn-submit:hover {
-    background: var(--purple-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(124,58,237,0.35);
-  }
-
-  .btn-submit:active { transform: translateY(0); }
-
-  .note {
-    font-size: 0.78rem;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.5;
-  }
-
-  .note a { color: var(--purple); text-decoration: none; }
-
-  /* Success */
-  .success-screen {
-    display: none;
-    text-align: center;
-    padding: 3rem 1.5rem;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  .success-icon {
-    width: 72px; height: 72px;
-    background: linear-gradient(135deg, #7C3AED, #A78BFA);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    margin: 0 auto 1.5rem;
-    box-shadow: 0 8px 24px rgba(124,58,237,0.35);
-  }
-
-  .success-icon svg { width: 36px; height: 36px; stroke: white; fill: none; }
-
-  .success-screen h2 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.75rem;
-    color: var(--ink);
-    margin-bottom: 0.75rem;
-  }
-
-  .success-screen p {
-    color: var(--muted);
-    font-size: 0.98rem;
-    line-height: 1.65;
-    max-width: 360px;
-    margin: 0 auto;
-  }
-
-  /* Animations */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--purple:#7C3AED;--purple-dark:#5B21B6;--purple-light:#A78BFA;--lavender:#F5F3FF;--white:#FFFFFF;--ink:#1E1333;--muted:#6B7280;--border:#DDD6FE}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--lavender);color:var(--ink);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 80% 10%,rgba(124,58,237,0.12) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 10% 80%,rgba(167,139,250,0.10) 0%,transparent 60%);pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:3rem 1.5rem 5rem}
+.header{text-align:center;margin-bottom:3rem;animation:fadeUp 0.6s ease both}
+.logo{display:inline-flex;align-items:center;gap:0.5rem;margin-bottom:2rem;text-decoration:none}
+.logo-mark{width:36px;height:36px;background:var(--purple);border-radius:10px;display:grid;place-items:center}
+.logo-mark svg{width:20px;height:20px;fill:white}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:var(--ink)}
+.badge{display:inline-flex;align-items:center;gap:0.4rem;background:var(--purple);color:white;font-size:0.72rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;padding:0.3rem 0.85rem;border-radius:100px;margin-bottom:1.25rem}
+.badge-dot{width:6px;height:6px;background:#A78BFA;border-radius:50%;animation:pulse 2s ease infinite}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2rem,5vw,2.75rem);line-height:1.1;color:var(--ink);margin-bottom:1rem}
+h1 em{font-style:normal;color:var(--purple)}
+.subtitle{font-size:1.05rem;color:var(--muted);line-height:1.65;max-width:480px;margin:0 auto 1.75rem}
+.perks{display:flex;justify-content:center;flex-wrap:wrap;gap:0.6rem}
+.perk{display:inline-flex;align-items:center;gap:0.35rem;background:var(--white);border:1px solid var(--border);border-radius:100px;padding:0.35rem 0.85rem;font-size:0.82rem;font-weight:500;color:var(--purple-dark)}
+.perk svg{width:14px;height:14px;flex-shrink:0}
+.card{background:var(--white);border:1px solid var(--border);border-radius:20px;padding:2.5rem 2.25rem;box-shadow:0 4px 32px rgba(124,58,237,0.07);animation:fadeUp 0.7s 0.15s ease both;margin-top:2rem}
+.section-label{font-family:'Syne',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--purple);margin-bottom:1.25rem;display:flex;align-items:center;gap:0.5rem}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:520px){.field-row{grid-template-columns:1fr}.card{padding:1.75rem 1.25rem}}
+.field{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem}
+label{font-size:0.84rem;font-weight:500;color:var(--ink)}
+label span{color:var(--purple);margin-left:2px}
+input,select,textarea{font-family:'DM Sans',sans-serif;font-size:0.92rem;color:var(--ink);background:var(--lavender);border:1.5px solid var(--border);border-radius:10px;padding:0.65rem 0.9rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;width:100%;-webkit-appearance:none}
+input::placeholder,textarea::placeholder{color:#C4B5FD}
+input:focus,select:focus,textarea:focus{border-color:var(--purple);background:var(--white);box-shadow:0 0 0 3px rgba(124,58,237,0.12)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%237C3AED'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 0.75rem center;background-size:18px;padding-right:2.5rem;cursor:pointer}
+textarea{resize:vertical;min-height:90px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-top:0.25rem}
+.check-item{display:flex;align-items:center;gap:0.6rem;background:var(--lavender);border:1.5px solid var(--border);border-radius:10px;padding:0.55rem 0.75rem;cursor:pointer;transition:border-color 0.18s,background 0.18s;font-size:0.84rem;color:var(--ink);user-select:none}
+.check-item:has(input:checked){border-color:var(--purple);background:#EDE9FE;font-weight:500;color:var(--purple-dark)}
+.check-item input[type="checkbox"]{width:16px;height:16px;flex-shrink:0;accent-color:var(--purple);cursor:pointer;padding:0}
+.star-row{display:flex;gap:0.4rem;margin-top:0.25rem}
+.star-btn{background:none;border:none;cursor:pointer;font-size:1.6rem;color:#DDD6FE;transition:color 0.15s,transform 0.1s;padding:0 2px;line-height:1}
+.star-btn.active{color:#F59E0B}
+.star-btn:hover{color:#F59E0B;transform:scale(1.15)}
+.cta-area{margin-top:2rem;display:flex;flex-direction:column;align-items:center;gap:0.75rem}
+.btn-submit{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:white;background:var(--purple);border:none;border-radius:12px;padding:0.9rem 2.5rem;cursor:pointer;width:100%;transition:background 0.2s,transform 0.15s,box-shadow 0.2s;box-shadow:0 4px 18px rgba(124,58,237,0.28);display:flex;align-items:center;justify-content:center;gap:0.5rem;position:relative;overflow:hidden}
+.btn-submit::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 60%);pointer-events:none}
+.btn-submit:hover{background:var(--purple-dark);transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,0.35)}
+.btn-submit:disabled{opacity:0.7;cursor:not-allowed;transform:none}
+.note{font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.5}
+.note a{color:var(--purple);text-decoration:none}
+.error-msg{font-size:0.8rem;color:#DC2626;text-align:center;display:none;margin-top:0.25rem}
+.success-screen{display:none;text-align:center;padding:3rem 1.5rem;animation:fadeUp 0.5s ease both}
+.success-icon{width:72px;height:72px;background:linear-gradient(135deg,#7C3AED,#A78BFA);border-radius:50%;display:grid;place-items:center;margin:0 auto 1.5rem;box-shadow:0 8px 24px rgba(124,58,237,0.35)}
+.success-icon svg{width:36px;height:36px;stroke:white;fill:none}
+.success-screen h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.75rem;color:var(--ink);margin-bottom:0.75rem}
+.success-screen p{color:var(--muted);font-size:0.98rem;line-height:1.65;max-width:360px;margin:0 auto}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 </style>
 </head>
 <body>
 <div class="wrap">
-
-  <!-- Header -->
   <div class="header">
     <a href="#" class="logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-      </div>
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
       <span class="logo-text">Ampliscore</span>
     </a>
-
-    <div>
-      <div class="badge"><span class="badge-dot"></span> Beta Program — Now Recruiting</div>
-    </div>
-
+    <div><div class="badge"><span class="badge-dot"></span> Beta Program — Now Recruiting</div></div>
     <h1>Help us build<br><em>something great.</em></h1>
     <p class="subtitle">Join our beta tester program, get early access to Ampliscore, and shape the product from the ground up — on web and mobile.</p>
-
     <div class="perks">
-      <span class="perk">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        Free Pro access — forever
-      </span>
-      <span class="perk">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        Direct input on features
-      </span>
-      <span class="perk">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-        Early access, always
-      </span>
+      <span class="perk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Free Pro access — forever</span>
+      <span class="perk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Direct input on features</span>
+      <span class="perk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Early access, always</span>
     </div>
   </div>
-
-  <!-- Form Card -->
   <div class="card" id="formCard">
     <form id="betaForm" novalidate>
-
-      <!-- Personal Info -->
       <div class="section-label">About You</div>
-
       <div class="field-row">
-        <div class="field">
-          <label for="firstName">First name <span>*</span></label>
-          <input type="text" id="firstName" placeholder="Alex" required>
-        </div>
-        <div class="field">
-          <label for="lastName">Last name <span>*</span></label>
-          <input type="text" id="lastName" placeholder="Smith" required>
-        </div>
+        <div class="field"><label for="firstName">First name <span>*</span></label><input type="text" id="firstName" placeholder="e.g. Jordan" autocomplete="off" required></div>
+        <div class="field"><label for="lastName">Last name <span>*</span></label><input type="text" id="lastName" placeholder="e.g. Smith" autocomplete="off" required></div>
       </div>
-
-      <div class="field">
-        <label for="email">Email address <span>*</span></label>
-        <input type="email" id="email" placeholder="you@university.edu" required>
-      </div>
-
+      <div class="field"><label for="email">Email address <span>*</span></label><input type="email" id="email" placeholder="you@university.edu" autocomplete="off" required></div>
       <div class="field-row">
-        <div class="field">
-          <label for="university">University / College <span>*</span></label>
-          <input type="text" id="university" placeholder="e.g. Kansas State University" required>
-        </div>
-        <div class="field">
-          <label for="year">Year of study <span>*</span></label>
+        <div class="field"><label for="university">University / College <span>*</span></label><input type="text" id="university" placeholder="e.g. Kansas State University" autocomplete="off" required></div>
+        <div class="field"><label for="year">Year of study <span>*</span></label>
           <select id="year" required>
             <option value="" disabled selected>Select year</option>
-            <option>Freshman</option>
-            <option>Sophomore</option>
-            <option>Junior</option>
-            <option>Senior</option>
-            <option>Graduate student</option>
-            <option>Other</option>
+            <option>Freshman</option><option>Sophomore</option><option>Junior</option><option>Senior</option><option>Graduate student</option><option>Other</option>
           </select>
         </div>
       </div>
-
-      <div class="field">
-        <label for="major">Major / Field of study</label>
-        <input type="text" id="major" placeholder="e.g. Computer Science">
-      </div>
-
-      <!-- Testing Scope -->
-      <div class="section-label" style="margin-top:1.75rem;">What will you test?</div>
-
+      <div class="field"><label for="major">Major / Field of study</label><input type="text" id="major" placeholder="e.g. Computer Science" autocomplete="off"></div>
+      <div class="section-label" style="margin-top:1.75rem">What will you test?</div>
       <div class="field">
         <label>Platform(s) <span>*</span></label>
         <div class="check-grid">
-          <label class="check-item"><input type="checkbox" name="platform" value="web"> 🌐 Web app</label>
-          <label class="check-item"><input type="checkbox" name="platform" value="ios"> 🍎 iOS app</label>
-          <label class="check-item"><input type="checkbox" name="platform" value="android"> 🤖 Android app</label>
-          <label class="check-item"><input type="checkbox" name="platform" value="all"> ✅ All of the above</label>
+          <label class="check-item"><input type="checkbox" name="platform" value="web"> Web app</label>
+          <label class="check-item"><input type="checkbox" name="platform" value="ios"> iOS app</label>
+          <label class="check-item"><input type="checkbox" name="platform" value="android"> Android app</label>
+          <label class="check-item"><input type="checkbox" name="platform" value="all"> All of the above</label>
         </div>
       </div>
-
       <div class="field">
         <label>Features you're most excited to test <span>*</span></label>
         <div class="check-grid">
-          <label class="check-item"><input type="checkbox" name="feature" value="grade-tracker"> 📊 Grade tracker</label>
-          <label class="check-item"><input type="checkbox" name="feature" value="gpa-planner"> 🎯 GPA planner</label>
-          <label class="check-item"><input type="checkbox" name="feature" value="professor-ratings"> ⭐ Professor ratings</label>
-          <label class="check-item"><input type="checkbox" name="feature" value="ai-predictor"> 🤖 AI grade predictor</label>
-          <label class="check-item"><input type="checkbox" name="feature" value="onboarding"> 🚀 Onboarding flow</label>
-          <label class="check-item"><input type="checkbox" name="feature" value="dashboard"> 🏠 Dashboard & UI</label>
+          <label class="check-item"><input type="checkbox" name="feature" value="grade-tracker"> Grade tracker</label>
+          <label class="check-item"><input type="checkbox" name="feature" value="gpa-planner"> GPA planner</label>
+          <label class="check-item"><input type="checkbox" name="feature" value="professor-ratings"> Professor ratings</label>
+          <label class="check-item"><input type="checkbox" name="feature" value="ai-predictor"> AI grade predictor</label>
+          <label class="check-item"><input type="checkbox" name="feature" value="onboarding"> Onboarding flow</label>
+          <label class="check-item"><input type="checkbox" name="feature" value="dashboard"> Dashboard & UI</label>
         </div>
       </div>
-
-      <!-- Experience -->
-      <div class="section-label" style="margin-top:1.75rem;">Your Experience</div>
-
+      <div class="section-label" style="margin-top:1.75rem">Your Experience</div>
       <div class="field">
         <label>How comfortable are you with testing apps?</label>
         <div class="star-row" id="starRow">
@@ -531,122 +131,124 @@
         </div>
         <input type="hidden" id="rating" value="0">
       </div>
-
-      <div class="field">
-        <label for="device">Primary device for testing</label>
+      <div class="field"><label for="device">Primary device for testing</label>
         <select id="device">
           <option value="" disabled selected>Select device</option>
-          <option>iPhone</option>
-          <option>Android phone</option>
-          <option>MacBook / Mac</option>
-          <option>Windows PC</option>
-          <option>iPad / Android tablet</option>
-          <option>Multiple devices</option>
+          <option>iPhone</option><option>Android phone</option><option>MacBook / Mac</option><option>Windows PC</option><option>iPad / Android tablet</option><option>Multiple devices</option>
         </select>
       </div>
-
-      <div class="field">
-        <label for="feedback">What's your biggest frustration with grade-tracking tools you've used before?</label>
-        <textarea id="feedback" placeholder="e.g. They're never accurate, don't support weighted grades, ugly UI..."></textarea>
-      </div>
-
-      <div class="field">
-        <label for="extra">Anything else you'd like us to know?</label>
-        <textarea id="extra" placeholder="Social handles, specific bugs you notice, ideas..." style="min-height:70px;"></textarea>
-      </div>
-
-      <!-- CTA -->
+      <div class="field"><label for="feedback">What's your biggest frustration with grade-tracking tools you've used before?</label><textarea id="feedback" placeholder="e.g. They're never accurate, don't support weighted grades, ugly UI..."></textarea></div>
+      <div class="field"><label for="extra">Anything else you'd like us to know?</label><textarea id="extra" placeholder="Social handles, specific bugs you notice, ideas..." style="min-height:70px"></textarea></div>
       <div class="cta-area">
         <button type="submit" class="btn-submit" id="submitBtn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
           Apply to Beta Program
         </button>
+        <p class="error-msg" id="errorMsg">Something went wrong. Please try again.</p>
         <p class="note">By applying you agree to our <a href="#">Terms</a> & <a href="#">Privacy Policy</a>.<br>We'll be in touch within 3–5 business days.</p>
       </div>
-
     </form>
-
-    <!-- Success -->
     <div class="success-screen" id="successScreen">
-      <div class="success-icon">
-        <svg viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
+      <div class="success-icon"><svg viewBox="0 0 24 24" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></div>
       <h2>You're on the list! 🎉</h2>
       <p>Thanks for applying to the Ampliscore beta. We'll review your application and get back to you within 3–5 business days with next steps and your <strong>free Pro access link</strong>.</p>
     </div>
   </div>
-
 </div>
-
 <script>
-  // Star rating
-  const stars = document.querySelectorAll('.star-btn');
-  const ratingInput = document.getElementById('rating');
+  const SUPABASE_URL = "https://zykldxurxazvcatvfxkd.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5a2xkeHVyeGF6dmNhdHZmeGtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxNjQwMTUsImV4cCI6MjA1OTc0MDAxNX0.r2kNy3jqyZb9HIFfR5Qu9m7-LJlqt2LCmkT6ZHOnFWg";
 
-  stars.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = parseInt(btn.dataset.val);
-      ratingInput.value = val;
-      stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= val));
+  let currentRating = 0;
+  const starBtns = document.querySelectorAll('.star-btn');
+
+  function setStars(val) {
+    starBtns.forEach(function(s) {
+      s.classList.toggle('active', parseInt(s.dataset.val) <= val);
     });
-    btn.addEventListener('mouseenter', () => {
-      const val = parseInt(btn.dataset.val);
-      stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= val));
+  }
+
+  starBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      currentRating = parseInt(btn.dataset.val);
+      document.getElementById('rating').value = currentRating;
+      setStars(currentRating);
     });
+    btn.addEventListener('mouseenter', function() { setStars(parseInt(btn.dataset.val)); });
+    btn.addEventListener('mouseleave', function() { setStars(currentRating); });
   });
 
-  document.getElementById('starRow').addEventListener('mouseleave', () => {
-    const val = parseInt(ratingInput.value);
-    stars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= val));
-  });
-
-  // Form submit
-  document.getElementById('betaForm').addEventListener('submit', function(e) {
+  document.getElementById('betaForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    const first = document.getElementById('firstName').value.trim();
-    const last  = document.getElementById('lastName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const uni   = document.getElementById('university').value.trim();
-    const year  = document.getElementById('year').value;
-    const platforms = [...document.querySelectorAll('input[name="platform"]:checked')];
-    const features  = [...document.querySelectorAll('input[name="feature"]:checked')];
+    var first     = document.getElementById('firstName').value.trim();
+    var last      = document.getElementById('lastName').value.trim();
+    var email     = document.getElementById('email').value.trim();
+    var uni       = document.getElementById('university').value.trim();
+    var year      = document.getElementById('year').value;
+    var platforms = Array.from(document.querySelectorAll('input[name="platform"]:checked')).map(function(el){ return el.value; });
+    var features  = Array.from(document.querySelectorAll('input[name="feature"]:checked')).map(function(el){ return el.value; });
 
-    if (!first || !last || !email || !uni || !year) {
-      shake(document.querySelector('.card'));
-      return;
-    }
-    if (!platforms.length || !features.length) {
+    if (!first || !last || !email || !uni || !year || !platforms.length || !features.length) {
       shake(document.querySelector('.card'));
       return;
     }
 
-    const btn = document.getElementById('submitBtn');
-    btn.textContent = 'Submitting…';
+    var btn = document.getElementById('submitBtn');
+    var errorMsg = document.getElementById('errorMsg');
+    btn.textContent = 'Submitting...';
     btn.disabled = true;
+    errorMsg.style.display = 'none';
 
-    setTimeout(() => {
-      document.getElementById('betaForm').style.display = 'none';
-      document.getElementById('successScreen').style.display = 'block';
-    }, 900);
+    try {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/beta_testers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          first_name:          first,
+          last_name:           last,
+          email:               email,
+          university:          uni,
+          year_of_study:       year,
+          major:               document.getElementById('major').value.trim(),
+          platforms:           platforms,
+          features:            features,
+          testing_experience:  currentRating || null,
+          primary_device:      document.getElementById('device').value || null,
+          biggest_frustration: document.getElementById('feedback').value.trim(),
+          extra_notes:         document.getElementById('extra').value.trim()
+        })
+      });
+
+      if (res.ok) {
+        document.getElementById('betaForm').style.display = 'none';
+        document.getElementById('successScreen').style.display = 'block';
+      } else {
+        var errText = await res.text();
+        console.error('Supabase error:', res.status, errText);
+        btn.textContent = 'Apply to Beta Program';
+        btn.disabled = false;
+        errorMsg.style.display = 'block';
+      }
+    } catch(err) {
+      console.error('Network error:', err);
+      btn.textContent = 'Apply to Beta Program';
+      btn.disabled = false;
+      errorMsg.style.display = 'block';
+    }
   });
 
   function shake(el) {
     el.style.animation = 'none';
     el.offsetHeight;
     el.style.animation = 'shake 0.4s ease';
-    el.addEventListener('animationend', () => el.style.animation = '', { once: true });
+    el.addEventListener('animationend', function() { el.style.animation = ''; }, { once: true });
   }
 </script>
-
-<style>
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%       { transform: translateX(-6px); }
-    40%       { transform: translateX(6px); }
-    60%       { transform: translateX(-4px); }
-    80%       { transform: translateX(4px); }
-  }
-</style>
 </body>
 </html>
