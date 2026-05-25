@@ -48,7 +48,24 @@ export default function CoursesPage() {
     const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
     setProfile(profileData);
     const { data } = await supabase.from("courses").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    setCourses(data || []);
+    const { data: aData } = await supabase.from("assignments").select("*").eq("user_id", user.id);
+    const { data: cData } = await supabase.from("grade_categories").select("*");
+    const enriched = (data || []).map((course: any) => {
+      const cats = (cData || []).filter((c: any) => c.course_id === course.id);
+      const cas = (aData || []).filter((a: any) => a.course_id === course.id && a.completed);
+      if (!cats.length || !cas.length) return { ...course, live_grade: null };
+      let w = 0, tw = 0;
+      for (const cat of cats) {
+        const ca = cas.filter((a: any) => a.category_id === cat.id);
+        if (ca.length) {
+          const e = ca.reduce((s: number, a: any) => s + (a.grade || 0), 0);
+          const p = ca.reduce((s: number, a: any) => s + (a.max_grade || 100), 0);
+          w += (e / p) * 100 * cat.weight; tw += cat.weight;
+        }
+      }
+      return { ...course, live_grade: tw > 0 ? Math.round((w / tw) * 10) / 10 : null };
+    });
+    setCourses(enriched);
     setLoading(false);
   };
 
