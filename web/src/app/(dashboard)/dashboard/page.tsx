@@ -35,7 +35,7 @@ export default function DashboardPage() {
             totalWeight += cat.weight;
           }
         }
-        const grade = totalWeight > 0 ? weighted / totalWeight : 0;
+        const grade = totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0;
         return { ...course, current_grade: grade };
       });
       setProfile({ ...profileData, email: user.email });
