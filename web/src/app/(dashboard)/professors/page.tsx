@@ -130,6 +130,7 @@ export default function ProfessorsPage() {
             onChange={(e) => setSearch(e.target.value)}
             className="px-4 py-2 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white w-56"
           />
+        <button onClick={() => setShowModal(true)} className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">+ Rate a professor</button>
         </div>
 
         {professors.length === 0 ? (
