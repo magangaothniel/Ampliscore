@@ -74,7 +74,7 @@ export default function PrivacyPage() {
                 <li>Opt out of marketing emails</li>
                 <li>Data portability</li>
               </ul>
-              <p className="mt-2">To exercise these rights, contact us at <a href="mailto:support@ampliscore.app" className="text-purple-600 hover:underline">support@ampliscore.app</a>.</p>
+              <p className="mt-2">To exercise these rights, contact us at <a href="mailto:magangaothniel@gmail.com" className="text-purple-600 hover:underline">magangaothniel@gmail.com</a>.</p>
             </section>
 
             <section>
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
 
             <section>
               <h2 className="text-lg font-semibold text-[#1E1040] mb-2">10. Contact</h2>
-              <p>For privacy questions or data requests, contact us at <a href="mailto:support@ampliscore.app" className="text-purple-600 hover:underline">support@ampliscore.app</a>.</p>
+              <p>For privacy questions or data requests, contact us at <a href="mailto:magangaothniel@gmail.com" className="text-purple-600 hover:underline">magangaothniel@gmail.com</a>.</p>
             </section>
 
           </div>

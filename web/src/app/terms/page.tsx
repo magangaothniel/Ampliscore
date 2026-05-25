@@ -75,7 +75,7 @@ export default function TermsPage() {
 
             <section>
               <h2 className="text-lg font-semibold text-[#1E1040] mb-2">12. Data Deletion</h2>
-              <p>You may request deletion of your account and all associated data at any time by contacting us through the app or emailing support@ampliscore.app. We will process deletion requests within 30 days.</p>
+              <p>You may request deletion of your account and all associated data at any time by contacting us through the app or emailing magangaothniel@gmail.com. We will process deletion requests within 30 days.</p>
             </section>
 
             <section>
@@ -85,7 +85,7 @@ export default function TermsPage() {
 
             <section>
               <h2 className="text-lg font-semibold text-[#1E1040] mb-2">14. Contact</h2>
-              <p>For questions about these Terms, contact us at <a href="mailto:support@ampliscore.app" className="text-purple-600 hover:underline">support@ampliscore.app</a>.</p>
+              <p>For questions about these Terms, contact us at <a href="mailto:magangaothniel@gmail.com" className="text-purple-600 hover:underline">magangaothniel@gmail.com</a>.</p>
             </section>
 
           </div>
