@@ -56,6 +56,13 @@ export default function SettingsPage() {
     router.push("/");
   };
 
+  const handleManageSubscription = async () => {
+    const res = await fetch("/api/stripe/portal", { method: "POST" });
+    const data = await res.json();
+    if (data.url) window.location.href = data.url;
+    else setErrorMsg("Could not open billing portal. Please contact support.");
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
@@ -117,10 +124,10 @@ export default function SettingsPage() {
 
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
         <h2 className="font-medium text-[#1E1040] mb-4">Subscription</h2>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <div className="text-sm font-medium text-[#1E1040]">{profile?.is_pro ? "Pro plan" : "Free plan"}</div>
-            <div className="text-xs text-purple-900/40 mt-0.5">{profile?.is_pro ? "$4.99/month" : "Up to 4 courses"}</div>
+            <div className="text-xs text-purple-900/40 mt-0.5">{profile?.is_pro ? "$4.99/month · Billed monthly" : "Up to 4 courses"}</div>
           </div>
           {!profile?.is_pro && (
             <Link href="/upgrade" className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
@@ -128,6 +135,15 @@ export default function SettingsPage() {
             </Link>
           )}
         </div>
+        {profile?.is_pro && (
+          <div className="border-t border-purple-50 pt-4">
+            <p className="text-xs text-purple-900/40 mb-3">You can cancel anytime. Your Pro access continues until the end of your billing period.</p>
+            <button onClick={handleManageSubscription}
+              className="border border-purple-200 text-purple-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+              Manage or cancel subscription →
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl border border-purple-100 p-6">

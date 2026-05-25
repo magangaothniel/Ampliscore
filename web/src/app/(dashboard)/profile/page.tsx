@@ -105,8 +105,8 @@ export default function ProfilePage() {
   return (
     <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#1E1040]">Account settings</h1>
-        <p className="text-sm text-purple-900/50 mt-1">Manage your profile and preferences</p>
+        <h1 className="text-2xl font-semibold text-[#1E1040]">Profile</h1>
+        <p className="text-sm text-purple-900/50 mt-1">Manage your personal information</p>
       </div>
 
       {successMsg && (
@@ -191,26 +191,7 @@ export default function ProfilePage() {
         </form>
       </div>
 
-      {/* Password */}
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-4">Change password</h2>
-        <form onSubmit={handlePasswordChange} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[#1E1040] mb-1.5">New password</label>
-            <input type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Min 8 characters" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Confirm password</label>
-            <input type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Repeat new password" />
-          </div>
-          <button type="submit" disabled={saving}
-            className="w-full py-2.5 border border-purple-200 text-purple-700 text-sm font-medium rounded-xl hover:bg-purple-50 transition-colors disabled:opacity-50">
-            {saving ? "Updating..." : "Update password"}
-          </button>
-        </form>
-      </div>
+
 
       {/* Referral */}
       <div className="bg-white rounded-2xl border border-purple-100 p-6">

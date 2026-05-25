@@ -146,7 +146,7 @@ export default function NavBar({ profile }: { profile: any }) {
           )}
           <div className="pt-2 border-t border-purple-50 mt-2 space-y-1">
             <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-[#1E1040] hover:bg-purple-50">
-              👤 Profile
+              Profile
             </Link>
             <Link href="/settings" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-[#1E1040] hover:bg-purple-50">
               ⚙️ Settings
