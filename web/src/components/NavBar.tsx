@@ -98,9 +98,12 @@ export default function NavBar({ profile }: { profile: any }) {
                 </div>
                 <div className="py-1">
                   <Link href="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
-                    �� Account settings
+                    👤 Profile
                   </Link>
                   {!profile?.is_pro && (
+                  </Link>
+                  <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
+                    ⚙️ Settings
                     <Link href="/upgrade" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-600 font-medium hover:bg-purple-50">
                       ⚡ Upgrade to Pro
                     </Link>
