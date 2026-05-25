@@ -605,6 +605,29 @@
   });
 
   // Form submit
+  document.getElementById('betaForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const first     = document.getElementById('firstName').value.trim();
+    const last      = document.getElementById('lastName').value.trim();
+    const email     = document.getElementById('email').value.trim();
+    const uni       = document.getElementById('university').value.trim();
+    const year      = document.getElementById('year').value;
+    const platforms = [...document.querySelectorAll('input[name="platform"]:checked')].map(el => el.value);
+    const features  = [...document.querySelectorAll('input[name="feature"]:checked')].map(el => el.value);
+    if (!first || !last || !email || !uni || !year || !platforms.length || !features.length) {
+      shake(document.querySelector('.card')); return;
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = 'Submitting…'; btn.disabled = true;
+    const res = await fetch(SUPABASE_URL + '/rest/v1/beta_testers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ first_name: first, last_name: last, email, university: uni, year_of_study: year, major: document.getElementById('major').value.trim(), platforms, features, testing_experience: parseInt(document.getElementById('rating').value) || null, primary_device: document.getElementById('device').value, biggest_frustration: document.getElementById('feedback').value.trim(), extra_notes: document.getElementById('extra').value.trim() })
+    });
+    if (res.ok) { document.getElementById('betaForm').style.display='none'; document.getElementById('successScreen').style.display='block'; }
+    else { btn.innerHTML='Apply to Beta Program'; btn.disabled=false; alert('Something went wrong. Please try again.'); }
+  });
+  function skip_old
   document.getElementById('betaForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
