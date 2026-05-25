@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 function Logo() {
@@ -22,23 +22,37 @@ function Logo() {
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({ fullName: "", email: "", password: "", university: "" });
+  const [refCode, setRefCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+
+  useEffect(() => {
+    const ref = searchParams.get("ref");
+    if (ref) setRefCode(ref);
+  }, [searchParams]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: { data: { full_name: form.fullName, university: form.university } },
     });
-    if (error) { setError(error.message); setLoading(false); }
-    else router.push("/dashboard");
+    if (error) { setError(error.message); setLoading(false); return; }
+    if (refCode && data.user) {
+      await fetch("/api/referral/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newUserId: data.user.id, refCode }),
+      });
+    }
+    router.push("/dashboard");
   };
 
   const handleGoogleLogin = async () => {
@@ -59,7 +73,11 @@ export default function RegisterPage() {
             <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
           </Link>
           <h1 className="text-2xl font-medium text-[#1E1040]">Create your account</h1>
-          <p className="text-sm text-purple-900/50 mt-1">Free forever. No credit card needed.</p>
+          {refCode ? (
+            <p className="text-sm text-purple-600 mt-1 font-medium">🎉 You were invited! Sign up free.</p>
+          ) : (
+            <p className="text-sm text-purple-900/50 mt-1">Free forever. No credit card needed.</p>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl border border-purple-100 p-8">

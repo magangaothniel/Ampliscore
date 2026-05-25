@@ -212,13 +212,43 @@ export default function ProfilePage() {
         </form>
       </div>
 
-      {/* Danger zone */}
-      <div className="bg-white rounded-2xl border border-red-100 p-6">
-        <h2 className="font-medium text-red-600 mb-1">Danger zone</h2>
-        <p className="text-sm text-purple-900/50 mb-4">Permanently delete your account and all data</p>
+      {/* Referral */}
+      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+        <h2 className="font-medium text-[#1E1040] mb-1">Refer a friend</h2>
+        <p className="text-sm text-purple-900/50 mb-4">Get 1 month Pro free for every 3 friends who sign up</p>
+        <div className="bg-purple-50 rounded-xl p-4 mb-4">
+          <div className="text-xs text-purple-900/40 mb-1">Your referral link</div>
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-medium text-purple-700 flex-1 truncate">
+              ampliscore.vercel.app/register?ref={profile?.referral_code || '...'}
+            </div>
+            <button
+              onClick={() => { navigator.clipboard.writeText(`https://ampliscore.vercel.app/register?ref=${profile?.referral_code}`); setSuccessMsg('Link copied!'); setTimeout(() => setSuccessMsg(''), 2000); }}
+              className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-colors flex-shrink-0"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex-1 bg-purple-50 rounded-xl p-3 text-center">
+            <div className="text-2xl font-bold text-purple-600">{profile?.referral_count || 0}</div>
+            <div className="text-xs text-purple-900/40">Friends referred</div>
+          </div>
+          <div className="flex-1 bg-purple-50 rounded-xl p-3 text-center">
+            <div className="text-2xl font-bold text-purple-600">{Math.max(0, 3 - (profile?.referral_count || 0))}</div>
+            <div className="text-xs text-purple-900/40">Until free Pro</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Account deletion */}
+      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+        <h2 className="font-medium text-[#1E1040] mb-1">Close account</h2>
+        <p className="text-sm text-purple-900/50 mb-4">Your data belongs to you. Closing your account will permanently delete your courses, grades, and all associated data.</p>
         <button onClick={() => setShowDeleteModal(true)}
-          className="border border-red-200 text-red-500 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors">
-          Delete account
+          className="border border-purple-200 text-purple-900/50 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+          Close my account
         </button>
       </div>
 
