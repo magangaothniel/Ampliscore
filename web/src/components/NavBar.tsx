@@ -77,6 +77,8 @@ export default function NavBar({ profile }: { profile: any }) {
             </Link>
           ))}
           {!profile?.is_pro && (
+                  {!profile?.is_pro && (
+                  {!profile?.is_pro && (
             <Link href="/upgrade" className="text-sm bg-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-700 transition-colors">
               ⚡ Upgrade
             </Link>
@@ -100,10 +102,10 @@ export default function NavBar({ profile }: { profile: any }) {
                   <Link href="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
                     👤 Profile
                   </Link>
-                  {!profile?.is_pro && (
-                  </Link>
                   <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
                     ⚙️ Settings
+                  </Link>
+                  {!profile?.is_pro && (
                     <Link href="/upgrade" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-600 font-medium hover:bg-purple-50">
                       ⚡ Upgrade to Pro
                     </Link>
