@@ -67,7 +67,6 @@ export default function ProfessorsPage() {
     const { data } = await supabase
       .from("professor_ratings")
       .select("*")
-      .eq("university", profile?.university || "")
       .order("created_at", { ascending: false });
     setRatings(data || []);
     setLoading(false);
@@ -122,7 +121,7 @@ export default function ProfessorsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-medium text-[#1E1040]">Professor ratings</h1>
-            <p className="text-sm text-purple-900/50 mt-1">{university} · {ratings.length} review{ratings.length !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-purple-900/50 mt-1">All universities · {ratings.length} review{ratings.length !== 1 ? "s" : ""}</p>
           </div>
           <input
             type="text"
@@ -137,7 +136,7 @@ export default function ProfessorsPage() {
           <div className="bg-white rounded-2xl border border-purple-100 py-20 text-center">
             <div className="text-5xl mb-4">⭐</div>
             <h2 className="text-lg font-medium text-[#1E1040] mb-2">No ratings yet</h2>
-            <p className="text-sm text-purple-900/50 mb-6">Be the first to rate a professor at {university}</p>
+            <p className="text-sm text-purple-900/50 mb-6">Be the first to rate a professor on Ampliscore</p>
             <button
               onClick={() => setShowModal(true)}
               className="bg-purple-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"

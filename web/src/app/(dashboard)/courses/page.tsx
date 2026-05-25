@@ -27,6 +27,7 @@ const FREE_LIMIT = 4;
 export default function CoursesPage() {
   const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
+  const [courseGrades, setCourseGrades] = useState<Record<string, number>>({});
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -158,7 +159,7 @@ export default function CoursesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {courses.map((course) => {
-              const grade = course.current_grade || 0;
+              const grade = courseGrades[course.id] ?? course.current_grade ?? 0;
               return (
                 <div key={course.id} className="bg-white rounded-2xl border border-purple-100 p-5">
                   <div className="flex items-start justify-between mb-4">
