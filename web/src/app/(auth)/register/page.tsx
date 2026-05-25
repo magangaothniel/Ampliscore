@@ -20,7 +20,7 @@ function Logo() {
   );
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [form, setForm] = useState({ fullName: "", email: "", password: "", university: "" });
@@ -144,5 +144,14 @@ export default function RegisterPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+import { Suspense } from "react";
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center"><div className="text-purple-600">Loading...</div></div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }
