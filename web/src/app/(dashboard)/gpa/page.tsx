@@ -95,19 +95,6 @@ export default function GPAPage() {
 
   return (
     <main className="min-h-screen bg-[#F5F3FF]">
-      <nav className="bg-white border-b border-purple-100 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Logo />
-          <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="text-sm text-purple-900/50 hover:text-purple-600">Dashboard</Link>
-          <Link href="/courses" className="text-sm text-purple-900/50 hover:text-purple-600">Courses</Link>
-          <Link href="/professors" className="text-sm text-purple-900/50 hover:text-purple-600">Professors</Link>
-          <Link href="/gpa" className="text-sm font-medium text-purple-600">GPA Planner</Link>
-        </div>
-        <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium">O</div>
-      </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="mb-6">

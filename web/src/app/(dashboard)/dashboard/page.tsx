@@ -7,6 +7,7 @@ import Link from "next/link";
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [courses, setCourses] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,8 +17,29 @@ export default function DashboardPage() {
       if (!user) { window.location.href = "/login"; return; }
       const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       const { data: coursesData } = await supabase.from("courses").select("*").eq("user_id", user.id);
+      const { data: assignData } = await supabase.from("assignments").select("*").eq("user_id", user.id);
+      const { data: catData } = await supabase.from("grade_categories").select("*");
+      setAssignments(assignData || []);
+      // Calculate real grades per course and update
+      const updatedCourses = (coursesData || []).map((course: any) => {
+        const cats = (catData || []).filter((c: any) => c.course_id === course.id);
+        const courseAssigns = (assignData || []).filter((a: any) => a.course_id === course.id && a.completed);
+        if (cats.length === 0 || courseAssigns.length === 0) return { ...course, current_grade: 0 };
+        let weighted = 0, totalWeight = 0;
+        for (const cat of cats) {
+          const catA = courseAssigns.filter((a: any) => a.category_id === cat.id);
+          if (catA.length > 0) {
+            const earned = catA.reduce((s: number, a: any) => s + (a.grade || 0), 0);
+            const possible = catA.reduce((s: number, a: any) => s + (a.max_grade || 100), 0);
+            weighted += (earned / possible) * 100 * cat.weight;
+            totalWeight += cat.weight;
+          }
+        }
+        const grade = totalWeight > 0 ? weighted / totalWeight : 0;
+        return { ...course, current_grade: grade };
+      });
       setProfile({ ...profileData, email: user.email });
-      setCourses(coursesData || []);
+      setCourses(updatedCourses);
       setLoading(false);
     };
     fetchData();

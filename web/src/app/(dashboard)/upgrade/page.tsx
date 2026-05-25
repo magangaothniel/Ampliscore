@@ -67,13 +67,6 @@ export default function UpgradePage() {
 
   return (
     <main className="min-h-screen bg-[#F5F3FF]">
-      <nav className="bg-white border-b border-purple-100 px-6 py-4 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <Logo />
-          <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
-        </Link>
-        <Link href="/dashboard" className="text-sm text-purple-600 hover:underline">← Back to dashboard</Link>
-      </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="text-center mb-12">

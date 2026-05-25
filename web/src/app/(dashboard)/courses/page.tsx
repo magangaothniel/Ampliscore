@@ -94,26 +94,6 @@ export default function CoursesPage() {
 
   return (
     <main className="min-h-screen bg-[#F5F3FF]">
-      <nav className="bg-white border-b border-purple-100 px-6 py-4 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <Logo />
-          <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
-        </Link>
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="text-sm text-purple-900/50 hover:text-purple-600">Dashboard</Link>
-          <Link href="/courses" className="text-sm font-medium text-purple-600">Courses</Link>
-          <Link href="/professors" className="text-sm text-purple-900/50 hover:text-purple-600">Professors</Link>
-          <Link href="/gpa" className="text-sm text-purple-900/50 hover:text-purple-600">GPA Planner</Link>
-          {!isPro && (
-            <Link href="/upgrade" className="text-sm bg-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-700 transition-colors">
-              ⚡ Upgrade
-            </Link>
-          )}
-        </div>
-        <Link href="/profile" className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs font-medium hover:bg-purple-700 transition-colors">
-          {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
-        </Link>
-      </nav>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-start justify-between mb-6">
