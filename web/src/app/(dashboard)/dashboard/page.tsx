@@ -24,7 +24,7 @@ export default function DashboardPage() {
       const updatedCourses = (coursesData || []).map((course: any) => {
         const cats = (catData || []).filter((c: any) => c.course_id === course.id);
         const courseAssigns = (assignData || []).filter((a: any) => a.course_id === course.id && a.completed);
-        if (cats.length === 0 || courseAssigns.length === 0) return { ...course, current_grade: 0 };
+        if (cats.length === 0) return { ...course, current_grade: 0 };
         let weighted = 0, totalWeight = 0;
         for (const cat of cats) {
           const catA = courseAssigns.filter((a: any) => a.category_id === cat.id);

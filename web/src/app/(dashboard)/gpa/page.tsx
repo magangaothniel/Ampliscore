@@ -36,13 +36,29 @@ export default function GPAPage() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
-    const { data } = await supabase
-      .from("courses")
-      .select("*")
-      .eq("user_id", user.id);
-    setCourses(data || []);
+    const { data } = await supabase.from("courses").select("*").eq("user_id", user.id);
+    const { data: assignData } = await supabase.from("assignments").select("*").eq("user_id", user.id);
+    const { data: catData } = await supabase.from("grade_categories").select("*");
+    const liveCourses = (data || []).map((course: any) => {
+      const cats = (catData || []).filter((c: any) => c.course_id === course.id);
+      const courseAssigns = (assignData || []).filter((a: any) => a.course_id === course.id && a.completed);
+      if (cats.length === 0) return { ...course, current_grade: 0 };
+      let weighted = 0, totalWeight = 0;
+      for (const cat of cats) {
+        const catA = courseAssigns.filter((a: any) => a.category_id === cat.id);
+        if (catA.length > 0) {
+          const earned = catA.reduce((s: number, a: any) => s + (a.grade || 0), 0);
+          const possible = catA.reduce((s: number, a: any) => s + (a.max_grade || 100), 0);
+          weighted += (earned / possible) * 100 * cat.weight;
+          totalWeight += cat.weight;
+        }
+      }
+      const grade = totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0;
+      return { ...course, current_grade: grade };
+    });
+    setCourses(liveCourses);
     const initial: Record<string, number> = {};
-    data?.forEach(c => { initial[c.id] = c.current_grade || 0; });
+    liveCourses.forEach((c: any) => { initial[c.id] = c.current_grade || 0; });
     setWhatIfGrades(initial);
     setLoading(false);
   };
