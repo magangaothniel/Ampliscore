@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase";
 
 interface Props {
   course: any;
@@ -13,10 +14,17 @@ export default function AIGradePredictor({ course, categories, assignments, isPr
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const [targetGrade, setTargetGrade] = useState("90");
+  const [limitInfo, setLimitInfo] = useState<{ used: number; cap: number } | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
 
   const runPredictor = async () => {
     setLoading(true);
     setResult("");
+    setLimitReached(false);
+
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { setResult("Please log in again."); setLoading(false); return; }
 
     const categoryData = categories.map(cat => {
       const catAssignments = assignments.filter(a => a.category_id === cat.id && a.completed);
@@ -47,15 +55,28 @@ Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.
     try {
       const res = await fetch("/api/predict", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }],
-        }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
       });
+
       const data = await res.json();
-      setResult(data.content?.[0]?.text || "Unable to generate prediction. Please try again.");
+
+      if (res.status === 429 || data.error === "limit_reached") {
+        setLimitReached(true);
+        setLimitInfo({ used: data.used, cap: data.cap });
+        setLoading(false);
+        return;
+      }
+
+      if (data.error) { setResult("Something went wrong. Please try again."); setLoading(false); return; }
+
+      setResult(data.content?.[0]?.text || "Unable to generate prediction.");
+      if (data.predictions_used !== undefined) {
+        setLimitInfo({ used: data.predictions_used, cap: data.cap });
+      }
     } catch {
       setResult("Something went wrong. Please try again.");
     }
@@ -96,17 +117,26 @@ Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.
         <div className="px-5 pb-5 border-t border-purple-50">
           <div className="flex items-center gap-3 mt-4 mb-4">
             <label className="text-sm text-[#1E1040] font-medium whitespace-nowrap">Target grade:</label>
-            <input
-              type="number" min="0" max="100" value={targetGrade}
+            <input type="number" min="0" max="100" value={targetGrade}
               onChange={e => setTargetGrade(e.target.value)}
-              className="w-20 px-3 py-1.5 rounded-lg border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-center"
-            />
+              className="w-20 px-3 py-1.5 rounded-lg border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-center" />
             <span className="text-sm text-purple-900/50">%</span>
-            <button onClick={runPredictor} disabled={loading}
+            <button onClick={runPredictor} disabled={loading || limitReached}
               className="ml-auto text-sm bg-purple-600 text-white px-4 py-1.5 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
               {loading ? "Analyzing..." : "Recalculate"}
             </button>
           </div>
+
+          {limitInfo && !limitReached && (
+            <p className="text-xs text-purple-900/40 mb-3">{limitInfo.used}/{limitInfo.cap} predictions used this month</p>
+          )}
+
+          {limitReached && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+              <p className="text-sm font-medium text-amber-800 mb-1">Monthly limit reached</p>
+              <p className="text-xs text-amber-600">You've used all {limitInfo?.cap} predictions for this month. Resets on the 1st.</p>
+            </div>
+          )}
 
           {loading && (
             <div className="flex items-center gap-3 py-6 justify-center">
