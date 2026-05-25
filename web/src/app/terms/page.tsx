@@ -1,65 +1,99 @@
 import Link from "next/link";
 
+export const metadata = {
+  title: "Terms of Service",
+  description: "Ampliscore Terms of Service",
+};
+
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-[#F5F3FF]">
-      <nav className="bg-white border-b border-purple-100 px-8 py-5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-            <rect width="36" height="36" rx="10" fill="#EDE9FE"/>
-            <circle cx="18" cy="18" r="9" fill="none" stroke="#7C3AED" strokeWidth="2"/>
-            <circle cx="18" cy="18" r="5" fill="#DDD6FE"/>
-            <circle cx="18" cy="18" r="2.5" fill="#7C3AED"/>
-          </svg>
-          <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
-        </Link>
-        <Link href="/" className="text-sm text-purple-600 hover:underline">← Back to home</Link>
-      </nav>
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-medium text-[#1E1040] mb-2">Terms of Service</h1>
-        <p className="text-sm text-purple-900/40 mb-8">Last updated: January 1, 2025</p>
-        <div className="bg-white rounded-2xl border border-purple-100 p-8 space-y-6 text-sm text-purple-900/70 leading-relaxed">
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">1. Acceptance of Terms</h2>
-            <p>By accessing or using Ampliscore ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service. You must be at least 13 years old to use Ampliscore.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">2. Description of Service</h2>
-            <p>Ampliscore is a grade tracking and professor rating platform for college and university students. The Service allows users to manually enter their grades, calculate their GPA, and submit ratings and reviews of professors. Ampliscore is not affiliated with, endorsed by, or connected to any university or educational institution. All grade data is entered manually by users and is not accessed from any official academic system.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">3. User Accounts</h2>
-            <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to provide accurate and complete information when creating your account. Ampliscore reserves the right to terminate accounts that violate these terms.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">4. User Content & Professor Reviews</h2>
-            <p>You retain ownership of content you submit. By submitting content, you grant Ampliscore a license to display and distribute it within the Service. Professor ratings and reviews must represent your genuine opinion and experience. You agree not to submit false, defamatory, or misleading reviews. Reviews must be opinion-based and not stated as verified facts. Ampliscore reserves the right to remove content that violates community guidelines.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text[#1E1040] mb-2">5. Prohibited Uses</h2>
-            <p>You may not use the Service to: post false or defamatory content about professors or institutions; harass, threaten, or harm other users; attempt to gain unauthorized access to our systems; use the Service for any unlawful purpose; or impersonate any person or entity.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">6. Disclaimer of Warranties</h2>
-            <p>Ampliscore is provided "as is" without warranties of any kind. Grade predictions and GPA calculations are estimates only and should not be relied upon as official academic records. Always verify your grades with your institution's official systems.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">7. Limitation of Liability</h2>
-            <p>Ampliscore shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our total liability shall not exceed the amount you paid for the Service in the past 12 months.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">8. Changes to Terms</h2>
-            <p>We may update these terms from time to time. We will notify you of significant changes via email or through the Service. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
-          </section>
-          <section>
-            <h2 className="text-base font-medium text-[#1E1040] mb-2">9. Contact</h2>
-            <p>For questions about these terms, contact us at <a href="mailto:legal@ampliscore.com" className="text-purple-600 hover:underline">legal@ampliscore.com</a></p>
-          </section>
+    <main className="min-h-screen bg-[#F5F3FF] py-12 px-6">
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-8">
+          <Link href="/" className="text-purple-600 text-sm hover:underline">← Back to Ampliscore</Link>
         </div>
+        <div className="bg-white rounded-2xl border border-purple-100 p-8 md:p-12">
+          <h1 className="text-3xl font-bold text-[#1E1040] mb-2">Terms of Service</h1>
+          <p className="text-sm text-purple-900/40 mb-8">Last updated: May 25, 2026</p>
+
+          <div className="prose prose-purple max-w-none space-y-6 text-sm text-purple-900/70 leading-relaxed">
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">1. Acceptance of Terms</h2>
+              <p>By accessing or using Ampliscore ("the Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, do not use the Service. You must be at least 13 years of age to use Ampliscore. By using the Service, you represent that you are 13 years of age or older.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">2. Description of Service</h2>
+              <p>Ampliscore is an academic grade tracking and GPA planning tool for college students. The Service allows users to track grades, calculate GPA estimates, rate professors, and plan academic performance. Ampliscore is not affiliated with, endorsed by, or officially connected to any university, college, or educational institution.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">3. User Accounts</h2>
+              <p>You are responsible for maintaining the confidentiality of your account credentials. You are responsible for all activity that occurs under your account. You must provide accurate and complete information when creating an account. Ampliscore reserves the right to suspend or terminate accounts that violate these Terms.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">4. User Data and FERPA</h2>
+              <p>Ampliscore is not a school official and does not have access to your official academic records. All grade data you enter into Ampliscore is self-reported by you. Ampliscore does not connect to or interface with any university's official systems. Your data is stored securely and is not shared with your educational institution. The Family Educational Rights and Privacy Act (FERPA) applies to educational institutions, not to third-party applications like Ampliscore where you voluntarily enter your own data.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">5. Accuracy of Information</h2>
+              <p>GPA calculations, grade predictions, and academic projections provided by Ampliscore are estimates only and are not guaranteed to be accurate. Do not rely solely on Ampliscore for academic decisions. Always verify your grades and GPA with your official university records. Ampliscore is not responsible for any academic decisions made based on information displayed in the app.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">6. Professor Ratings</h2>
+              <p>Professor ratings on Ampliscore are submitted by users and reflect individual opinions only. Ampliscore does not verify the accuracy of ratings or reviews. Ampliscore is not responsible for the content of user-submitted ratings. Users must not submit false, defamatory, or malicious reviews. Ampliscore reserves the right to remove any content that violates these Terms.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">7. Prohibited Conduct</h2>
+              <p>You agree not to: use the Service for any unlawful purpose; submit false or misleading information; attempt to gain unauthorized access to any part of the Service; interfere with or disrupt the Service; use automated tools to scrape or collect data from the Service; impersonate any person or entity.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">8. Subscription and Payments</h2>
+              <p>Ampliscore offers a free tier and a Pro subscription. Pro subscriptions are billed monthly. You may cancel at any time. Refunds are handled on a case-by-case basis. Ampliscore reserves the right to change pricing with 30 days notice. Payments are processed securely through Stripe.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">9. Intellectual Property</h2>
+              <p>All content, design, and code in Ampliscore is the property of Ampliscore and is protected by copyright law. You may not copy, reproduce, or distribute any part of the Service without written permission.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">10. Disclaimer of Warranties</h2>
+              <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. AMPLISCORE DOES NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR COMPLETELY SECURE. YOUR USE OF THE SERVICE IS AT YOUR OWN RISK.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">11. Limitation of Liability</h2>
+              <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, AMPLISCORE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE, INCLUDING BUT NOT LIMITED TO ACADEMIC DECISIONS MADE BASED ON APP DATA.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">12. Data Deletion</h2>
+              <p>You may request deletion of your account and all associated data at any time by contacting us through the app or emailing support@ampliscore.app. We will process deletion requests within 30 days.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">13. Changes to Terms</h2>
+              <p>Ampliscore reserves the right to modify these Terms at any time. We will notify users of material changes via email or in-app notification. Continued use of the Service after changes constitutes acceptance of the new Terms.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-[#1E1040] mb-2">14. Contact</h2>
+              <p>For questions about these Terms, contact us at <a href="mailto:support@ampliscore.app" className="text-purple-600 hover:underline">support@ampliscore.app</a>.</p>
+            </section>
+
+          </div>
+        </div>
+        <p className="text-center text-xs text-purple-900/30 mt-6">
+          <Link href="/privacy" className="hover:underline">Privacy Policy</Link> · © 2026 Ampliscore
+        </p>
       </div>
-      <footer className="border-t border-purple-100 bg-white py-6 text-center text-sm text-purple-400 mt-8">
-        © 2026 Ampliscore · <Link href="/privacy" className="hover:text-purple-600">Privacy Policy</Link>
-      </footer>
     </main>
   );
 }
