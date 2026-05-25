@@ -20,6 +20,8 @@ export default function CourseDetailPage() {
   const [catForm, setCatForm] = useState({ name: "", weight: "" });
   const [assignForm, setAssignForm] = useState({ name: "", grade: "", max_grade: "100", category_id: "", completed: true });
   const [saving, setSaving] = useState(false);
+  const [editingCat, setEditingCat] = useState<any>(null);
+  const [editCatForm, setEditCatForm] = useState({ name: "", weight: "" });
 
   useEffect(() => { fetchAll(); }, [id]);
 
@@ -68,6 +70,27 @@ export default function CourseDetailPage() {
     setShowCatModal(false);
     fetchAll();
     setSaving(false);
+  };
+
+  const handleEditCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    const supabase = createClient();
+    await supabase.from("grade_categories").update({
+      name: editCatForm.name,
+      weight: parseFloat(editCatForm.weight),
+    }).eq("id", editingCat.id);
+    setEditingCat(null);
+    fetchAll();
+    setSaving(false);
+  };
+
+  const handleDeleteCategory = async (catId: string) => {
+    if (!confirm("Delete this category? All grades in it will also be deleted.")) return;
+    const supabase = createClient();
+    await supabase.from("assignments").delete().eq("category_id", catId);
+    await supabase.from("grade_categories").delete().eq("id", catId);
+    fetchAll();
   };
 
   const handleAddAssignment = async (e: React.FormEvent) => {
@@ -176,12 +199,22 @@ export default function CourseDetailPage() {
                         <div className="text-sm font-medium text-[#1E1040]">{cat.name}</div>
                         <div className="text-xs text-purple-900/40">{cat.weight}% of grade</div>
                       </div>
-                      <div className="text-right">
-                        {avg !== null ? (
-                          <div className={`text-sm font-medium ${getGradeColor(avg)}`}>{Math.round(avg)}%</div>
-                        ) : (
-                          <div className="text-xs text-purple-900/30">No grades</div>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          {avg !== null ? (
+                            <div className={`text-sm font-medium ${getGradeColor(avg)}`}>{Math.round(avg)}%</div>
+                          ) : (
+                            <div className="text-xs text-purple-900/30">No grades</div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => { setEditingCat(cat); setEditCatForm({ name: cat.name, weight: String(cat.weight) }); }}
+                          className="text-xs text-purple-400 hover:text-purple-600 px-1.5 py-0.5 rounded hover:bg-purple-50"
+                        >✏️</button>
+                        <button
+                          onClick={() => handleDeleteCategory(cat.id)}
+                          className="text-purple-900/20 hover:text-red-400 transition-colors"
+                        >×</button>
                       </div>
                     </div>
                   );
@@ -347,6 +380,46 @@ export default function CourseDetailPage() {
                 <button type="button" onClick={() => setShowAssignModal(false)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
                   {saving ? "Saving..." : "Add grade"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Category Modal */}
+      {editingCat && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-medium text-[#1E1040]">Edit category</h2>
+              <button onClick={() => setEditingCat(null)} className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+            </div>
+            <form onSubmit={handleEditCategory} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Category name</label>
+                <input
+                  type="text"
+                  value={editCatForm.name}
+                  onChange={(e) => setEditCatForm({ ...editCatForm, name: e.target.value })}
+                  required
+                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Weight (%)</label>
+                <input
+                  type="number"
+                  value={editCatForm.weight}
+                  onChange={(e) => setEditCatForm({ ...editCatForm, weight: e.target.value })}
+                  min="1" max="100" required
+                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setEditingCat(null)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
+                  {saving ? "Saving..." : "Save"}
                 </button>
               </div>
             </form>
