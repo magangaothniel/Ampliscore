@@ -455,11 +455,11 @@
       <div class="field-row">
         <div class="field">
           <label for="firstName">First name <span>*</span></label>
-          <input type="text" id="firstName" placeholder="e.g. Jordan" required>
+          <input type="text" id="firstName" placeholder="Othniel" required>
         </div>
         <div class="field">
           <label for="lastName">Last name <span>*</span></label>
-          <input type="text" id="lastName" placeholder="e.g. Smith" required>
+          <input type="text" id="lastName" placeholder="Maganga" required>
         </div>
       </div>
 
@@ -579,10 +579,6 @@
 </div>
 
 <script>
-  // ── Supabase config ──
-  const SUPABASE_URL = "https://zykldxurxazvcatvfxkd.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5a2xkeHVyeGF6dmNhdHZmeGtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxNjQwMTUsImV4cCI6MjA1OTc0MDAxNX0.r2kNy3jqyZb9HIFfR5Qu9m7-LJlqt2LCmkT6ZHOnFWg";
-
   // Star rating
   const stars = document.querySelectorAll('.star-btn');
   const ratingInput = document.getElementById('rating');
@@ -605,29 +601,6 @@
   });
 
   // Form submit
-  document.getElementById('betaForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const first     = document.getElementById('firstName').value.trim();
-    const last      = document.getElementById('lastName').value.trim();
-    const email     = document.getElementById('email').value.trim();
-    const uni       = document.getElementById('university').value.trim();
-    const year      = document.getElementById('year').value;
-    const platforms = [...document.querySelectorAll('input[name="platform"]:checked')].map(el => el.value);
-    const features  = [...document.querySelectorAll('input[name="feature"]:checked')].map(el => el.value);
-    if (!first || !last || !email || !uni || !year || !platforms.length || !features.length) {
-      shake(document.querySelector('.card')); return;
-    }
-    const btn = document.getElementById('submitBtn');
-    btn.innerHTML = 'Submitting…'; btn.disabled = true;
-    const res = await fetch(SUPABASE_URL + '/rest/v1/beta_testers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ first_name: first, last_name: last, email, university: uni, year_of_study: year, major: document.getElementById('major').value.trim(), platforms, features, testing_experience: parseInt(document.getElementById('rating').value) || null, primary_device: document.getElementById('device').value, biggest_frustration: document.getElementById('feedback').value.trim(), extra_notes: document.getElementById('extra').value.trim() })
-    });
-    if (res.ok) { document.getElementById('betaForm').style.display='none'; document.getElementById('successScreen').style.display='block'; }
-    else { btn.innerHTML='Apply to Beta Program'; btn.disabled=false; alert('Something went wrong. Please try again.'); }
-  });
-  function skip_old
   document.getElementById('betaForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
