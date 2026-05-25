@@ -22,13 +22,13 @@ export const metadata: Metadata = {
     title: "Ampliscore — Know where you stand",
     description: "Track your grades, predict your final score, find the best professors, and plan your GPA — all in one place.",
     url: "https://ampliscore.vercel.app",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Ampliscore — Know where you stand" }],
+    images: [{ url: "/api/og", width: 1200, height: 630, alt: "Ampliscore — Know where you stand" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ampliscore — Know where you stand",
     description: "Track your grades, predict your final score, find the best professors, and plan your GPA.",
-    images: ["/og-image.png"],
+    images: ["/api/og"],
   },
   icons: {
     icon: "/icon.png",
