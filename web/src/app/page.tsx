@@ -109,6 +109,16 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="max-w-3xl mx-auto px-6 pb-16">
+        <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl p-10 text-center">
+          <div className="inline-block bg-purple-500/40 text-purple-100 text-xs px-3 py-1 rounded-full mb-4">🧪 Beta Program</div>
+          <h2 className="text-3xl font-medium text-white mb-3">Be the first to try everything</h2>
+          <p className="text-purple-200 mb-8 max-w-md mx-auto">Join our beta program, test all features on web and mobile, and get <strong className="text-white">free Pro access</strong> — forever.</p>
+          <a href="https://ampliscore.vercel.app/beta.html" target="_blank" rel="noopener noreferrer" className="inline-block bg-white text-purple-700 font-medium px-8 py-3 rounded-xl hover:bg-purple-50 transition-colors">
+            Apply for Beta Access →
+          </a>
+        </div>
+      </section>
       <footer className="border-t border-purple-100 bg-white py-6 text-center text-sm text-purple-400">
         © 2026 Ampliscore · Know where you stand
       </footer>
