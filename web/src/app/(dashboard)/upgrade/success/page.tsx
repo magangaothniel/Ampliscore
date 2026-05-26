@@ -13,9 +13,20 @@ function SuccessContent() {
       if (!sessionId) return;
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("profiles").update({ is_pro: true }).eq("id", user.id);
-      }
+      if (!user) return;
+
+      // Get stripe_customer_id from our API using the session_id
+      const res = await fetch("/api/stripe/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+      const data = await res.json();
+
+      await supabase.from("profiles").update({
+        is_pro: true,
+        stripe_customer_id: data.customerId || null,
+      }).eq("id", user.id);
     };
     upgradeUser();
   }, [sessionId]);

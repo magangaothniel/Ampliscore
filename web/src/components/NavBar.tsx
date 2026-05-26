@@ -78,7 +78,7 @@ export default function NavBar({ profile }: { profile: any }) {
           ))}
           {!profile?.is_pro && (
             <Link href="/upgrade" className="text-sm bg-purple-600 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-700 transition-colors">
-              ⚡ Upgrade
+               Upgrade
             </Link>
           )}
         </div>
@@ -98,20 +98,20 @@ export default function NavBar({ profile }: { profile: any }) {
                 </div>
                 <div className="py-1">
                   <Link href="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
-                    �� Profile
+                     Profile
                   </Link>
                   <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
-                    ⚙️ Settings
+                     Settings
                   </Link>
                   {!profile?.is_pro && (
                     <Link href="/upgrade" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-600 font-medium hover:bg-purple-50">
-                      ⚡ Upgrade to Pro
+                       Upgrade to Pro
                     </Link>
                   )}
                 </div>
                 <div className="border-t border-purple-50">
                   <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 w-full text-left">
-                    🚪 Sign out
+                     Sign out
                   </button>
                 </div>
               </div>
@@ -141,18 +141,17 @@ export default function NavBar({ profile }: { profile: any }) {
           ))}
           {!profile?.is_pro && (
             <Link href="/upgrade" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm font-medium text-purple-600 bg-purple-50">
-              ⚡ Upgrade to Pro — $4.99/mo
+               Upgrade to Pro — $4.99/mo
             </Link>
           )}
           <div className="pt-2 border-t border-purple-50 mt-2 space-y-1">
-            <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-[#1E1040] hover:bg-purple-50">
-              Profile
+            <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-[#1E1040] hover:bg-purple-50"> Profile
             </Link>
             <Link href="/settings" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-[#1E1040] hover:bg-purple-50">
-              ⚙️ Settings
+               Settings
             </Link>
             <button onClick={handleSignOut} className="flex items-center w-full px-2 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50">
-              🚪 Sign out
+               Sign out
             </button>
           </div>
         </div>
