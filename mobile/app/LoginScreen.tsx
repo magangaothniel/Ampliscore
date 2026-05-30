@@ -5,7 +5,7 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as WebBrowser from 'expo-web-browser'
-import { makeRedirectUri } from 'expo-auth-session'
+import * as Linking from 'expo-linking'
 import { supabase } from '../lib/supabase'
 
 WebBrowser.maybeCompleteAuthSession()
@@ -40,7 +40,7 @@ export default function LoginScreen({ navigation }: any) {
   }
 
   async function verifyOtp() {
-    if (!otp || otp.length < 4) return Alert.alert('Enter the code', 'Check your SMS for the verification code.')
+    if (!otp || otp.length < 4) return Alert.alert('Enter the code', 'Check your SMS.')
     setLoading(true)
     const { error } = await supabase.auth.verifyOtp({
       phone: phone.replace(/\s/g, ''),
@@ -54,7 +54,7 @@ export default function LoginScreen({ navigation }: any) {
   async function signInWithGoogle() {
     setLoading(true)
     try {
-      const redirectTo = makeRedirectUri({ scheme: 'ampliscore', path: 'auth/callback' })
+      const redirectTo = Linking.createURL('auth/callback')
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -63,14 +63,20 @@ export default function LoginScreen({ navigation }: any) {
         },
       })
       if (error) throw error
-      if (!data.url) throw new Error('No OAuth URL returned')
+      if (!data.url) throw new Error('No OAuth URL')
+
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
+
       if (result.type === 'success' && result.url) {
         const url = result.url
-        const hashParams = new URLSearchParams(url.split('#')[1] || '')
-        const queryParams = new URLSearchParams(url.split('?')[1] || '')
-        const access_token = hashParams.get('access_token') || queryParams.get('access_token')
-        const refresh_token = hashParams.get('refresh_token') || queryParams.get('refresh_token')
+        // Parse tokens from hash or query params
+        const hashPart = url.split('#')[1] || ''
+        const queryPart = url.split('?')[1]?.split('#')[0] || ''
+        const hash = new URLSearchParams(hashPart)
+        const query = new URLSearchParams(queryPart)
+        const access_token = hash.get('access_token') || query.get('access_token')
+        const refresh_token = hash.get('refresh_token') || query.get('refresh_token')
+
         if (access_token) {
           const { error: sessionError } = await supabase.auth.setSession({
             access_token,
@@ -78,7 +84,7 @@ export default function LoginScreen({ navigation }: any) {
           })
           if (sessionError) throw sessionError
         } else {
-          Alert.alert('Sign in failed', 'No access token received.')
+          Alert.alert('Sign in incomplete', 'Could not retrieve session. Please try again.')
         }
       }
     } catch (e: any) {
@@ -139,7 +145,7 @@ export default function LoginScreen({ navigation }: any) {
                   <>
                     <Text style={styles.label}>Phone number</Text>
                     <TextInput style={styles.input} placeholder="+1 202 555 1234" placeholderTextColor="#C4B5FD" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-                    <Text style={styles.hint}>Include your country code e.g. +1 for US</Text>
+                    <Text style={styles.hint}>Include country code e.g. +1 for US</Text>
                     <TouchableOpacity style={[styles.btn, loading && styles.btnDisabled]} onPress={sendOtp} disabled={loading}>
                       {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Send code</Text>}
                     </TouchableOpacity>
