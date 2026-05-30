@@ -15,13 +15,13 @@ export const metadata: Metadata = {
   },
   description: "Track your grades, predict your final score, find the best professors, and plan your GPA — all in one place. Free for US college students.",
   keywords: ["grade tracker", "GPA calculator", "college grades", "professor ratings", "GPA planner", "student app"],
-  metadataBase: new URL("https://ampliscore.vercel.app"),
+  metadataBase: new URL("https://ampliscore.app"),
   openGraph: {
     type: "website",
     siteName: "Ampliscore",
     title: "Ampliscore — Know where you stand",
     description: "Track your grades, predict your final score, find the best professors, and plan your GPA — all in one place.",
-    url: "https://ampliscore.vercel.app",
+    url: "https://ampliscore.app",
     images: [{ url: "/api/og", width: 1200, height: 630, alt: "Ampliscore — Know where you stand" }],
   },
   twitter: {
