@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import * as WebBrowser from 'expo-web-browser'
 import * as Google from 'expo-auth-session/providers/google'
+import { makeRedirectUri } from 'expo-auth-session'
 import { supabase } from '../lib/supabase'
 
 WebBrowser.maybeCompleteAuthSession()
@@ -30,9 +31,11 @@ export default function LoginScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false)
 
   // Google
+  const redirectUri = makeRedirectUri({ useProxy: true })
   const [request, response, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID,
     iosClientId: GOOGLE_IOS_CLIENT_ID,
+    redirectUri,
   })
 
   useEffect(() => {
