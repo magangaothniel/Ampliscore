@@ -1,63 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as WebBrowser from 'expo-web-browser'
-import * as Google from 'expo-auth-session/providers/google'
 import { makeRedirectUri } from 'expo-auth-session'
 import { supabase } from '../lib/supabase'
 
 WebBrowser.maybeCompleteAuthSession()
 
-const GOOGLE_WEB_CLIENT_ID = '182581653071-uj78ltncokgib4mmugl586f2lomuil0c.apps.googleusercontent.com'
-const GOOGLE_IOS_CLIENT_ID = '182581653071-tsel7cfek1mg6ad62e839h0b8dpsb1ok.apps.googleusercontent.com'
-
 type Tab = 'email' | 'phone' | 'google'
 
 export default function LoginScreen({ navigation }: any) {
   const [tab, setTab] = useState<Tab>('email')
-
-  // Email
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-
-  // Phone
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
-
   const [loading, setLoading] = useState(false)
-
-  // Google
-  const redirectUri = makeRedirectUri({ useProxy: true })
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    webClientId: GOOGLE_WEB_CLIENT_ID,
-    iosClientId: GOOGLE_IOS_CLIENT_ID,
-    redirectUri,
-  })
-
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params
-      if (id_token) {
-        handleGoogleToken(id_token)
-      } else {
-        Alert.alert('Google sign in failed', 'No token received.')
-      }
-    }
-  }, [response])
-
-  async function handleGoogleToken(idToken: string) {
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: idToken,
-    })
-    if (error) Alert.alert('Google sign in failed', error.message)
-    setLoading(false)
-  }
 
   async function signInEmail() {
     if (!email || !password) return Alert.alert('Missing fields', 'Please enter your email and password.')
@@ -72,11 +34,8 @@ export default function LoginScreen({ navigation }: any) {
     if (!cleaned) return Alert.alert('Enter your phone number', 'Include country code e.g. +12025551234')
     setLoading(true)
     const { error } = await supabase.auth.signInWithOtp({ phone: cleaned })
-    if (error) {
-      Alert.alert('Failed to send code', error.message)
-    } else {
-      setOtpSent(true)
-    }
+    if (error) Alert.alert('Failed to send code', error.message)
+    else setOtpSent(true)
     setLoading(false)
   }
 
@@ -92,12 +51,46 @@ export default function LoginScreen({ navigation }: any) {
     setLoading(false)
   }
 
+  async function signInWithGoogle() {
+    setLoading(true)
+    try {
+      const redirectTo = makeRedirectUri({ scheme: 'ampliscore', path: 'auth/callback' })
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true,
+        },
+      })
+      if (error) throw error
+      if (!data.url) throw new Error('No OAuth URL returned')
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
+      if (result.type === 'success' && result.url) {
+        const url = result.url
+        const hashParams = new URLSearchParams(url.split('#')[1] || '')
+        const queryParams = new URLSearchParams(url.split('?')[1] || '')
+        const access_token = hashParams.get('access_token') || queryParams.get('access_token')
+        const refresh_token = hashParams.get('refresh_token') || queryParams.get('refresh_token')
+        if (access_token) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token,
+            refresh_token: refresh_token ?? '',
+          })
+          if (sessionError) throw sessionError
+        } else {
+          Alert.alert('Sign in failed', 'No access token received.')
+        }
+      }
+    } catch (e: any) {
+      Alert.alert('Google sign in failed', e.message)
+    }
+    setLoading(false)
+  }
+
   return (
     <LinearGradient colors={['#F5F3FF', '#EDE9FE']} style={styles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled">
-
-          {/* Logo */}
           <View style={styles.logoWrap}>
             <View style={styles.logoMark}>
               <View style={styles.outerRing} />
@@ -110,12 +103,10 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.tagline}>KNOW WHERE YOU STAND</Text>
           </View>
 
-          {/* Card */}
           <View style={styles.card}>
             <Text style={styles.heading}>Welcome back</Text>
             <Text style={styles.sub}>Sign in to your account</Text>
 
-            {/* Tab switcher */}
             <View style={styles.tabRow}>
               {(['email', 'phone', 'google'] as Tab[]).map(t => (
                 <TouchableOpacity
@@ -124,95 +115,42 @@ export default function LoginScreen({ navigation }: any) {
                   onPress={() => { setTab(t); setOtpSent(false) }}
                 >
                   <Text style={[styles.tabText, tab === t && styles.tabTextActive]}>
-                    {t === 'email' ? '✉️ Email' : t === 'phone' ? '📱 Phone' : 'Google'}
+                    {t === 'email' ? '✉️ Email' : t === 'phone' ? '📱 Phone' : 'G  Google'}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            {/* Email tab */}
             {tab === 'email' && (
               <View>
                 <Text style={styles.label}>Email</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="you@university.edu"
-                  placeholderTextColor="#C4B5FD"
-                  value={email}
-                  onChangeText={setEmail}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
+                <TextInput style={styles.input} placeholder="you@university.edu" placeholderTextColor="#C4B5FD" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
                 <Text style={styles.label}>Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="••••••••"
-                  placeholderTextColor="#C4B5FD"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-                <TouchableOpacity
-                  style={[styles.btn, loading && styles.btnDisabled]}
-                  onPress={signInEmail}
-                  disabled={loading}
-                >
-                  {loading
-                    ? <ActivityIndicator color="#fff" />
-                    : <Text style={styles.btnText}>Sign in</Text>
-                  }
+                <TextInput style={styles.input} placeholder="••••••••" placeholderTextColor="#C4B5FD" value={password} onChangeText={setPassword} secureTextEntry />
+                <TouchableOpacity style={[styles.btn, loading && styles.btnDisabled]} onPress={signInEmail} disabled={loading}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Sign in</Text>}
                 </TouchableOpacity>
               </View>
             )}
 
-            {/* Phone tab */}
             {tab === 'phone' && (
               <View>
                 {!otpSent ? (
                   <>
                     <Text style={styles.label}>Phone number</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="+1 202 555 1234"
-                      placeholderTextColor="#C4B5FD"
-                      value={phone}
-                      onChangeText={setPhone}
-                      keyboardType="phone-pad"
-                    />
+                    <TextInput style={styles.input} placeholder="+1 202 555 1234" placeholderTextColor="#C4B5FD" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
                     <Text style={styles.hint}>Include your country code e.g. +1 for US</Text>
-                    <TouchableOpacity
-                      style={[styles.btn, loading && styles.btnDisabled]}
-                      onPress={sendOtp}
-                      disabled={loading}
-                    >
-                      {loading
-                        ? <ActivityIndicator color="#fff" />
-                        : <Text style={styles.btnText}>Send code</Text>
-                      }
+                    <TouchableOpacity style={[styles.btn, loading && styles.btnDisabled]} onPress={sendOtp} disabled={loading}>
+                      {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Send code</Text>}
                     </TouchableOpacity>
                   </>
                 ) : (
                   <>
                     <Text style={styles.otpInfo}>Code sent to {phone} 📲</Text>
                     <Text style={styles.label}>Verification code</Text>
-                    <TextInput
-                      style={[styles.input, styles.otpInput]}
-                      placeholder="123456"
-                      placeholderTextColor="#C4B5FD"
-                      value={otp}
-                      onChangeText={setOtp}
-                      keyboardType="number-pad"
-                      maxLength={6}
-                    />
-                    <TouchableOpacity
-                      style={[styles.btn, loading && styles.btnDisabled]}
-                      onPress={verifyOtp}
-                      disabled={loading}
-                    >
-                      {loading
-                        ? <ActivityIndicator color="#fff" />
-                        : <Text style={styles.btnText}>Verify & sign in</Text>
-                      }
+                    <TextInput style={[styles.input, styles.otpInput]} placeholder="123456" placeholderTextColor="#C4B5FD" value={otp} onChangeText={setOtp} keyboardType="number-pad" maxLength={6} />
+                    <TouchableOpacity style={[styles.btn, loading && styles.btnDisabled]} onPress={verifyOtp} disabled={loading}>
+                      {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Verify & sign in</Text>}
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setOtpSent(false)} style={styles.resendBtn}>
                       <Text style={styles.resendText}>Wrong number? Go back</Text>
@@ -222,31 +160,19 @@ export default function LoginScreen({ navigation }: any) {
               </View>
             )}
 
-            {/* Google tab */}
             {tab === 'google' && (
               <View style={styles.googleWrap}>
                 <Text style={styles.googleSub}>Sign in with your Google account. No password needed.</Text>
-                <TouchableOpacity
-                  style={[styles.googleBtn, (!request || loading) && styles.btnDisabled]}
-                  onPress={() => promptAsync()}
-                  disabled={!request || loading}
-                >
-                  {loading
-                    ? <ActivityIndicator color="#fff" />
-                    : <Text style={styles.googleBtnText}><Text style={{fontWeight:'900', fontSize:17}}>G</Text>  Continue with Google</Text>
-                  }
+                <TouchableOpacity style={[styles.googleBtn, loading && styles.btnDisabled]} onPress={signInWithGoogle} disabled={loading}>
+                  {loading ? <ActivityIndicator color="#1E1333" /> : <Text style={styles.googleBtnText}>G  Continue with Google</Text>}
                 </TouchableOpacity>
               </View>
             )}
           </View>
 
-          {/* Footer */}
           <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.footer}>
-            <Text style={styles.footerText}>
-              Don't have an account? <Text style={styles.footerLink}>Sign up free</Text>
-            </Text>
+            <Text style={styles.footerText}>Don't have an account? <Text style={styles.footerLink}>Sign up free</Text></Text>
           </TouchableOpacity>
-
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
