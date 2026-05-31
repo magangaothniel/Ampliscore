@@ -28,6 +28,11 @@
       "expo-secure-store",
       "expo-web-browser"
     ],
-    "scheme": "ampliscore"
+    "scheme": "ampliscore",
+    "extra": {
+      "eas": {
+        "projectId": "65595311-5c00-43c0-805b-9d9d70327ea0"
+      }
+    }
   }
 }
