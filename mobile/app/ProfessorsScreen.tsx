@@ -1,0 +1,261 @@
+import { useState, useEffect } from 'react'
+import {
+  View, Text, StyleSheet, ScrollView, TextInput,
+  TouchableOpacity, Modal, Alert, ActivityIndicator
+} from 'react-native'
+import { supabase } from '../lib/supabase'
+
+type Rating = {
+  id: string
+  professor_name: string
+  university: string
+  course_code: string
+  rating: number
+  difficulty: number
+  would_take_again: boolean
+  comment: string
+  created_at: string
+}
+
+function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {[1, 2, 3, 4, 5].map(i => (
+        <View key={i} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: i <= rating ? '#F59E0B' : '#E9D5FF' }} />
+      ))}
+    </View>
+  )
+}
+
+export default function ProfessorsScreen() {
+  const [ratings, setRatings] = useState<Rating[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [modalVisible, setModalVisible] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  const [profName, setProfName] = useState('')
+  const [university, setUniversity] = useState('')
+  const [courseCode, setCourseCode] = useState('')
+  const [rating, setRating] = useState(5)
+  const [difficulty, setDifficulty] = useState(3)
+  const [wouldTakeAgain, setWouldTakeAgain] = useState(true)
+  const [comment, setComment] = useState('')
+
+  useEffect(() => { fetchRatings() }, [])
+
+  async function fetchRatings() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('professor_ratings')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (data) setRatings(data)
+    setLoading(false)
+  }
+
+  async function submitRating() {
+    if (!profName.trim()) return Alert.alert('Missing field', 'Please enter professor name.')
+    setSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase.from('professor_ratings').insert({
+      user_id: user.id,
+      professor_name: profName.trim(),
+      university: university.trim(),
+      course_code: courseCode.trim(),
+      rating,
+      difficulty,
+      would_take_again: wouldTakeAgain,
+      comment: comment.trim(),
+    })
+    if (error) Alert.alert('Error', error.message)
+    else {
+      setModalVisible(false)
+      resetForm()
+      fetchRatings()
+    }
+    setSaving(false)
+  }
+
+  function resetForm() {
+    setProfName(''); setUniversity(''); setCourseCode('')
+    setRating(5); setDifficulty(3); setWouldTakeAgain(true); setComment('')
+  }
+
+  const filtered = ratings.filter(r =>
+    r.professor_name?.toLowerCase().includes(search.toLowerCase()) ||
+    r.university?.toLowerCase().includes(search.toLowerCase()) ||
+    r.course_code?.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Professors</Text>
+          <Text style={styles.sub}>{ratings.length} rating{ratings.length !== 1 ? 's' : ''}</Text>
+        </View>
+        <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
+          <Text style={styles.addBtnText}>+ Rate</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.searchWrap}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search professors or universities..."
+          placeholderTextColor="#C4B5FD"
+          value={search}
+          onChangeText={setSearch}
+        />
+      </View>
+
+      {loading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color="#7C3AED" />
+        </View>
+      ) : filtered.length === 0 ? (
+        <View style={styles.center}>
+          <Text style={styles.emptyTitle}>No ratings yet</Text>
+          <Text style={styles.emptySub}>Be the first to rate a professor</Text>
+          <TouchableOpacity style={styles.emptyBtn} onPress={() => setModalVisible(true)}>
+            <Text style={styles.emptyBtnText}>+ Rate a professor</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 20 }}>
+          {filtered.map(r => (
+            <View key={r.id} style={styles.card}>
+              <View style={styles.cardTop}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.profName}>{r.professor_name}</Text>
+                  <Text style={styles.profMeta}>{r.university}{r.course_code ? ` · ${r.course_code}` : ''}</Text>
+                </View>
+                <View style={styles.ratingBadge}>
+                  <Text style={styles.ratingNum}>{r.rating}.0</Text>
+                </View>
+              </View>
+              <Stars rating={r.rating} />
+              <View style={styles.tagsRow}>
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>Difficulty: {r.difficulty}/5</Text>
+                </View>
+                {r.would_take_again && (
+                  <View style={[styles.tag, styles.tagGreen]}>
+                    <Text style={[styles.tagText, { color: '#16a34a' }]}>Would take again</Text>
+                  </View>
+                )}
+              </View>
+              {r.comment ? <Text style={styles.comment}>"{r.comment}"</Text> : null}
+            </View>
+          ))}
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      )}
+
+      <Modal visible={modalVisible} animationType="slide" presentationStyle="pageSheet">
+        <View style={styles.modal}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Rate a professor</Text>
+            <TouchableOpacity onPress={() => { setModalVisible(false); resetForm() }}>
+              <Text style={styles.modalClose}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
+            <Text style={styles.label}>Professor name *</Text>
+            <TextInput style={styles.input} placeholder="e.g. Dr. Smith" placeholderTextColor="#C4B5FD" value={profName} onChangeText={setProfName} />
+
+            <Text style={styles.label}>University</Text>
+            <TextInput style={styles.input} placeholder="e.g. Kansas State University" placeholderTextColor="#C4B5FD" value={university} onChangeText={setUniversity} />
+
+            <Text style={styles.label}>Course code</Text>
+            <TextInput style={styles.input} placeholder="e.g. CS 101" placeholderTextColor="#C4B5FD" value={courseCode} onChangeText={setCourseCode} />
+
+            <Text style={styles.label}>Overall rating</Text>
+            <View style={styles.ratingRow}>
+              {[1, 2, 3, 4, 5].map(i => (
+                <TouchableOpacity key={i} onPress={() => setRating(i)} style={[styles.ratingBtn, rating >= i && styles.ratingBtnActive]}>
+                  <Text style={[styles.ratingBtnText, rating >= i && styles.ratingBtnTextActive]}>{i}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.label}>Difficulty (1-5)</Text>
+            <View style={styles.ratingRow}>
+              {[1, 2, 3, 4, 5].map(i => (
+                <TouchableOpacity key={i} onPress={() => setDifficulty(i)} style={[styles.ratingBtn, difficulty >= i && styles.ratingBtnActive]}>
+                  <Text style={[styles.ratingBtnText, difficulty >= i && styles.ratingBtnTextActive]}>{i}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.label}>Would take again?</Text>
+            <View style={styles.toggleRow}>
+              <TouchableOpacity style={[styles.toggleBtn, wouldTakeAgain && styles.toggleBtnActive]} onPress={() => setWouldTakeAgain(true)}>
+                <Text style={[styles.toggleText, wouldTakeAgain && styles.toggleTextActive]}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.toggleBtn, !wouldTakeAgain && styles.toggleBtnActive]} onPress={() => setWouldTakeAgain(false)}>
+                <Text style={[styles.toggleText, !wouldTakeAgain && styles.toggleTextActive]}>No</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.label}>Comment</Text>
+            <TextInput style={[styles.input, styles.commentInput]} placeholder="Share your experience..." placeholderTextColor="#C4B5FD" value={comment} onChangeText={setComment} multiline numberOfLines={4} />
+
+            <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={submitRating} disabled={saving}>
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Submit rating</Text>}
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </Modal>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#F5F3FF' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 12 },
+  title: { fontSize: 24, fontWeight: '700', color: '#1E1333' },
+  sub: { fontSize: 14, color: '#A78BFA', marginTop: 2 },
+  addBtn: { backgroundColor: '#7C3AED', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 16 },
+  addBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  searchWrap: { paddingHorizontal: 20, marginBottom: 8 },
+  searchInput: { backgroundColor: '#fff', borderRadius: 12, padding: 14, fontSize: 14, color: '#1E1333', borderWidth: 1.5, borderColor: '#DDD6FE' },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: '#1E1333', marginBottom: 8 },
+  emptySub: { fontSize: 14, color: '#A78BFA', textAlign: 'center', marginBottom: 24 },
+  emptyBtn: { backgroundColor: '#7C3AED', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 28 },
+  emptyBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  card: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 12, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
+  cardTop: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 },
+  profName: { fontSize: 16, fontWeight: '700', color: '#1E1333' },
+  profMeta: { fontSize: 12, color: '#A78BFA', marginTop: 2 },
+  ratingBadge: { backgroundColor: '#F5F3FF', borderRadius: 10, width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  ratingNum: { fontSize: 16, fontWeight: '700', color: '#7C3AED' },
+  tagsRow: { flexDirection: 'row', gap: 8, marginTop: 8, marginBottom: 8 },
+  tag: { backgroundColor: '#F5F3FF', borderRadius: 99, paddingVertical: 4, paddingHorizontal: 10 },
+  tagGreen: { backgroundColor: '#DCFCE7' },
+  tagText: { fontSize: 11, color: '#7C3AED', fontWeight: '600' },
+  comment: { fontSize: 13, color: '#6B7280', fontStyle: 'italic', marginTop: 4 },
+  modal: { flex: 1, backgroundColor: '#fff' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 24, borderBottomWidth: 1, borderBottomColor: '#F5F3FF' },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1E1333' },
+  modalClose: { fontSize: 16, color: '#7C3AED', fontWeight: '600' },
+  modalBody: { padding: 20 },
+  label: { fontSize: 12, fontWeight: '600', color: '#6D28D9', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 16 },
+  input: { backgroundColor: '#F5F3FF', borderWidth: 1.5, borderColor: '#DDD6FE', borderRadius: 12, padding: 14, fontSize: 15, color: '#1E1333' },
+  commentInput: { height: 100, textAlignVertical: 'top' },
+  ratingRow: { flexDirection: 'row', gap: 8 },
+  ratingBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: '#F5F3FF', alignItems: 'center', borderWidth: 1.5, borderColor: '#DDD6FE' },
+  ratingBtnActive: { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+  ratingBtnText: { fontSize: 15, fontWeight: '700', color: '#7C3AED' },
+  ratingBtnTextActive: { color: '#fff' },
+  toggleRow: { flexDirection: 'row', gap: 12 },
+  toggleBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: '#F5F3FF', alignItems: 'center', borderWidth: 1.5, borderColor: '#DDD6FE' },
+  toggleBtnActive: { backgroundColor: '#7C3AED', borderColor: '#7C3AED' },
+  toggleText: { fontSize: 15, fontWeight: '700', color: '#7C3AED' },
+  toggleTextActive: { color: '#fff' },
+  saveBtn: { backgroundColor: '#7C3AED', borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 32 },
+  saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+})

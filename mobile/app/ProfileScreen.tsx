@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
 
 type Profile = {
   full_name: string | null
-  email: string | null
   is_pro: boolean
   referral_code: string | null
   referral_count: number
-  avatar_url: string | null
 }
 
 export default function ProfileScreen() {
@@ -16,9 +15,7 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
 
-  useEffect(() => {
-    fetchProfile()
-  }, [])
+  useEffect(() => { fetchProfile() }, [])
 
   async function fetchProfile() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -30,7 +27,7 @@ export default function ProfileScreen() {
   }
 
   async function signOut() {
-    Alert.alert('Sign out', 'Are you sure you want to sign out?', [
+    Alert.alert('Sign out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign out', style: 'destructive', onPress: () => supabase.auth.signOut() }
     ])
@@ -42,14 +39,14 @@ export default function ProfileScreen() {
     </View>
   )
 
+  const shortCode = profile?.referral_code ? profile.referral_code.slice(0, 8).toUpperCase() : '—'
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Profile</Text>
       </View>
 
-      {/* Avatar + name */}
       <View style={styles.avatarSection}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
@@ -59,29 +56,23 @@ export default function ProfileScreen() {
         <Text style={styles.name}>{profile?.full_name || 'Student'}</Text>
         <Text style={styles.emailText}>{email}</Text>
         {profile?.is_pro ? (
-          <View style={styles.proBadge}>
-            <Text style={styles.proBadgeText}>✦ Pro</Text>
-          </View>
+          <View style={styles.proBadge}><Text style={styles.proBadgeText}>✦ Pro</Text></View>
         ) : (
-          <View style={styles.freeBadge}>
-            <Text style={styles.freeBadgeText}>Free plan</Text>
-          </View>
+          <View style={styles.freeBadge}><Text style={styles.freeBadgeText}>Free plan</Text></View>
         )}
       </View>
 
-      {/* Stats */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
           <Text style={styles.statVal}>{profile?.referral_count || 0}</Text>
           <Text style={styles.statLabel}>Referrals</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statVal}>{profile?.referral_code || '—'}</Text>
+          <Text style={styles.statVal}>{shortCode}</Text>
           <Text style={styles.statLabel}>Referral code</Text>
         </View>
       </View>
 
-      {/* Upgrade banner */}
       {!profile?.is_pro && (
         <View style={styles.upgradeBanner}>
           <Text style={styles.upgradeTitle}>✦ Upgrade to Pro</Text>
@@ -90,31 +81,29 @@ export default function ProfileScreen() {
         </View>
       )}
 
-      {/* Menu items */}
       <View style={styles.menu}>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>👤</Text>
+          <Ionicons name="person-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Edit profile</Text>
-          <Text style={styles.menuArrow}>›</Text>
+          <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>🔔</Text>
+          <Ionicons name="notifications-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Notifications</Text>
-          <Text style={styles.menuArrow}>›</Text>
+          <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>🔒</Text>
+          <Ionicons name="lock-closed-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Privacy & security</Text>
-          <Text style={styles.menuArrow}>›</Text>
+          <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>❓</Text>
+        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
+          <Ionicons name="help-circle-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Help & support</Text>
-          <Text style={styles.menuArrow}>›</Text>
+          <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
       </View>
 
-      {/* Sign out */}
       <TouchableOpacity style={styles.signOutBtn} onPress={signOut}>
         <Text style={styles.signOutText}>Sign out</Text>
       </TouchableOpacity>
@@ -148,9 +137,8 @@ const styles = StyleSheet.create({
   upgradePrice: { fontSize: 15, fontWeight: '700', color: '#fff' },
   menu: { marginHorizontal: 20, backgroundColor: '#fff', borderRadius: 16, overflow: 'hidden', marginBottom: 20, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   menuItem: { flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#F5F3FF' },
-  menuIcon: { fontSize: 18, marginRight: 12 },
+  menuIcon: { marginRight: 12 },
   menuLabel: { flex: 1, fontSize: 15, color: '#1E1333', fontWeight: '500' },
-  menuArrow: { fontSize: 20, color: '#C4B5FD' },
   signOutBtn: { marginHorizontal: 20, backgroundColor: '#fff', borderRadius: 14, padding: 16, alignItems: 'center', borderWidth: 1.5, borderColor: '#FCA5A5' },
   signOutText: { color: '#dc2626', fontWeight: '700', fontSize: 15 },
 })
