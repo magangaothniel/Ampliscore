@@ -14,7 +14,7 @@ export default function TermsGate({ profile }: { profile: any }) {
   const handleAccept = async () => {
     setAccepting(true);
     const supabase = createClient();
-    await supabase.from("profiles").update({ terms_accepted: true }).eq("id", profile.id);
+    await supabase.from("profiles").update({ terms_accepted: true, terms_accepted_at: new Date().toISOString() }).eq("id", profile.id);
     setShow(false);
     setAccepting(false);
   };

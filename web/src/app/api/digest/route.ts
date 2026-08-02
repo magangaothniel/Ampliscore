@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
         const html = weeklyDigestEmail({ firstName, gpa, atRiskCourses: atRisk, courses: liveCourses });
 
         const { error } = await resend.emails.send({
-          from: "Ampliscore <onboarding@resend.dev>",
+          from: "Ampliscore <digest@ampliscore.app>",
           to: email,
           subject: `Your weekly grade summary — GPA: ${gpa.toFixed(2)}`,
           html,
