@@ -5,16 +5,20 @@ import { createClient } from "@/lib/supabase";
 
 function Logo() {
   return (
-    <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
-      <rect width="36" height="36" rx="10" fill="#EDE9FE"/>
-      <circle cx="18" cy="18" r="9" fill="none" stroke="#7C3AED" strokeWidth="2"/>
-      <circle cx="18" cy="18" r="5" fill="#DDD6FE"/>
-      <circle cx="18" cy="18" r="2.5" fill="#7C3AED"/>
-      <line x1="18" y1="9" x2="18" y2="12" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="18" y1="24" x2="18" y2="27" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="9" y1="18" x2="12" y2="18" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="24" y1="18" x2="27" y2="18" stroke="#7C3AED" strokeWidth="1.8" strokeLinecap="round"/>
-      <line x1="13" y1="13" x2="15.5" y2="15.5" stroke="#7C3AED" strokeWidth="1.5" strokeLinecap="round"/>
+    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+      <defs>
+        <linearGradient id="capG_resetpassword" x1="0" y1="64" x2="64" y2="0">
+          <stop offset="0" stopColor="#5B21B6" />
+          <stop offset="1" stopColor="#7C3AED" />
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="16" fill="#EDE9FE" />
+      <g transform="translate(32,34) scale(0.78) translate(-32,-29)">
+        <path d="M32 11 L59 23.5 L32 36 L5 23.5 Z" stroke="url(#capG_resetpassword)" strokeWidth="4.6" strokeLinejoin="round" />
+        <path d="M16.5 29 L16.5 41.5 C16.5 46.8 47.5 46.8 47.5 41.5 L47.5 29" stroke="url(#capG_resetpassword)" strokeWidth="4.6" strokeLinecap="round" />
+        <path d="M59 23.5 L59 39.5" stroke="url(#capG_resetpassword)" strokeWidth="4" strokeLinecap="round" />
+        <circle cx="59" cy="45.6" r="4.9" fill="#7C3AED" stroke="#FFFFFF" strokeWidth="2.4" />
+      </g>
     </svg>
   );
 }
