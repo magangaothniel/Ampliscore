@@ -1,0 +1,22 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    - cron: "0 13 */2 * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://zykldxurxazvcatvfxkd.supabase.co/rest/v1/beta_testers?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+          echo "Supabase responded with HTTP $STATUS"
+          if [ "$STATUS" -ge 500 ]; then
+            echo "::error::Supabase may be paused or down (HTTP $STATUS)"
+            exit 1
+          fi
