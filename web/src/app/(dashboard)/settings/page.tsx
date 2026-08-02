@@ -39,7 +39,7 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
-  cconst handleDeleteAccount = async () => {
+  const handleDeleteAccount = async () => {
     if (deleteConfirm !== "DELETE") return;
     setDeleting(true);
     const supabase = createClient();
