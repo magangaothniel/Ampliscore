@@ -50,6 +50,36 @@ export default function ProfessorsPage() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [reportTarget, setReportTarget] = useState<any>(null);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportSending, setReportSending] = useState(false);
+  const [reportDone, setReportDone] = useState(false);
+  const [reportError, setReportError] = useState("");
+
+  const submitReport = async () => {
+    if (!reportReason) { setReportError("Pick a reason."); return; }
+    setReportSending(true); setReportError("");
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { setReportError("Please sign in again."); setReportSending(false); return; }
+    const res = await fetch("/api/ratings/report", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ rating_id: reportTarget.id, reason: reportReason, details: reportDetails }),
+    });
+    setReportSending(false);
+    if (res.ok) { setReportDone(true); }
+    else {
+      const j = await res.json().catch(() => ({}));
+      setReportError(j.error || "Could not submit report.");
+    }
+  };
+
+  const closeReport = () => {
+    setReportTarget(null); setReportReason(""); setReportDetails("");
+    setReportDone(false); setReportError("");
+  };
   const [form, setForm] = useState({
     professor_name: "",
     course_code: "",
@@ -191,6 +221,12 @@ export default function ProfessorsPage() {
                         </span>
                       </div>
                       {review.review && <p className="text-sm text-purple-900/60 leading-relaxed">{review.review}</p>}
+                      <button
+                        onClick={() => setReportTarget(review)}
+                        className="mt-2 text-xs text-purple-900/35 hover:text-purple-600 transition-colors"
+                      >
+                        Report
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -278,6 +314,79 @@ export default function ProfessorsPage() {
           </div>
         </div>
       )}
+
+      {reportTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            {reportDone ? (
+              <>
+                <h2 className="text-lg font-medium text-[#1E1040] mb-2">Report received</h2>
+                <p className="text-sm text-purple-900/60 mb-5">
+                  Thanks — we review every report and remove reviews that break our rules.
+                </p>
+                <button
+                  onClick={closeReport}
+                  className="w-full bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
+                >
+                  Done
+                </button>
+              </>
+            ) : (
+              <>
+                <h2 className="text-lg font-medium text-[#1E1040] mb-1">Report this review</h2>
+                <p className="text-sm text-purple-900/50 mb-4">Tell us what&apos;s wrong with it.</p>
+                <div className="space-y-2 mb-4">
+                  {[
+                    ["inaccurate", "Inaccurate or misleading"],
+                    ["offensive", "Offensive language"],
+                    ["harassment", "Targets or harasses someone"],
+                    ["spam", "Spam or advertising"],
+                    ["not_a_review", "Not about the professor"],
+                    ["other", "Something else"],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      onClick={() => setReportReason(value)}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-sm border transition-colors ${
+                        reportReason === value
+                          ? "bg-purple-50 border-purple-300 text-purple-700"
+                          : "border-purple-100 text-purple-900/60 hover:border-purple-200"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Anything else we should know? (optional)"
+                  rows={3}
+                  maxLength={1000}
+                  className="w-full border border-purple-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:border-purple-500"
+                />
+                {reportError && <p className="text-sm text-red-500 mb-3">{reportError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    onClick={closeReport}
+                    className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={submitReport}
+                    disabled={reportSending}
+                    className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                  >
+                    {reportSending ? "Sending..." : "Submit report"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }
