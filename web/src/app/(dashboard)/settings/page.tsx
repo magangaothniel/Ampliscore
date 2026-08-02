@@ -39,15 +39,23 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
-  const handleDeleteAccount = async () => {
+  cconst handleDeleteAccount = async () => {
     if (deleteConfirm !== "DELETE") return;
     setDeleting(true);
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    await supabase.from("profiles").delete().eq("id", user.id);
-    await supabase.auth.signOut();
-    router.push("/");
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { setDeleting(false); return; }
+    const res = await fetch("/api/account/delete", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    });
+    if (res.ok) {
+      await supabase.auth.signOut();
+      router.push("/");
+    } else {
+      setDeleting(false);
+      alert("Account deletion failed. Please try again or contact support.");
+    }
   };
 
   const handleSignOut = async () => {
