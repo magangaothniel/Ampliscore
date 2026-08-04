@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
+import { cached, invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor, calculateGPA } from "@/lib/utils";
 import Link from "next/link";
 
@@ -15,10 +16,16 @@ export default function DashboardPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { window.location.href = "/login"; return; }
-      const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
-      const { data: coursesData } = await supabase.from("courses").select("*").eq("user_id", user.id);
-      const { data: assignData } = await supabase.from("assignments").select("*").eq("user_id", user.id);
-      const { data: catData } = await supabase.from("grade_categories").select("*");
+      const [profileData, coursesData, assignData, catData] = await Promise.all([
+        cached(`profile:${user.id}`, async () =>
+          (await supabase.from("profiles").select("*").eq("id", user.id).single()).data),
+        cached(`courses:${user.id}`, async () =>
+          (await supabase.from("courses").select("*").eq("user_id", user.id)).data),
+        cached(`assignments:${user.id}`, async () =>
+          (await supabase.from("assignments").select("*").eq("user_id", user.id)).data),
+        cached(`categories:${user.id}`, async () =>
+          (await supabase.from("grade_categories").select("*")).data),
+      ]);
       setAssignments(assignData || []);
       // Calculate real grades per course and update
       const updatedCourses = (coursesData || []).map((course: any) => {

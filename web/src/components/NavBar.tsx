@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { invalidateAll } from "@/lib/cache";
 
 function Logo() {
   return (
@@ -61,6 +62,7 @@ export default function NavBar({ profile }: { profile: any }) {
   }, []);
 
   const handleSignOut = async () => {
+    invalidateAll();
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/");

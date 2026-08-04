@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { cached, invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor } from "@/lib/utils";
 
 function Logo() {
@@ -49,11 +50,17 @@ export default function CoursesPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
     setUserId(user.id);
-    const { data: profileData } = await supabase.from("profiles").select("*").eq("id", user.id).single();
+    const profileData = await cached(`profile:${user.id}`, async () =>
+      (await supabase.from("profiles").select("*").eq("id", user.id).single()).data);
     setProfile(profileData);
-    const { data } = await supabase.from("courses").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    const { data: aData } = await supabase.from("assignments").select("*").eq("user_id", user.id);
-    const { data: cData } = await supabase.from("grade_categories").select("*");
+    const [data, aData, cData] = await Promise.all([
+      cached(`courses:${user.id}:ordered`, async () =>
+        (await supabase.from("courses").select("*").eq("user_id", user.id).order("created_at", { ascending: false })).data),
+      cached(`assignments:${user.id}`, async () =>
+        (await supabase.from("assignments").select("*").eq("user_id", user.id)).data),
+      cached(`categories:${user.id}`, async () =>
+        (await supabase.from("grade_categories").select("*")).data),
+    ]);
     const enriched = (data || []).map((course: any) => {
       const cats = (cData || []).filter((c: any) => c.course_id === course.id);
       const cas = (aData || []).filter((a: any) => a.course_id === course.id && a.completed);
@@ -93,6 +100,7 @@ export default function CoursesPage() {
       color: form.color,
       current_grade: 0,
     });
+    invalidate("courses");
     if (!error) {
       setShowModal(false);
       setForm({ name: "", code: "", professor: "", credits: "3", semester: "Fall", year: "2026", color: "#7C3AED" });
@@ -105,6 +113,9 @@ export default function CoursesPage() {
     if (!confirm("Delete this course? This cannot be undone.")) return;
     const supabase = createClient();
     await supabase.from("courses").delete().eq("id", id);
+      invalidate("courses");
+      invalidate("categories");
+      invalidate("assignments");
     fetchCourses();
   };
 

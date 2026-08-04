@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { cached, invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor, calculateGPA, getGradePoints } from "@/lib/utils";
 
 function Logo() {
@@ -40,9 +41,14 @@ export default function GPAPage() {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
-    const { data } = await supabase.from("courses").select("*").eq("user_id", user.id);
-    const { data: assignData } = await supabase.from("assignments").select("*").eq("user_id", user.id);
-    const { data: catData } = await supabase.from("grade_categories").select("*");
+    const [data, assignData, catData] = await Promise.all([
+      cached(`courses:${user.id}`, async () =>
+        (await supabase.from("courses").select("*").eq("user_id", user.id)).data),
+      cached(`assignments:${user.id}`, async () =>
+        (await supabase.from("assignments").select("*").eq("user_id", user.id)).data),
+      cached(`categories:${user.id}`, async () =>
+        (await supabase.from("grade_categories").select("*")).data),
+    ]);
     const liveCourses = (data || []).map((course: any) => {
       const cats = (catData || []).filter((c: any) => c.course_id === course.id);
       const courseAssigns = (assignData || []).filter((a: any) => a.course_id === course.id && a.completed);
