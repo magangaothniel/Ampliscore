@@ -119,7 +119,7 @@ export default function GPAPage() {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="mb-6">
           <h1 className="font-display text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">GPA Planner</h1>
-          <p className="text-sm text-purple-900/50 mt-1">Run what-if scenarios and plan your path to your target GPA</p>
+          <p className="text-sm text-ink-600 mt-1">Run what-if scenarios and plan your path to your target GPA</p>
         </div>
 
         {/* GPA Summary */}
@@ -148,12 +148,12 @@ export default function GPAPage() {
           {/* What-if sliders */}
           <div className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
             <div className="px-5 py-4 border-b border-purple-50">
-              <h2 className="font-medium text-[#1E1040]">What if my grades were...</h2>
-              <p className="text-xs text-purple-900/40 mt-0.5">Drag sliders to see how grades affect your GPA</p>
+              <h2 className="font-medium text-ink-900">What if my grades were...</h2>
+              <p className="text-xs text-ink-400 mt-0.5">Drag sliders to see how grades affect your GPA</p>
             </div>
             {courses.length === 0 ? (
               <div className="py-10 text-center">
-                <p className="text-sm text-purple-900/40">No courses yet</p>
+                <p className="text-sm text-ink-400">No courses yet</p>
                 <Link href="/courses" className="text-sm text-purple-600 hover:underline mt-1 block">Add courses first</Link>
               </div>
             ) : (
@@ -163,10 +163,10 @@ export default function GPAPage() {
                   return (
                     <div key={course.id} className="px-5 py-4">
                       <div className="flex items-center justify-between mb-2">
-                        <div className="text-sm font-medium text-[#1E1040]">{course.name}</div>
+                        <div className="text-sm font-medium text-ink-900">{course.name}</div>
                         <div className="flex items-center gap-2">
                           <span className={`text-sm font-medium ${getGradeColor(grade)}`}>{grade}%</span>
-                          <span className="text-xs text-purple-900/40">{getLetterGrade(grade)}</span>
+                          <span className="text-xs text-ink-400">{getLetterGrade(grade)}</span>
                         </div>
                       </div>
                       <input
@@ -188,9 +188,9 @@ export default function GPAPage() {
           <div className="space-y-4">
             {/* Target GPA */}
             <div className="bg-white rounded-xl border border-ink-200 shadow-card p-5">
-              <h2 className="font-medium text-[#1E1040] mb-4">Target GPA calculator</h2>
+              <h2 className="font-medium text-ink-900 mb-4">Target GPA calculator</h2>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-purple-900/60">Target GPA</span>
+                <span className="text-sm text-ink-600">Target GPA</span>
                 <span className="text-lg font-medium text-purple-600">{targetGPA.toFixed(1)}</span>
               </div>
               <input
@@ -203,7 +203,7 @@ export default function GPAPage() {
                 className="w-full accent-purple-600 mb-4"
               />
               {needed !== null && (
-                <div className={`rounded-xl p-3 text-sm ${needed <= 4.0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>
+                <div className={`rounded-xl p-3 text-sm ${needed <= 4.0 ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-bad"}`}>
                   {needed <= 4.0
                     ? `You need an avg of ${(needed * 25).toFixed(0)}% (${getLetterGrade(needed * 25)}) across your planned courses to reach ${targetGPA.toFixed(1)} GPA`
                     : `A ${targetGPA.toFixed(1)} GPA is not achievable with your current courses — add more credits`
@@ -215,8 +215,8 @@ export default function GPAPage() {
             {/* Add hypothetical courses */}
             <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
               <div className="px-5 py-4 border-b border-purple-50">
-                <h2 className="font-medium text-[#1E1040]">Plan future courses</h2>
-                <p className="text-xs text-purple-900/40 mt-0.5">Add courses you plan to take</p>
+                <h2 className="font-medium text-ink-900">Plan future courses</h2>
+                <p className="text-xs text-ink-400 mt-0.5">Add courses you plan to take</p>
               </div>
               <div className="p-5">
                 <div className="grid grid-cols-3 gap-2 mb-3">
@@ -253,11 +253,11 @@ export default function GPAPage() {
                   <div className="space-y-2">
                     {hypothetical.map(c => (
                       <div key={c.id} className="flex items-center justify-between bg-purple-50 rounded-xl px-3 py-2">
-                        <div className="text-sm text-[#1E1040]">{c.name}</div>
+                        <div className="text-sm text-ink-900">{c.name}</div>
                         <div className="flex items-center gap-3">
-                          <span className="text-xs text-purple-900/40">{c.credits} cr</span>
+                          <span className="text-xs text-ink-400">{c.credits} cr</span>
                           <span className={`text-sm font-medium ${getGradeColor(c.grade)}`}>{c.grade}%</span>
-                          <button onClick={() => removeHypothetical(c.id)} className="text-purple-900/20 hover:text-red-400">×</button>
+                          <button onClick={() => removeHypothetical(c.id)} className="text-ink-400 hover:text-bad">×</button>
                         </div>
                       </div>
                     ))}

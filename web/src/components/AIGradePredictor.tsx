@@ -105,7 +105,7 @@ Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.
         className="w-full flex items-center justify-between px-5 py-4 hover:bg-purple-50/50 transition-colors">
         <div className="flex items-center gap-2">
           <span className="text-lg">🤖</span>
-          <span className="font-medium text-[#1E1040]">AI Grade Predictor</span>
+          <span className="font-medium text-ink-900">AI Grade Predictor</span>
           <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">Pro</span>
         </div>
         <svg className={`w-4 h-4 text-purple-400 transition-transform ${open ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,11 +116,11 @@ Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.
       {open && (
         <div className="px-5 pb-5 border-t border-purple-50">
           <div className="flex items-center gap-3 mt-4 mb-4">
-            <label className="text-sm text-[#1E1040] font-medium whitespace-nowrap">Target grade:</label>
+            <label className="text-sm text-ink-900 font-medium whitespace-nowrap">Target grade:</label>
             <input type="number" min="0" max="100" value={targetGrade}
               onChange={e => setTargetGrade(e.target.value)}
               className="w-20 px-3 py-1.5 rounded-lg border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-center" />
-            <span className="text-sm text-purple-900/50">%</span>
+            <span className="text-sm text-ink-600">%</span>
             <button onClick={runPredictor} disabled={loading || limitReached}
               className="ml-auto text-sm bg-purple-600 text-white px-4 py-1.5 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50">
               {loading ? "Analyzing..." : "Recalculate"}
@@ -128,7 +128,7 @@ Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.
           </div>
 
           {limitInfo && !limitReached && (
-            <p className="text-xs text-purple-900/40 mb-3">{limitInfo.used}/{limitInfo.cap} predictions used this month</p>
+            <p className="text-xs text-ink-400 mb-3">{limitInfo.used}/{limitInfo.cap} predictions used this month</p>
           )}
 
           {limitReached && (
@@ -141,14 +141,14 @@ Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.
           {loading && (
             <div className="flex items-center gap-3 py-6 justify-center">
               <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-purple-900/50">Claude is analyzing your grades...</span>
+              <span className="text-sm text-ink-600">Claude is analyzing your grades...</span>
             </div>
           )}
 
           {result && !loading && (
             <div className="bg-[#F5F3FF] rounded-xl p-4">
-              <p className="text-sm text-[#1E1040] leading-relaxed whitespace-pre-wrap">{result}</p>
-              <p className="text-xs text-purple-900/30 mt-3">Powered by Claude AI · Based on your current grades</p>
+              <p className="text-sm text-ink-900 leading-relaxed whitespace-pre-wrap">{result}</p>
+              <p className="text-xs text-ink-400 mt-3">Powered by Claude AI · Based on your current grades</p>
             </div>
           )}
         </div>

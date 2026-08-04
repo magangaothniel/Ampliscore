@@ -121,7 +121,7 @@ export default function CoursesPage() {
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="font-display text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">My courses</h1>
-            <p className="text-sm text-purple-900/50 mt-1">{courses.length} course{courses.length !== 1 ? "s" : ""} this semester</p>
+            <p className="text-sm text-ink-600 mt-1">{courses.length} course{courses.length !== 1 ? "s" : ""} this semester</p>
           </div>
           {atLimit ? (
             <Link href="/upgrade" className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
@@ -138,8 +138,8 @@ export default function CoursesPage() {
         {!isPro && (
           <div className="bg-white rounded-xl border border-ink-200 shadow-card p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-[#1E1040] font-medium">Free plan · Course slots</span>
-              <span className={`text-sm font-medium ${atLimit ? "text-red-500" : nearLimit ? "text-amber-500" : "text-purple-600"}`}>
+              <span className="text-sm text-ink-900 font-medium">Free plan · Course slots</span>
+              <span className={`text-sm font-medium ${atLimit ? "text-bad" : nearLimit ? "text-warn" : "text-purple-600"}`}>
                 {courses.length} / {FREE_LIMIT} used
               </span>
             </div>
@@ -154,16 +154,16 @@ export default function CoursesPage() {
             </div>
             {atLimit ? (
               <div className="flex items-center justify-between">
-                <p className="text-xs text-red-500">You've reached the free limit.</p>
+                <p className="text-xs text-bad">You've reached the free limit.</p>
                 <Link href="/upgrade" className="text-xs text-purple-600 font-medium hover:underline">Upgrade for unlimited →</Link>
               </div>
             ) : nearLimit ? (
               <div className="flex items-center justify-between">
-                <p className="text-xs text-amber-500">1 slot remaining on free plan.</p>
+                <p className="text-xs text-warn">1 slot remaining on free plan.</p>
                 <Link href="/upgrade" className="text-xs text-purple-600 font-medium hover:underline">Upgrade for unlimited →</Link>
               </div>
             ) : (
-              <p className="text-xs text-purple-900/40">{FREE_LIMIT - courses.length} slots remaining · <Link href="/upgrade" className="text-purple-600 hover:underline">Upgrade for unlimited</Link></p>
+              <p className="text-xs text-ink-400">{FREE_LIMIT - courses.length} slots remaining · <Link href="/upgrade" className="text-purple-600 hover:underline">Upgrade for unlimited</Link></p>
             )}
           </div>
         )}
@@ -171,8 +171,8 @@ export default function CoursesPage() {
         {courses.length === 0 ? (
           <div className="bg-white rounded-xl border border-ink-200 shadow-card py-20 text-center">
             <div className="text-5xl mb-4">📚</div>
-            <h2 className="text-lg font-medium text-[#1E1040] mb-2">No courses yet</h2>
-            <p className="text-sm text-purple-900/50 mb-6">Add your first course to start tracking your grades</p>
+            <h2 className="text-lg font-medium text-ink-900 mb-2">No courses yet</h2>
+            <p className="text-sm text-ink-600 mb-6">Add your first course to start tracking your grades</p>
             <button onClick={() => setShowModal(true)} className="bg-purple-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
               Add your first course
             </button>
@@ -187,29 +187,29 @@ export default function CoursesPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full flex-shrink-0 mt-1" style={{ background: course.color }} />
                       <div>
-                        <h3 className="font-medium text-[#1E1040]">{course.name}</h3>
-                        <p className="text-xs text-purple-900/40">{course.code} · {course.semester} {course.year}</p>
+                        <h3 className="font-medium text-ink-900">{course.name}</h3>
+                        <p className="text-xs text-ink-400">{course.code} · {course.semester} {course.year}</p>
                       </div>
                     </div>
-                    <button onClick={() => handleDelete(course.id)} aria-label="Delete course" className="text-purple-900/20 hover:text-red-400 transition-colors text-lg leading-none">×</button>
+                    <button onClick={() => handleDelete(course.id)} aria-label="Delete course" className="text-ink-400 hover:text-bad transition-colors text-lg leading-none">×</button>
                   </div>
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <div className="text-xs text-purple-900/40 mb-0.5">Professor</div>
-                      <div className="text-sm text-[#1E1040]">{course.professor || "Not set"}</div>
+                      <div className="text-xs text-ink-400 mb-0.5">Professor</div>
+                      <div className="text-sm text-ink-900">{course.professor || "Not set"}</div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-purple-900/40 mb-0.5">Credits</div>
-                      <div className="text-sm text-[#1E1040]">{course.credits} cr</div>
+                      <div className="text-xs text-ink-400 mb-0.5">Credits</div>
+                      <div className="text-sm text-ink-900">{course.credits} cr</div>
                     </div>
                     <div className="text-right">
                       {grade > 0 ? (
                         <>
                           <div className={`font-display text-3xl font-bold tnum ${grade >= 70 ? "text-good" : grade >= 60 ? "text-warn" : "text-bad"}`}>{grade}%</div>
-                          <div className="text-xs text-purple-900/40">{getLetterGrade(grade)}</div>
+                          <div className="text-xs text-ink-400">{getLetterGrade(grade)}</div>
                         </>
                       ) : (
-                        <div className="text-sm text-purple-900/30">N/A</div>
+                        <div className="text-sm text-ink-400">N/A</div>
                       )}
                     </div>
                   </div>
@@ -236,7 +236,7 @@ export default function CoursesPage() {
               <div key={`empty-${i}`} className="bg-white/50 rounded-2xl border border-dashed border-purple-200 p-5 flex items-center justify-center min-h-[200px]">
                 <div className="text-center">
                   <div className="text-2xl mb-2">📚</div>
-                  <div className="text-sm text-purple-900/40">Empty slot</div>
+                  <div className="text-sm text-ink-400">Empty slot</div>
                   <button onClick={() => setShowModal(true)} className="text-xs text-purple-600 hover:underline mt-1 block">+ Add course</button>
                 </div>
               </div>
@@ -264,23 +264,23 @@ export default function CoursesPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-medium text-[#1E1040]">Add a course</h2>
-              <button onClick={() => setShowModal(false)} aria-label="Close dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <h2 className="text-lg font-medium text-ink-900">Add a course</h2>
+              <button onClick={() => setShowModal(false)} aria-label="Close dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleAddCourse} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Course name *</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Course name *</label>
                 <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Calculus II" required
                   className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Course code</label>
+                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Course code</label>
                   <input type="text" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="e.g. MATH 201"
                     className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Credits</label>
+                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Credits</label>
                   <select value={form.credits} onChange={(e) => setForm({ ...form, credits: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
                     {[1,2,3,4,5,6].map(n => <option key={n} value={n}>{n}</option>)}
@@ -288,20 +288,20 @@ export default function CoursesPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Professor</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Professor</label>
                 <input type="text" value={form.professor} onChange={(e) => setForm({ ...form, professor: e.target.value })} placeholder="e.g. Dr. Smith"
                   className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Semester</label>
+                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Semester</label>
                   <select value={form.semester} onChange={(e) => setForm({ ...form, semester: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
                     {["Fall","Spring","Summer","Winter"].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Year</label>
+                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Year</label>
                   <select value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
                     {["2024","2025","2026"].map(y => <option key={y} value={y}>{y}</option>)}
@@ -309,7 +309,7 @@ export default function CoursesPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-2">Color</label>
+                <label className="block text-sm font-medium text-ink-900 mb-2">Color</label>
                 <div className="flex gap-2">
                   {COLORS.map(c => (
                     <button key={c} type="button" onClick={() => setForm({ ...form, color: c })}

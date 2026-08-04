@@ -77,25 +77,25 @@ export default function UpgradePage() {
           <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 text-xs font-medium px-4 py-2 rounded-full mb-4">
             ⚡ Upgrade to Pro
           </div>
-          <h1 className="text-4xl font-medium text-[#1E1040] mb-4">
+          <h1 className="text-4xl font-medium text-ink-900 mb-4">
             Know exactly where you stand.<br/>
             <span className="text-purple-600">Never get blindsided again.</span>
           </h1>
-          <p className="text-lg text-purple-900/50 max-w-xl mx-auto">
+          <p className="text-lg text-ink-600 max-w-xl mx-auto">
             Pro students catch failing grades 3 weeks earlier, hit their target GPA 2x more often, and spend less time stressing about finals.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 max-w-3xl mx-auto">
           <div className="bg-white rounded-2xl border border-purple-100 p-6">
-            <h2 className="text-lg font-medium text-[#1E1040] mb-1">Free</h2>
-            <div className="text-3xl font-medium text-[#1E1040] mb-1">$0<span className="text-sm text-purple-400 font-normal">/month</span></div>
-            <p className="text-sm text-purple-900/40 mb-6">Good for getting started</p>
+            <h2 className="text-lg font-medium text-ink-900 mb-1">Free</h2>
+            <div className="text-3xl font-medium text-ink-900 mb-1">$0<span className="text-sm text-purple-400 font-normal">/month</span></div>
+            <p className="text-sm text-ink-400 mb-6">Good for getting started</p>
             <div className="space-y-3 mb-6">
               {FREE_FEATURES.map((f) => (
                 <div key={f.text} className="flex items-center gap-2.5">
-                  <span className={`text-sm flex-shrink-0 ${f.included ? "text-emerald-500" : "text-purple-900/20"}`}>{f.included ? "✓" : "✗"}</span>
-                  <span className={`text-sm ${f.included ? "text-[#1E1040]" : "text-purple-900/30 line-through"}`}>{f.text}</span>
+                  <span className={`text-sm flex-shrink-0 ${f.included ? "text-emerald-500" : "text-ink-400"}`}>{f.included ? "✓" : "✗"}</span>
+                  <span className={`text-sm ${f.included ? "text-ink-900" : "text-ink-400 line-through"}`}>{f.text}</span>
                 </div>
               ))}
             </div>
@@ -115,7 +115,7 @@ export default function UpgradePage() {
                 </div>
               ))}
             </div>
-            {error && <div className="bg-red-100 text-red-600 text-xs px-3 py-2 rounded-xl mb-3">{error}</div>}
+            {error && <div className="bg-red-100 text-bad text-xs px-3 py-2 rounded-xl mb-3">{error}</div>}
             <button onClick={handleUpgrade} disabled={loading}
               className="w-full bg-white text-purple-700 py-3 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors disabled:opacity-50">
               {loading ? "Redirecting to checkout..." : "Upgrade to Pro — $4.99/mo"}
@@ -125,7 +125,7 @@ export default function UpgradePage() {
         </div>
 
         <div className="mb-16">
-          <h2 className="text-2xl font-medium text-[#1E1040] text-center mb-8">What you unlock with Pro</h2>
+          <h2 className="text-2xl font-medium text-ink-900 text-center mb-8">What you unlock with Pro</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { icon: "🤖", title: "AI grade predictor", desc: "See your exact final grade before you sit the exam. Know what score you need on every remaining assignment." },
@@ -135,23 +135,23 @@ export default function UpgradePage() {
             ].map((f) => (
               <div key={f.title} className="bg-white rounded-2xl border border-purple-100 p-5">
                 <div className="text-2xl mb-3">{f.icon}</div>
-                <h3 className="font-medium text-[#1E1040] mb-2 text-sm">{f.title}</h3>
-                <p className="text-xs text-purple-900/50 leading-relaxed">{f.desc}</p>
+                <h3 className="font-medium text-ink-900 mb-2 text-sm">{f.title}</h3>
+                <p className="text-xs text-ink-600 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
 
         <div className="mb-16">
-          <h2 className="text-2xl font-medium text-[#1E1040] text-center mb-8">What students are saying</h2>
+          <h2 className="text-2xl font-medium text-ink-900 text-center mb-8">What students are saying</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {TESTIMONIALS.map((t) => (
               <div key={t.name} className="bg-white rounded-2xl border border-purple-100 p-5">
                 <div className="text-amber-400 mb-3 text-sm">★★★★★</div>
-                <p className="text-sm text-purple-900/70 leading-relaxed mb-4">"{t.text}"</p>
+                <p className="text-sm text-ink-600 leading-relaxed mb-4">"{t.text}"</p>
                 <div>
-                  <div className="text-sm font-medium text-[#1E1040]">{t.name}</div>
-                  <div className="text-xs text-purple-900/40">{t.university}</div>
+                  <div className="text-sm font-medium text-ink-900">{t.name}</div>
+                  <div className="text-xs text-ink-400">{t.university}</div>
                 </div>
               </div>
             ))}
@@ -159,7 +159,7 @@ export default function UpgradePage() {
         </div>
 
         <div className="max-w-2xl mx-auto mb-12">
-          <h2 className="text-2xl font-medium text-[#1E1040] text-center mb-8">Common questions</h2>
+          <h2 className="text-2xl font-medium text-ink-900 text-center mb-8">Common questions</h2>
           <div className="space-y-4">
             {[
               { q: "Can I cancel anytime?", a: "Yes — cancel with one click from your account settings. No questions asked, no penalties." },
@@ -168,8 +168,8 @@ export default function UpgradePage() {
               { q: "Do I need Pro to use professor ratings?", a: "No — professor ratings are free for everyone. Pro unlocks the grade tracking and GPA planning features." },
             ].map((item) => (
               <div key={item.q} className="bg-white rounded-2xl border border-purple-100 p-5">
-                <h3 className="font-medium text-[#1E1040] mb-2 text-sm">{item.q}</h3>
-                <p className="text-sm text-purple-900/50 leading-relaxed">{item.a}</p>
+                <h3 className="font-medium text-ink-900 mb-2 text-sm">{item.q}</h3>
+                <p className="text-sm text-ink-600 leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>

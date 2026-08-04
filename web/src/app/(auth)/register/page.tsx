@@ -102,7 +102,7 @@ function RegisterForm() {
 
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-purple-100" />
-            <span className="text-xs text-purple-900/30">or</span>
+            <span className="text-xs text-ink-400">or</span>
             <div className="flex-1 h-px bg-purple-100" />
           </div>
 
@@ -143,7 +143,7 @@ function RegisterForm() {
             <Link href="/login" className="text-brand-600 font-medium hover:text-brand-700">Log in</Link>
           </p>
         </div>
-        <p className="text-center text-xs text-purple-900/30 mt-4">
+        <p className="text-center text-xs text-ink-400 mt-4">
           By signing up you agree to our <Link href="/terms" className="hover:underline">Terms</Link> and <Link href="/privacy" className="hover:underline">Privacy Policy</Link>.
         </p>
       </div>

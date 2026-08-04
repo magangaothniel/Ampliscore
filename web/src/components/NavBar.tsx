@@ -71,12 +71,12 @@ export default function NavBar({ profile }: { profile: any }) {
       <div className="flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2.5 flex-shrink-0">
           <Logo />
-          <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
+          <span className="text-lg font-medium text-ink-900">ampli<span className="text-purple-600">score</span></span>
         </Link>
         <div className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map(link => (
             <Link key={link.href} href={link.href} id={link.id}
-              className={`text-sm font-medium transition-colors ${pathname === link.href ? "text-purple-600" : "text-purple-900/50 hover:text-purple-600"}`}>
+              className={`text-sm font-medium transition-colors ${pathname === link.href ? "text-purple-600" : "text-ink-600 hover:text-purple-600"}`}>
               {link.label}
             </Link>
           ))}
@@ -96,15 +96,15 @@ export default function NavBar({ profile }: { profile: any }) {
                 <div className="px-4 py-3 border-b border-purple-50 flex items-center gap-3">
                   <Avatar profile={profile} size="lg" />
                   <div>
-                    <div className="text-sm font-medium text-[#1E1040]">{profile?.full_name || "Student"}</div>
-                    <div className="text-xs text-purple-900/40 mt-0.5 truncate max-w-[140px]">{profile?.email}</div>
+                    <div className="text-sm font-medium text-ink-900">{profile?.full_name || "Student"}</div>
+                    <div className="text-xs text-ink-400 mt-0.5 truncate max-w-[140px]">{profile?.email}</div>
                   </div>
                 </div>
                 <div className="py-1">
-                  <Link href="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
+                  <Link href="/profile" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-900 hover:bg-purple-50">
                      Profile
                   </Link>
-                  <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1E1040] hover:bg-purple-50">
+                  <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-900 hover:bg-purple-50">
                      Settings
                   </Link>
                   {!profile?.is_pro && (
@@ -114,7 +114,7 @@ export default function NavBar({ profile }: { profile: any }) {
                   )}
                 </div>
                 <div className="border-t border-purple-50">
-                  <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 w-full text-left">
+                  <button onClick={handleSignOut} className="flex items-center gap-3 px-4 py-2.5 text-sm text-bad hover:bg-red-50 w-full text-left">
                      Sign out
                   </button>
                 </div>
@@ -133,13 +133,13 @@ export default function NavBar({ profile }: { profile: any }) {
           <div className="flex items-center gap-3 px-2 pb-3 mb-2 border-b border-purple-50">
             <Avatar profile={profile} size="lg" />
             <div>
-              <div className="text-sm font-medium text-[#1E1040]">{profile?.full_name || "Student"}</div>
-              <div className="text-xs text-purple-900/40">{profile?.university || "No university set"}</div>
+              <div className="text-sm font-medium text-ink-900">{profile?.full_name || "Student"}</div>
+              <div className="text-xs text-ink-400">{profile?.university || "No university set"}</div>
             </div>
           </div>
           {NAV_LINKS.map(link => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
-              className={`flex items-center px-2 py-2.5 rounded-xl text-sm font-medium transition-colors ${pathname === link.href ? "bg-purple-50 text-purple-600" : "text-[#1E1040] hover:bg-purple-50"}`}>
+              className={`flex items-center px-2 py-2.5 rounded-xl text-sm font-medium transition-colors ${pathname === link.href ? "bg-purple-50 text-purple-600" : "text-ink-900 hover:bg-purple-50"}`}>
               {link.label}
             </Link>
           ))}
@@ -149,12 +149,12 @@ export default function NavBar({ profile }: { profile: any }) {
             </Link>
           )}
           <div className="pt-2 border-t border-purple-50 mt-2 space-y-1">
-            <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-[#1E1040] hover:bg-purple-50"> Profile
+            <Link href="/profile" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-ink-900 hover:bg-purple-50"> Profile
             </Link>
-            <Link href="/settings" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-[#1E1040] hover:bg-purple-50">
+            <Link href="/settings" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-ink-900 hover:bg-purple-50">
                Settings
             </Link>
-            <button onClick={handleSignOut} className="flex items-center w-full px-2 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50">
+            <button onClick={handleSignOut} className="flex items-center w-full px-2 py-2.5 rounded-xl text-sm text-bad hover:bg-red-50">
                Sign out
             </button>
           </div>

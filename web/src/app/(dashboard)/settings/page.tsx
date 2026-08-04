@@ -81,8 +81,8 @@ export default function SettingsPage() {
     <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1E1040]">Settings</h1>
-          <p className="text-sm text-purple-900/50 mt-1">Manage your account and preferences</p>
+          <h1 className="text-2xl font-semibold text-ink-900">Settings</h1>
+          <p className="text-sm text-ink-600 mt-1">Manage your account and preferences</p>
         </div>
         <Link href="/profile" className="text-sm text-purple-600 hover:underline">← Profile</Link>
       </div>
@@ -91,15 +91,15 @@ export default function SettingsPage() {
       {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{errorMsg}</div>}
 
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-4">Change password</h2>
+        <h2 className="font-medium text-ink-900 mb-4">Change password</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#1E1040] mb-1.5">New password</label>
+            <label className="block text-sm font-medium text-ink-900 mb-1.5">New password</label>
             <input type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
               className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Min 8 characters" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Confirm password</label>
+            <label className="block text-sm font-medium text-ink-900 mb-1.5">Confirm password</label>
             <input type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
               className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Repeat new password" />
           </div>
@@ -111,31 +111,31 @@ export default function SettingsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-4">Legal</h2>
+        <h2 className="font-medium text-ink-900 mb-4">Legal</h2>
         <div className="space-y-3">
-          <Link href="/terms" target="_blank" className="flex items-center justify-between py-2 text-sm text-[#1E1040] hover:text-purple-600 transition-colors">
+          <Link href="/terms" target="_blank" className="flex items-center justify-between py-2 text-sm text-ink-900 hover:text-purple-600 transition-colors">
             <span>Terms of Service</span>
-            <span className="text-purple-900/30">→</span>
+            <span className="text-ink-400">→</span>
           </Link>
           <div className="h-px bg-purple-50" />
-          <Link href="/privacy" target="_blank" className="flex items-center justify-between py-2 text-sm text-[#1E1040] hover:text-purple-600 transition-colors">
+          <Link href="/privacy" target="_blank" className="flex items-center justify-between py-2 text-sm text-ink-900 hover:text-purple-600 transition-colors">
             <span>Privacy Policy</span>
-            <span className="text-purple-900/30">→</span>
+            <span className="text-ink-400">→</span>
           </Link>
           <div className="h-px bg-purple-50" />
-          <div className="flex items-center justify-between py-2 text-sm text-purple-900/40">
+          <div className="flex items-center justify-between py-2 text-sm text-ink-400">
             <span>Terms accepted</span>
-            <span className="text-green-500 font-medium">✓ Yes</span>
+            <span className="text-good font-medium">✓ Yes</span>
           </div>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-4">Subscription</h2>
+        <h2 className="font-medium text-ink-900 mb-4">Subscription</h2>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-sm font-medium text-[#1E1040]">{profile?.is_pro ? "Pro plan" : "Free plan"}</div>
-            <div className="text-xs text-purple-900/40 mt-0.5">{profile?.is_pro ? "$4.99/month · Billed monthly" : "Up to 4 courses"}</div>
+            <div className="text-sm font-medium text-ink-900">{profile?.is_pro ? "Pro plan" : "Free plan"}</div>
+            <div className="text-xs text-ink-400 mt-0.5">{profile?.is_pro ? "$4.99/month · Billed monthly" : "Up to 4 courses"}</div>
           </div>
           {!profile?.is_pro && (
             <Link href="/upgrade" className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
@@ -145,7 +145,7 @@ export default function SettingsPage() {
         </div>
         {profile?.is_pro && (
           <div className="border-t border-purple-50 pt-4">
-            <p className="text-xs text-purple-900/40 mb-3">You can cancel anytime. Your Pro access continues until the end of your billing period.</p>
+            <p className="text-xs text-ink-400 mb-3">You can cancel anytime. Your Pro access continues until the end of your billing period.</p>
             <button onClick={handleManageSubscription}
               className="border border-purple-200 text-purple-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
               Manage or cancel subscription →
@@ -155,8 +155,8 @@ export default function SettingsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-1">Sign out</h2>
-        <p className="text-sm text-purple-900/50 mb-4">Sign out of your Ampliscore account on this device.</p>
+        <h2 className="font-medium text-ink-900 mb-1">Sign out</h2>
+        <p className="text-sm text-ink-600 mb-4">Sign out of your Ampliscore account on this device.</p>
         <button onClick={handleSignOut}
           className="border border-purple-200 text-purple-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
           Sign out
@@ -164,25 +164,25 @@ export default function SettingsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-1">Close account</h2>
-        <p className="text-sm text-purple-900/50 mb-4">Your data belongs to you. Closing your account will permanently delete your courses, grades, and all associated data.</p>
+        <h2 className="font-medium text-ink-900 mb-1">Close account</h2>
+        <p className="text-sm text-ink-600 mb-4">Your data belongs to you. Closing your account will permanently delete your courses, grades, and all associated data.</p>
         <button onClick={() => setShowDeleteModal(true)}
-          className="border border-purple-200 text-purple-900/50 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+          className="border border-purple-200 text-ink-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
           Close my account
         </button>
       </div>
 
-      <div className="text-center text-xs text-purple-900/30 pb-8">
+      <div className="text-center text-xs text-ink-400 pb-8">
         <p>© 2026 Ampliscore · Not affiliated with any university</p>
       </div>
 
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h2 className="text-lg font-medium text-[#1E1040] mb-2">Close your account?</h2>
-            <p className="text-sm text-purple-900/50 mb-4">This will permanently delete your courses, grades, and ratings. This cannot be undone.</p>
+            <h2 className="text-lg font-medium text-ink-900 mb-2">Close your account?</h2>
+            <p className="text-sm text-ink-600 mb-4">This will permanently delete your courses, grades, and ratings. This cannot be undone.</p>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Type <span className="font-mono text-purple-600">DELETE</span> to confirm</label>
+              <label className="block text-sm font-medium text-ink-900 mb-1.5">Type <span className="font-mono text-purple-600">DELETE</span> to confirm</label>
               <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
             </div>

@@ -18,7 +18,7 @@ function Logo() {
         <circle cx="59" cy="45.6" r="4.9" fill="#7C3AED" stroke="#FFFFFF" strokeWidth="2.4" />
       </g>
     </svg>
-      <span className="text-xl font-medium text-[#1E1040]">
+      <span className="text-xl font-medium text-ink-900">
         ampli<span className="text-purple-600">score</span>
       </span>
     </div>

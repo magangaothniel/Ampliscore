@@ -84,7 +84,7 @@ export default function LoginPage() {
           </button>
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-purple-100" />
-            <span className="text-xs text-purple-900/30">or</span>
+            <span className="text-xs text-ink-400">or</span>
             <div className="flex-1 h-px bg-purple-100" />
           </div>
           <form onSubmit={handleLogin} className="space-y-4">

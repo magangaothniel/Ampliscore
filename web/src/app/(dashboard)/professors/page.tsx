@@ -155,7 +155,7 @@ export default function ProfessorsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="font-display text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">Professor ratings</h1>
-            <p className="text-sm text-purple-900/50 mt-1">All universities · {ratings.length} review{ratings.length !== 1 ? "s" : ""}</p>
+            <p className="text-sm text-ink-600 mt-1">All universities · {ratings.length} review{ratings.length !== 1 ? "s" : ""}</p>
           </div>
           <input
             type="text"
@@ -170,8 +170,8 @@ export default function ProfessorsPage() {
         {professors.length === 0 ? (
           <div className="bg-white rounded-xl border border-ink-200 shadow-card py-20 text-center">
             <div className="text-5xl mb-4">⭐</div>
-            <h2 className="text-lg font-medium text-[#1E1040] mb-2">No ratings yet</h2>
-            <p className="text-sm text-purple-900/50 mb-6">Be the first to rate a professor on Ampliscore</p>
+            <h2 className="text-lg font-medium text-ink-900 mb-2">No ratings yet</h2>
+            <p className="text-sm text-ink-600 mb-6">Be the first to rate a professor on Ampliscore</p>
             <button
               onClick={() => setShowModal(true)}
               className="bg-purple-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
@@ -185,20 +185,20 @@ export default function ProfessorsPage() {
               <div key={prof.name} className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
                 <div className="flex items-start justify-between p-5 border-b border-purple-50">
                   <div>
-                    <h3 className="font-medium text-[#1E1040] text-lg">{prof.name}</h3>
-                    <p className="text-xs text-purple-900/40 mt-0.5">{prof.reviews.length} review{prof.reviews.length !== 1 ? "s" : ""}</p>
+                    <h3 className="font-medium text-ink-900 text-lg">{prof.name}</h3>
+                    <p className="text-xs text-ink-400 mt-0.5">{prof.reviews.length} review{prof.reviews.length !== 1 ? "s" : ""}</p>
                   </div>
                   <div className="flex items-center gap-6 text-right">
                     <div>
                       <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Rating</div>
                       <div className="flex items-center gap-1">
                         <StarRating value={Math.round(prof.avgRating)} />
-                        <span className="text-sm font-medium text-[#1E1040] ml-1">{prof.avgRating.toFixed(1)}</span>
+                        <span className="text-sm font-medium text-ink-900 ml-1">{prof.avgRating.toFixed(1)}</span>
                       </div>
                     </div>
                     <div>
                       <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Difficulty</div>
-                      <div className="text-lg font-medium text-[#1E1040]">{prof.avgDifficulty.toFixed(1)}/5</div>
+                      <div className="text-lg font-medium text-ink-900">{prof.avgDifficulty.toFixed(1)}/5</div>
                     </div>
                     <div>
                       <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Take again</div>
@@ -220,10 +220,10 @@ export default function ProfessorsPage() {
                           {review.would_take_again ? "Would take again" : "Would not take again"}
                         </span>
                       </div>
-                      {review.review && <p className="text-sm text-purple-900/60 leading-relaxed">{review.review}</p>}
+                      {review.review && <p className="text-sm text-ink-600 leading-relaxed">{review.review}</p>}
                       <button
                         onClick={() => setReportTarget(review)}
-                        className="mt-2 text-xs text-purple-900/35 hover:text-purple-600 transition-colors"
+                        className="mt-2 text-xs text-ink-400 hover:text-purple-600 transition-colors"
                       >
                         Report
                       </button>
@@ -241,12 +241,12 @@ export default function ProfessorsPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-medium text-[#1E1040]">Rate a professor</h2>
-              <button onClick={() => setShowModal(false)} aria-label="Close dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <h2 className="text-lg font-medium text-ink-900">Rate a professor</h2>
+              <button onClick={() => setShowModal(false)} aria-label="Close dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Professor name *</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Professor name *</label>
                 <input
                   type="text"
                   value={form.professor_name}
@@ -257,7 +257,7 @@ export default function ProfessorsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Course code</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Course code</label>
                 <input
                   type="text"
                   value={form.course_code}
@@ -267,16 +267,16 @@ export default function ProfessorsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-2">Overall rating *</label>
+                <label className="block text-sm font-medium text-ink-900 mb-2">Overall rating *</label>
                 <StarRating value={form.rating} onChange={(v) => setForm({ ...form, rating: v })} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-2">Difficulty</label>
+                <label className="block text-sm font-medium text-ink-900 mb-2">Difficulty</label>
                 <StarRating value={form.difficulty} onChange={(v) => setForm({ ...form, difficulty: v })} />
-                <p className="text-xs text-purple-900/40 mt-1">1 = very easy, 5 = very hard</p>
+                <p className="text-xs text-ink-400 mt-1">1 = very easy, 5 = very hard</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Review</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Review</label>
                 <textarea
                   value={form.review}
                   onChange={(e) => setForm({ ...form, review: e.target.value })}
@@ -286,19 +286,19 @@ export default function ProfessorsPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-2">Would you take this professor again?</label>
+                <label className="block text-sm font-medium text-ink-900 mb-2">Would you take this professor again?</label>
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, would_take_again: true })}
-                    className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors ${form.would_take_again ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "border-purple-200 text-purple-900/50"}`}
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors ${form.would_take_again ? "bg-emerald-50 text-good border-emerald-200" : "border-purple-200 text-ink-600"}`}
                   >
                     Yes ✓
                   </button>
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, would_take_again: false })}
-                    className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors ${!form.would_take_again ? "bg-red-50 text-red-500 border-red-200" : "border-purple-200 text-purple-900/50"}`}
+                    className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-colors ${!form.would_take_again ? "bg-red-50 text-bad border-red-200" : "border-purple-200 text-ink-600"}`}
                   >
                     No ✗
                   </button>
@@ -320,8 +320,8 @@ export default function ProfessorsPage() {
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
             {reportDone ? (
               <>
-                <h2 className="text-lg font-medium text-[#1E1040] mb-2">Report received</h2>
-                <p className="text-sm text-purple-900/60 mb-5">
+                <h2 className="text-lg font-medium text-ink-900 mb-2">Report received</h2>
+                <p className="text-sm text-ink-600 mb-5">
                   Thanks — we review every report and remove reviews that break our rules.
                 </p>
                 <button
@@ -333,8 +333,8 @@ export default function ProfessorsPage() {
               </>
             ) : (
               <>
-                <h2 className="text-lg font-medium text-[#1E1040] mb-1">Report this review</h2>
-                <p className="text-sm text-purple-900/50 mb-4">Tell us what&apos;s wrong with it.</p>
+                <h2 className="text-lg font-medium text-ink-900 mb-1">Report this review</h2>
+                <p className="text-sm text-ink-600 mb-4">Tell us what&apos;s wrong with it.</p>
                 <div className="space-y-2 mb-4">
                   {[
                     ["inaccurate", "Inaccurate or misleading"],
@@ -350,7 +350,7 @@ export default function ProfessorsPage() {
                       className={`w-full text-left px-3 py-2 rounded-xl text-sm border transition-colors ${
                         reportReason === value
                           ? "bg-purple-50 border-purple-300 text-purple-700"
-                          : "border-purple-100 text-purple-900/60 hover:border-purple-200"
+                          : "border-purple-100 text-ink-600 hover:border-purple-200"
                       }`}
                     >
                       {label}
@@ -365,7 +365,7 @@ export default function ProfessorsPage() {
                   maxLength={1000}
                   className="w-full border border-purple-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:border-purple-500"
                 />
-                {reportError && <p className="text-sm text-red-500 mb-3">{reportError}</p>}
+                {reportError && <p className="text-sm text-bad mb-3">{reportError}</p>}
                 <div className="flex gap-2">
                   <button
                     onClick={closeReport}

@@ -113,8 +113,8 @@ export default function ProfilePage() {
   return (
     <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#1E1040]">Profile</h1>
-        <p className="text-sm text-purple-900/50 mt-1">Manage your personal information</p>
+        <h1 className="text-2xl font-semibold text-ink-900">Profile</h1>
+        <p className="text-sm text-ink-600 mt-1">Manage your personal information</p>
       </div>
 
       {successMsg && (
@@ -126,7 +126,7 @@ export default function ProfilePage() {
 
       {/* Avatar */}
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-4">Profile picture</h2>
+        <h2 className="font-medium text-ink-900 mb-4">Profile picture</h2>
         <div className="flex items-center gap-5">
           <div className="relative">
             {profile?.avatar_url ? (
@@ -148,7 +148,7 @@ export default function ProfilePage() {
               className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50">
               {uploadingAvatar ? "Uploading..." : "Upload photo"}
             </button>
-            <p className="text-xs text-purple-900/40">JPG, PNG or WebP · Max 2MB</p>
+            <p className="text-xs text-ink-400">JPG, PNG or WebP · Max 2MB</p>
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
           </div>
         </div>
@@ -156,31 +156,31 @@ export default function ProfilePage() {
 
       {/* Profile info */}
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-4">Personal information</h2>
+        <h2 className="font-medium text-ink-900 mb-4">Personal information</h2>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Full name</label>
+            <label className="block text-sm font-medium text-ink-900 mb-1.5">Full name</label>
             <input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
               className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Your name" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Email</label>
+            <label className="block text-sm font-medium text-ink-900 mb-1.5">Email</label>
             <input value={profile?.email || ""} disabled
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-100 text-sm bg-purple-50 text-purple-900/40 cursor-not-allowed" />
+              className="w-full px-4 py-2.5 rounded-xl border border-purple-100 text-sm bg-purple-50 text-ink-400 cursor-not-allowed" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#1E1040] mb-1.5">University</label>
+            <label className="block text-sm font-medium text-ink-900 mb-1.5">University</label>
             <input value={form.university} onChange={e => setForm(f => ({ ...f, university: e.target.value }))}
               className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="e.g. Kansas State University" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Major</label>
+              <label className="block text-sm font-medium text-ink-900 mb-1.5">Major</label>
               <input value={form.major} onChange={e => setForm(f => ({ ...f, major: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="e.g. Computer Science" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Year</label>
+              <label className="block text-sm font-medium text-ink-900 mb-1.5">Year</label>
               <select value={form.year_of_study} onChange={e => setForm(f => ({ ...f, year_of_study: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white">
                 <option value="">Select year</option>
@@ -203,10 +203,10 @@ export default function ProfilePage() {
 
       {/* Referral */}
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-1">Refer a friend</h2>
-        <p className="text-sm text-purple-900/50 mb-4">Get 1 month Pro free for every 3 friends who sign up</p>
+        <h2 className="font-medium text-ink-900 mb-1">Refer a friend</h2>
+        <p className="text-sm text-ink-600 mb-4">Get 1 month Pro free for every 3 friends who sign up</p>
         <div className="bg-purple-50 rounded-xl p-4 mb-4">
-          <div className="text-xs text-purple-900/40 mb-1">Your referral link</div>
+          <div className="text-xs text-ink-400 mb-1">Your referral link</div>
           <div className="flex items-center gap-2">
             <div className="text-sm font-medium text-purple-700 flex-1 truncate">
               ampliscore.vercel.app/register?ref={profile?.referral_code || '...'}
@@ -222,27 +222,27 @@ export default function ProfilePage() {
         <div className="flex items-center gap-3">
           <div className="flex-1 bg-purple-50 rounded-xl p-3 text-center">
             <div className="text-2xl font-bold text-purple-600">{profile?.referral_count || 0}</div>
-            <div className="text-xs text-purple-900/40">Friends referred</div>
+            <div className="text-xs text-ink-400">Friends referred</div>
           </div>
           <div className="flex-1 bg-purple-50 rounded-xl p-3 text-center">
             <div className="text-2xl font-bold text-purple-600">{Math.max(0, 3 - (profile?.referral_count || 0))}</div>
-            <div className="text-xs text-purple-900/40">Until free Pro</div>
+            <div className="text-xs text-ink-400">Until free Pro</div>
           </div>
         </div>
       </div>
 
       {/* Account deletion */}
       <div className="bg-white rounded-2xl border border-purple-100 p-6">
-        <h2 className="font-medium text-[#1E1040] mb-1">Close account</h2>
-        <p className="text-sm text-purple-900/50 mb-4">Your data belongs to you. Closing your account will permanently delete your courses, grades, and all associated data.</p>
+        <h2 className="font-medium text-ink-900 mb-1">Close account</h2>
+        <p className="text-sm text-ink-600 mb-4">Your data belongs to you. Closing your account will permanently delete your courses, grades, and all associated data.</p>
         <button onClick={() => setShowDeleteModal(true)}
-          className="border border-purple-200 text-purple-900/50 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+          className="border border-purple-200 text-ink-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
           Close my account
         </button>
       </div>
 
       {/* Legal */}
-      <div className="text-center text-xs text-purple-900/30 pb-8">
+      <div className="text-center text-xs text-ink-400 pb-8">
         <p>© 2026 Ampliscore · Not affiliated with any university</p>
       </div>
 
@@ -250,10 +250,10 @@ export default function ProfilePage() {
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h2 className="text-lg font-medium text-[#1E1040] mb-2">Delete your account?</h2>
-            <p className="text-sm text-purple-900/50 mb-4">This will permanently delete your courses, grades, and ratings. This cannot be undone.</p>
+            <h2 className="text-lg font-medium text-ink-900 mb-2">Delete your account?</h2>
+            <p className="text-sm text-ink-600 mb-4">This will permanently delete your courses, grades, and ratings. This cannot be undone.</p>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Type <span className="text-red-500 font-mono">DELETE</span> to confirm</label>
+              <label className="block text-sm font-medium text-ink-900 mb-1.5">Type <span className="text-bad font-mono">DELETE</span> to confirm</label>
               <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-red-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" />
             </div>

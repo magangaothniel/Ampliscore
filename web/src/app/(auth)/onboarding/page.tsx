@@ -92,10 +92,10 @@ export default function OnboardingPage() {
         {step === 0 && (
           <div className="bg-white rounded-2xl border border-purple-100 p-8 text-center">
             <Logo />
-            <h1 className="text-2xl font-medium text-[#1E1040] mt-4 mb-2">
+            <h1 className="text-2xl font-medium text-ink-900 mt-4 mb-2">
               Welcome to Ampliscore{form.full_name ? `, ${form.full_name.split(" ")[0]}` : ""}! 👋
             </h1>
-            <p className="text-purple-900/50 text-sm mb-6 leading-relaxed">
+            <p className="text-ink-600 text-sm mb-6 leading-relaxed">
               Let's set up your profile so we can personalize your experience. It takes less than a minute.
             </p>
             <div className="grid grid-cols-2 gap-3 mb-8 text-left">
@@ -107,7 +107,7 @@ export default function OnboardingPage() {
               ].map(f => (
                 <div key={f.text} className="flex items-center gap-2 bg-purple-50 rounded-xl p-3">
                   <span>{f.icon}</span>
-                  <span className="text-xs text-purple-900/70 font-medium">{f.text}</span>
+                  <span className="text-xs text-ink-600 font-medium">{f.text}</span>
                 </div>
               ))}
             </div>
@@ -124,11 +124,11 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="bg-white rounded-2xl border border-purple-100 p-8">
             <div className="text-3xl mb-4">🎓</div>
-            <h2 className="text-xl font-medium text-[#1E1040] mb-1">Where do you go to school?</h2>
-            <p className="text-sm text-purple-900/50 mb-6">This helps us show you professor ratings from your campus.</p>
+            <h2 className="text-xl font-medium text-ink-900 mb-1">Where do you go to school?</h2>
+            <p className="text-sm text-ink-600 mb-6">This helps us show you professor ratings from your campus.</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Your name</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Your name</label>
                 <input
                   type="text" value={form.full_name}
                   onChange={(e) => setForm({ ...form, full_name: e.target.value })}
@@ -137,7 +137,7 @@ export default function OnboardingPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">University *</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">University *</label>
                 <input
                   type="text" value={form.university}
                   onChange={(e) => setForm({ ...form, university: e.target.value })}
@@ -165,11 +165,11 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="bg-white rounded-2xl border border-purple-100 p-8">
             <div className="text-3xl mb-4">��</div>
-            <h2 className="text-xl font-medium text-[#1E1040] mb-1">What are you studying?</h2>
-            <p className="text-sm text-purple-900/50 mb-6">Optional — helps us give you better recommendations.</p>
+            <h2 className="text-xl font-medium text-ink-900 mb-1">What are you studying?</h2>
+            <p className="text-sm text-ink-600 mb-6">Optional — helps us give you better recommendations.</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Major</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Major</label>
                 <input
                   type="text" value={form.major}
                   onChange={(e) => setForm({ ...form, major: e.target.value })}
@@ -178,7 +178,7 @@ export default function OnboardingPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Year of study</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Year of study</label>
                 <select
                   value={form.year_of_study}
                   onChange={(e) => setForm({ ...form, year_of_study: e.target.value })}
@@ -213,8 +213,8 @@ export default function OnboardingPage() {
           <div className="bg-white rounded-2xl border border-purple-100 p-8">
             <div className="text-center mb-6">
               <div className="text-4xl mb-2">{TOUR_STEPS[tourStep].icon}</div>
-              <h2 className="text-xl font-medium text-[#1E1040] mb-2">{TOUR_STEPS[tourStep].title}</h2>
-              <p className="text-sm text-purple-900/50 leading-relaxed">{TOUR_STEPS[tourStep].desc}</p>
+              <h2 className="text-xl font-medium text-ink-900 mb-2">{TOUR_STEPS[tourStep].title}</h2>
+              <p className="text-sm text-ink-600 leading-relaxed">{TOUR_STEPS[tourStep].desc}</p>
             </div>
 
             {/* Tour progress */}

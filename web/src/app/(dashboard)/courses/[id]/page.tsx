@@ -135,7 +135,7 @@ export default function CourseDetailPage() {
 
   if (!course) return (
     <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
-      <div className="text-red-500">Course not found</div>
+      <div className="text-bad">Course not found</div>
     </div>
   );
 
@@ -149,15 +149,15 @@ export default function CourseDetailPage() {
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 rounded-full" style={{ background: course.color }} />
               <div>
-                <h1 className="text-2xl font-medium text-[#1E1040]">{course.name}</h1>
-                <p className="text-sm text-purple-900/40">{course.code} · {course.professor} · {course.semester} {course.year}</p>
+                <h1 className="text-2xl font-medium text-ink-900">{course.name}</h1>
+                <p className="text-sm text-ink-400">{course.code} · {course.professor} · {course.semester} {course.year}</p>
               </div>
             </div>
             <div className="text-right">
-              <div className={`text-4xl font-medium ${hasAnyGrades ? getGradeColor(currentGrade) : "text-purple-900/30"}`}>
+              <div className={`text-4xl font-medium ${hasAnyGrades ? getGradeColor(currentGrade) : "text-ink-400"}`}>
                 {hasAnyGrades ? `${currentGrade}%` : "N/A"}
               </div>
-              <div className="text-sm text-purple-900/40">{hasAnyGrades ? getLetterGrade(currentGrade) : "No grades yet"}</div>
+              <div className="text-sm text-ink-400">{hasAnyGrades ? getLetterGrade(currentGrade) : "No grades yet"}</div>
             </div>
           </div>
           <div className="mt-4 w-full bg-purple-50 rounded-full h-3">
@@ -170,7 +170,7 @@ export default function CourseDetailPage() {
             />
           </div>
           {totalWeight !== 100 && totalWeight > 0 && (
-            <p className="text-xs text-amber-500 mt-2">⚠️ Grade weights add up to {totalWeight}% (should be 100%)</p>
+            <p className="text-xs text-warn mt-2">⚠️ Grade weights add up to {totalWeight}% (should be 100%)</p>
           )}
         </div>
 
@@ -178,12 +178,12 @@ export default function CourseDetailPage() {
           {/* Categories */}
           <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-purple-50">
-              <h2 className="font-medium text-[#1E1040]">Grade categories</h2>
+              <h2 className="font-medium text-ink-900">Grade categories</h2>
               <button onClick={() => setShowCatModal(true)} className="text-sm text-purple-600 hover:underline">+ Add</button>
             </div>
             {categories.length === 0 ? (
               <div className="py-10 text-center">
-                <p className="text-sm text-purple-900/40 mb-3">No categories yet</p>
+                <p className="text-sm text-ink-400 mb-3">No categories yet</p>
                 <button onClick={() => setShowCatModal(true)} className="text-sm text-purple-600 hover:underline">Add a category</button>
               </div>
             ) : (
@@ -196,15 +196,15 @@ export default function CourseDetailPage() {
                   return (
                     <div key={cat.id} className="flex items-center justify-between px-5 py-3">
                       <div>
-                        <div className="text-sm font-medium text-[#1E1040]">{cat.name}</div>
-                        <div className="text-xs text-purple-900/40">{cat.weight}% of grade</div>
+                        <div className="text-sm font-medium text-ink-900">{cat.name}</div>
+                        <div className="text-xs text-ink-400">{cat.weight}% of grade</div>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="text-right">
                           {avg !== null ? (
                             <div className={`text-sm font-medium ${getGradeColor(avg)}`}>{Math.round(avg)}%</div>
                           ) : (
-                            <div className="text-xs text-purple-900/30">No grades</div>
+                            <div className="text-xs text-ink-400">No grades</div>
                           )}
                         </div>
                         <button
@@ -213,7 +213,7 @@ export default function CourseDetailPage() {
                         >✏️</button>
                         <button
                           onClick={() => handleDeleteCategory(cat.id)}
-                          className="text-purple-900/20 hover:text-red-400 transition-colors"
+                          className="text-ink-400 hover:text-bad transition-colors"
                         >×</button>
                       </div>
                     </div>
@@ -226,19 +226,19 @@ export default function CourseDetailPage() {
           {/* Assignments */}
           <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-purple-50">
-              <h2 className="font-medium text-[#1E1040]">Grades</h2>
+              <h2 className="font-medium text-ink-900">Grades</h2>
               <button
                 onClick={() => setShowAssignModal(true)}
                 disabled={categories.length === 0}
-                className="text-sm text-purple-600 hover:underline disabled:text-purple-900/20 disabled:cursor-not-allowed"
+                className="text-sm text-purple-600 hover:underline disabled:text-ink-400 disabled:cursor-not-allowed"
               >
                 + Add grade
               </button>
             </div>
             {assignments.length === 0 ? (
               <div className="py-10 text-center">
-                <p className="text-sm text-purple-900/40 mb-1">No grades yet</p>
-                <p className="text-xs text-purple-900/30">Add categories first, then grades</p>
+                <p className="text-sm text-ink-400 mb-1">No grades yet</p>
+                <p className="text-xs text-ink-400">Add categories first, then grades</p>
               </div>
             ) : (
               <div className="divide-y divide-purple-50 max-h-80 overflow-y-auto">
@@ -248,17 +248,17 @@ export default function CourseDetailPage() {
                   return (
                     <div key={a.id} className="flex items-center justify-between px-5 py-3">
                       <div>
-                        <div className="text-sm font-medium text-[#1E1040]">{a.name}</div>
-                        <div className="text-xs text-purple-900/40">{cat?.name || "Unknown"}</div>
+                        <div className="text-sm font-medium text-ink-900">{a.name}</div>
+                        <div className="text-xs text-ink-400">{cat?.name || "Unknown"}</div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <div className={`text-sm font-medium ${getGradeColor(pct)}`}>{a.grade}/{a.max_grade}</div>
-                          <div className="text-xs text-purple-900/40">{pct}%</div>
+                          <div className="text-xs text-ink-400">{pct}%</div>
                         </div>
                         <button
                           onClick={() => handleDeleteAssignment(a.id)}
-                          className="text-purple-900/20 hover:text-red-400 transition-colors"
+                          className="text-ink-400 hover:text-bad transition-colors"
                         >
                           ×
                         </button>
@@ -282,12 +282,12 @@ export default function CourseDetailPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-medium text-[#1E1040]">Add category</h2>
-              <button onClick={() => setShowCatModal(false)} aria-label="Close category dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <h2 className="text-lg font-medium text-ink-900">Add category</h2>
+              <button onClick={() => setShowCatModal(false)} aria-label="Close category dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Category name</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Category name</label>
                 <input
                   type="text"
                   value={catForm.name}
@@ -298,7 +298,7 @@ export default function CourseDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Weight (%)</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Weight (%)</label>
                 <input
                   type="number"
                   value={catForm.weight}
@@ -308,7 +308,7 @@ export default function CourseDetailPage() {
                   className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
                 />
               </div>
-              <p className="text-xs text-purple-900/40">Current total: {totalWeight}% — remaining: {100 - totalWeight}%</p>
+              <p className="text-xs text-ink-400">Current total: {totalWeight}% — remaining: {100 - totalWeight}%</p>
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowCatModal(false)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
@@ -325,12 +325,12 @@ export default function CourseDetailPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-medium text-[#1E1040]">Add a grade</h2>
-              <button onClick={() => setShowAssignModal(false)} aria-label="Close assignment dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <h2 className="text-lg font-medium text-ink-900">Add a grade</h2>
+              <button onClick={() => setShowAssignModal(false)} aria-label="Close assignment dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleAddAssignment} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Assignment name</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Assignment name</label>
                 <input
                   type="text"
                   value={assignForm.name}
@@ -341,7 +341,7 @@ export default function CourseDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Category</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Category</label>
                 <select
                   value={assignForm.category_id}
                   onChange={(e) => setAssignForm({ ...assignForm, category_id: e.target.value })}
@@ -354,7 +354,7 @@ export default function CourseDetailPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Your score</label>
+                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Your score</label>
                   <input
                     type="number"
                     value={assignForm.grade}
@@ -365,7 +365,7 @@ export default function CourseDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Out of</label>
+                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Out of</label>
                   <input
                     type="number"
                     value={assignForm.max_grade}
@@ -392,12 +392,12 @@ export default function CourseDetailPage() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-medium text-[#1E1040]">Edit category</h2>
-              <button onClick={() => setEditingCat(null)} aria-label="Close edit dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <h2 className="text-lg font-medium text-ink-900">Edit category</h2>
+              <button onClick={() => setEditingCat(null)} aria-label="Close edit dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleEditCategory} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Category name</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Category name</label>
                 <input
                   type="text"
                   value={editCatForm.name}
@@ -407,7 +407,7 @@ export default function CourseDetailPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Weight (%)</label>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Weight (%)</label>
                 <input
                   type="number"
                   value={editCatForm.weight}
