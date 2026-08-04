@@ -153,7 +153,7 @@ export default function DashboardPage() {
                       <div className="w-16 md:w-24 bg-ink-100 rounded-full h-1.5 hidden sm:block overflow-hidden">
                         <div className="h-1.5 rounded-full" style={{
                           width: hasGrade ? `${grade}%` : "0%",
-                          background: grade >= 70 ? "#0F9D6E" : grade >= 60 ? "#D97706" : "#DC2626"
+                          background: grade >= 70 ? "#0A7350" : grade >= 60 ? "#A8500A" : "#BE1B1B"
                         }} />
                       </div>
                     </div>

@@ -68,7 +68,7 @@ export default function LandingPage() {
         {/* Real product view — this is what the dashboard actually shows */}
         <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
           <p className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1">Current GPA</p>
-          <p className="font-display text-6xl font-bold text-brand-600 tnum leading-none mb-6">3.42</p>
+          <div className="font-display text-6xl font-bold text-brand-600 tnum leading-none mb-6">3.42</div>
           <div className="space-y-4">
             {[
               { name: "Organic Chemistry", code: "CHM 350", pct: 78, grade: "C+", tone: "warn" },

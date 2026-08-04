@@ -22,14 +22,14 @@
   /* ---- Ink (text + hairlines) ---- */
   --color-ink-100: #F1EFF7;
   --color-ink-200: #E5E2EF;
-  --color-ink-400: #8E88A3;
+  --color-ink-400: #6B6480;
   --color-ink-600: #5B5470;
   --color-ink-900: #241A3E;
 
   /* ---- Grade semantics: ONLY for grade meaning, never decoration ---- */
-  --color-good: #0F9D6E;
-  --color-warn: #D97706;
-  --color-bad:  #DC2626;
+  --color-good: #0A7350;
+  --color-warn: #A8500A;
+  --color-bad:  #BE1B1B;
 
   /* ---- Type ---- */
   --font-sans: var(--font-inter), system-ui, sans-serif;
@@ -81,8 +81,8 @@ input, select, textarea {
 }
 
 input::placeholder, select::placeholder, textarea::placeholder {
-  color: #8E88A3 !important;
-  -webkit-text-fill-color: #8E88A3 !important;
+  color: #6B6480 !important;
+  -webkit-text-fill-color: #6B6480 !important;
 }
 
 /* ---- Prevent horizontal overflow on mobile ---- */
