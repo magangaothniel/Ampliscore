@@ -74,22 +74,22 @@ function RegisterForm() {
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center gap-2 mb-6">
             <Logo />
-            <span className="text-lg font-medium text-[#1E1040]">ampli<span className="text-purple-600">score</span></span>
+            <span className="font-display text-lg font-bold text-ink-900">ampli<span className="text-brand-600">score</span></span>
           </Link>
-          <h1 className="text-2xl font-medium text-[#1E1040]">Create your account</h1>
+          <h1 className="font-display text-3xl font-bold text-ink-900 tracking-tight">Create your account</h1>
           {refCode ? (
-            <p className="text-sm text-purple-600 mt-1 font-medium">🎉 You were invited! Sign up free.</p>
+            <p className="text-sm text-brand-600 mt-1.5 font-medium">You were invited. Sign up free.</p>
           ) : (
-            <p className="text-sm text-purple-900/50 mt-1">Free forever. No credit card needed.</p>
+            <p className="text-sm text-ink-600 mt-1.5">Free for 4 courses. No card required.</p>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl border border-purple-100 p-8">
+        <div className="bg-white rounded-xl border border-ink-200 shadow-card p-7 md:p-8">
           {/* Google Sign Up */}
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 border border-purple-200 py-2.5 rounded-xl text-sm font-medium text-[#1E1040] hover:bg-purple-50 transition-colors mb-4 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 border border-ink-200 h-11 rounded-lg text-sm font-medium text-ink-900 hover:bg-brand-50 transition-colors mb-4 disabled:opacity-50"
           >
             <svg width="18" height="18" viewBox="0 0 18 18">
               <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 002.38-5.88c0-.57-.05-.66-.15-1.18z"/>
@@ -108,39 +108,39 @@ function RegisterForm() {
 
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Full name</label>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-ink-600 mb-1.5">Full name</label>
               <input type="text" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                 placeholder="Your name" required
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
+                className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">University</label>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-ink-600 mb-1.5">University</label>
               <input type="text" value={form.university} onChange={(e) => setForm({ ...form, university: e.target.value })}
                 placeholder="e.g. University of Michigan" required
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
+                className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Email</label>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-ink-600 mb-1.5">Email</label>
               <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="you@university.edu" required
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
+                className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#1E1040] mb-1.5">Password</label>
+              <label className="block text-xs font-semibold uppercase tracking-wide text-ink-600 mb-1.5">Password</label>
               <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
                 placeholder="Min 8 characters" required minLength={8}
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30" />
+                className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors" />
             </div>
-            {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100">{error}</div>}
+            {error && <div className="bg-white text-bad text-sm px-4 py-3 rounded-lg border border-ink-200">{error}</div>}
             <button type="submit" disabled={loading}
-              className="w-full bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50">
+              className="w-full bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50">
               {loading ? "Creating account..." : "Create free account"}
             </button>
           </form>
 
-          <p className="text-center text-sm text-purple-900/50 mt-6">
+          <p className="text-center text-sm text-ink-600 mt-6">
             Already have an account?{" "}
-            <Link href="/login" className="text-purple-600 font-medium hover:underline">Log in</Link>
+            <Link href="/login" className="text-brand-600 font-medium hover:text-brand-700">Log in</Link>
           </p>
         </div>
         <p className="text-center text-xs text-purple-900/30 mt-4">
