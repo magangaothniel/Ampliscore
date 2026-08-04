@@ -45,13 +45,14 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 pt-16 md:pt-24 pb-20 grid md:grid-cols-2 gap-12 md:gap-16 items-center">
         <div>
           <h1 className="font-display text-4xl md:text-5xl font-bold text-ink-900 leading-[1.1] tracking-tight mb-5">
-            Know where you stand,
+            Your GPA,
             <br />
-            <span className="text-brand-600">every semester</span>
+            <span className="text-brand-600">live all semester</span>
           </h1>
           <p className="text-lg text-ink-600 leading-relaxed mb-8 max-w-md">
-            Enter your courses once. Ampliscore keeps your grade current, tells you
-            what you need on the final, and warns you before a class slips.
+            You know your GPA in August, then you&apos;re blind until final grades post.
+            Ampliscore shows it move in real time — enter one test score and watch
+            your GPA update.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/register" className="bg-brand-600 text-white px-6 py-3 rounded-lg font-medium text-sm hover:bg-brand-700 transition-colors">
@@ -97,31 +98,31 @@ export default function LandingPage() {
             ))}
           </div>
           <p className="text-xs text-ink-400 mt-6 pt-4 border-t border-ink-100">
-            Example dashboard. Your courses, your numbers.
+            Your GPA updates the moment you enter a grade.
           </p>
         </div>
       </section>
 
       {/* What it does — plain statements, no icons, no filler */}
       <section className="max-w-5xl mx-auto px-6 pb-20">
-        <h2 className="font-display text-2xl font-bold text-ink-900 mb-8">What it does</h2>
+        <h2 className="font-display text-2xl font-bold text-ink-900 mb-8">What you get</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-ink-200 rounded-xl overflow-hidden border border-ink-200">
           {[
             {
-              title: "Keeps your grade current",
-              desc: "Add a score, the weighted grade updates. No spreadsheet, no math.",
+              title: "Live GPA",
+              desc: "Enter a grade and your GPA updates instantly. No waiting until December to find out where you landed.",
             },
             {
-              title: "Tells you what you need",
-              desc: "Set a target grade and see the score required on everything left.",
+              title: "What you need to score",
+              desc: "Set a target grade and our AI tells you what you need on everything left, and whether it is still achievable.",
             },
             {
               title: "Warns you early",
               desc: "A course slipping toward failing shows up on your dashboard and in a Monday email.",
             },
             {
-              title: "Predicts your final grade",
-              desc: "Claude reads your trajectory and category weights to project where you land.",
+              title: "Final grade prediction",
+              desc: "See the grade each class is heading toward, based on the assignments you have already turned in.",
             },
             {
               title: "Plans your GPA",
