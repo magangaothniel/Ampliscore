@@ -242,7 +242,7 @@ export default function ProfessorsPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-ink-900">Rate a professor</h2>
-              <button onClick={() => setShowModal(false)} aria-label="Close dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
+              <button onClick={() => setShowModal(false)} aria-label="Close dialog" title="Close dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

@@ -62,11 +62,31 @@ export async function POST(req: NextRequest) {
 
     const results = [];
 
+    // Read everything once instead of per user. The old loop ran an unfiltered
+    // select on grade_categories for every single profile, so 500 users meant
+    // 500 full table scans of identical data, plus two more queries each.
+    const { data: allCourses } = await supabase.from("courses").select("*");
+    const { data: allAssigns } = await supabase.from("assignments").select("*");
+    const { data: allCats } = await supabase.from("grade_categories").select("*");
+
+    const coursesByUser = new Map<string, any[]>();
+    for (const c of allCourses || []) {
+      const list = coursesByUser.get(c.user_id) || [];
+      list.push(c);
+      coursesByUser.set(c.user_id, list);
+    }
+    const assignsByUser = new Map<string, any[]>();
+    for (const a of allAssigns || []) {
+      const list = assignsByUser.get(a.user_id) || [];
+      list.push(a);
+      assignsByUser.set(a.user_id, list);
+    }
+
     for (const profile of mergedProfiles) {
       try {
-        const { data: courses } = await supabase.from("courses").select("*").eq("user_id", profile.id);
-        const { data: assigns } = await supabase.from("assignments").select("*").eq("user_id", profile.id);
-        const { data: cats } = await supabase.from("grade_categories").select("*");
+        const courses = coursesByUser.get(profile.id) || [];
+        const assigns = assignsByUser.get(profile.id) || [];
+        const cats = allCats || [];
 
         const liveCourses = (courses || []).map((c: any) => ({
           name: c.name,

@@ -109,9 +109,25 @@ export default function CoursesPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
-      <div className="text-purple-600 font-medium">Loading...</div>
-    </div>
+    <main className="min-h-screen bg-brand-50">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8 animate-pulse">
+        <div className="h-8 w-44 bg-ink-100 rounded mb-2" />
+        <div className="h-4 w-40 bg-ink-100 rounded mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[0, 1].map((i) => (
+            <div key={i} className="bg-white rounded-xl border border-ink-200 p-5">
+              <div className="h-5 w-32 bg-ink-100 rounded mb-2" />
+              <div className="h-3 w-24 bg-ink-100 rounded mb-6" />
+              <div className="h-2 w-full bg-ink-100 rounded mb-5" />
+              <div className="flex gap-2">
+                <div className="h-9 flex-1 bg-ink-100 rounded-lg" />
+                <div className="h-9 flex-1 bg-ink-100 rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 
   return (
@@ -191,7 +207,7 @@ export default function CoursesPage() {
                         <p className="text-xs text-ink-400">{course.code} · {course.semester} {course.year}</p>
                       </div>
                     </div>
-                    <button onClick={() => handleDelete(course.id)} aria-label="Delete course" className="text-ink-400 hover:text-bad transition-colors text-lg leading-none">×</button>
+                    <button onClick={() => handleDelete(course.id)} aria-label="Delete course" title="Delete course" className="text-ink-400 hover:text-bad transition-colors text-lg leading-none">×</button>
                   </div>
                   <div className="flex items-center justify-between mb-3">
                     <div>
@@ -265,7 +281,7 @@ export default function CoursesPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-ink-900">Add a course</h2>
-              <button onClick={() => setShowModal(false)} aria-label="Close dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
+              <button onClick={() => setShowModal(false)} aria-label="Close dialog" title="Close dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleAddCourse} className="space-y-4">
               <div>
