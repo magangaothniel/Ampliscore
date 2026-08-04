@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase";
 
 function Logo() {
   return (
-    <svg width="32" height="32" viewBox="0 0 64 64" fill="none">
+    <svg aria-hidden="true" width="32" height="32" viewBox="0 0 64 64" fill="none">
       <defs>
         <linearGradient id="capG_professors" x1="0" y1="64" x2="64" y2="0">
           <stop offset="0" stopColor="#5B21B6" />
@@ -242,7 +242,7 @@ export default function ProfessorsPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-[#1E1040]">Rate a professor</h2>
-              <button onClick={() => setShowModal(false)} className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <button onClick={() => setShowModal(false)} aria-label="Close dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

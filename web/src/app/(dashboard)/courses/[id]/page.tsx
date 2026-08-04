@@ -283,7 +283,7 @@ export default function CourseDetailPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-[#1E1040]">Add category</h2>
-              <button onClick={() => setShowCatModal(false)} className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <button onClick={() => setShowCatModal(false)} aria-label="Close category dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div>
@@ -326,7 +326,7 @@ export default function CourseDetailPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-[#1E1040]">Add a grade</h2>
-              <button onClick={() => setShowAssignModal(false)} className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <button onClick={() => setShowAssignModal(false)} aria-label="Close assignment dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleAddAssignment} className="space-y-4">
               <div>
@@ -393,7 +393,7 @@ export default function CourseDetailPage() {
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-[#1E1040]">Edit category</h2>
-              <button onClick={() => setEditingCat(null)} className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
+              <button onClick={() => setEditingCat(null)} aria-label="Close edit dialog" className="text-purple-900/30 hover:text-purple-900 text-xl">×</button>
             </div>
             <form onSubmit={handleEditCategory} className="space-y-4">
               <div>

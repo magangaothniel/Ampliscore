@@ -3,7 +3,7 @@ import Link from "next/link";
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
+      <svg aria-hidden="true" width="36" height="36" viewBox="0 0 64 64" fill="none">
       <defs>
         <linearGradient id="capG_app" x1="0" y1="64" x2="64" y2="0">
           <stop offset="0" stopColor="#5B21B6" />
