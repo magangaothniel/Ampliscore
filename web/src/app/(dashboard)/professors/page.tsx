@@ -154,7 +154,7 @@ export default function ProfessorsPage() {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-medium text-[#1E1040]">Professor ratings</h1>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">Professor ratings</h1>
             <p className="text-sm text-purple-900/50 mt-1">All universities · {ratings.length} review{ratings.length !== 1 ? "s" : ""}</p>
           </div>
           <input
@@ -168,7 +168,7 @@ export default function ProfessorsPage() {
         </div>
 
         {professors.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-purple-100 py-20 text-center">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card py-20 text-center">
             <div className="text-5xl mb-4">⭐</div>
             <h2 className="text-lg font-medium text-[#1E1040] mb-2">No ratings yet</h2>
             <p className="text-sm text-purple-900/50 mb-6">Be the first to rate a professor on Ampliscore</p>
@@ -182,7 +182,7 @@ export default function ProfessorsPage() {
         ) : (
           <div className="space-y-4">
             {professors.map((prof) => (
-              <div key={prof.name} className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
+              <div key={prof.name} className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
                 <div className="flex items-start justify-between p-5 border-b border-purple-50">
                   <div>
                     <h3 className="font-medium text-[#1E1040] text-lg">{prof.name}</h3>
@@ -190,19 +190,19 @@ export default function ProfessorsPage() {
                   </div>
                   <div className="flex items-center gap-6 text-right">
                     <div>
-                      <div className="text-xs text-purple-900/40 mb-1">Rating</div>
+                      <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Rating</div>
                       <div className="flex items-center gap-1">
                         <StarRating value={Math.round(prof.avgRating)} />
                         <span className="text-sm font-medium text-[#1E1040] ml-1">{prof.avgRating.toFixed(1)}</span>
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-purple-900/40 mb-1">Difficulty</div>
+                      <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Difficulty</div>
                       <div className="text-lg font-medium text-[#1E1040]">{prof.avgDifficulty.toFixed(1)}/5</div>
                     </div>
                     <div>
-                      <div className="text-xs text-purple-900/40 mb-1">Take again</div>
-                      <div className={`text-lg font-medium ${prof.wouldTakeAgain >= 70 ? "text-emerald-600" : prof.wouldTakeAgain >= 50 ? "text-amber-500" : "text-red-500"}`}>
+                      <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Take again</div>
+                      <div className={`font-display text-lg font-bold tnum ${prof.wouldTakeAgain >= 70 ? "text-good" : prof.wouldTakeAgain >= 50 ? "text-warn" : "text-bad"}`}>
                         {prof.wouldTakeAgain}%
                       </div>
                     </div>
@@ -216,7 +216,7 @@ export default function ProfessorsPage() {
                         {review.course_code && (
                           <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">{review.course_code}</span>
                         )}
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${review.would_take_again ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${review.would_take_again ? "bg-brand-50 text-good" : "bg-brand-50 text-bad"}`}>
                           {review.would_take_again ? "Would take again" : "Would not take again"}
                         </span>
                       </div>

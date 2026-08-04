@@ -118,27 +118,27 @@ export default function GPAPage() {
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-medium text-[#1E1040]">GPA Planner</h1>
+          <h1 className="font-display text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">GPA Planner</h1>
           <p className="text-sm text-purple-900/50 mt-1">Run what-if scenarios and plan your path to your target GPA</p>
         </div>
 
         {/* GPA Summary */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-2xl p-5 border border-purple-100">
-            <div className="text-xs text-purple-900/40 mb-1">Current GPA</div>
-            <div className={`text-3xl font-medium ${currentGPA >= 3.5 ? "text-emerald-600" : currentGPA >= 2.5 ? "text-amber-500" : "text-red-500"}`}>
+            <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Current GPA</div>
+            <div className="font-display text-3xl md:text-4xl font-bold tnum text-brand-600">
               {currentGPA.toFixed(2)}
             </div>
           </div>
           <div className="bg-white rounded-2xl p-5 border border-purple-100">
-            <div className="text-xs text-purple-900/40 mb-1">What-if GPA</div>
-            <div className={`text-3xl font-medium ${whatIfGPA >= 3.5 ? "text-emerald-600" : whatIfGPA >= 2.5 ? "text-amber-500" : "text-red-500"}`}>
+            <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">What-if GPA</div>
+            <div className="font-display text-3xl md:text-4xl font-bold tnum text-ink-900">
               {whatIfGPA.toFixed(2)}
             </div>
           </div>
           <div className="bg-white rounded-2xl p-5 border border-purple-100">
-            <div className="text-xs text-purple-900/40 mb-1">Combined GPA</div>
-            <div className={`text-3xl font-medium ${combinedGPA >= 3.5 ? "text-emerald-600" : combinedGPA >= 2.5 ? "text-amber-500" : "text-red-500"}`}>
+            <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Combined GPA</div>
+            <div className="font-display text-3xl md:text-4xl font-bold tnum text-ink-900">
               {combinedGPA.toFixed(2)}
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function GPAPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* What-if sliders */}
-          <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
             <div className="px-5 py-4 border-b border-purple-50">
               <h2 className="font-medium text-[#1E1040]">What if my grades were...</h2>
               <p className="text-xs text-purple-900/40 mt-0.5">Drag sliders to see how grades affect your GPA</p>
@@ -187,7 +187,7 @@ export default function GPAPage() {
           {/* Target GPA + Hypothetical */}
           <div className="space-y-4">
             {/* Target GPA */}
-            <div className="bg-white rounded-2xl border border-purple-100 p-5">
+            <div className="bg-white rounded-xl border border-ink-200 shadow-card p-5">
               <h2 className="font-medium text-[#1E1040] mb-4">Target GPA calculator</h2>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-purple-900/60">Target GPA</span>

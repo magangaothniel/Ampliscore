@@ -120,7 +120,7 @@ export default function CoursesPage() {
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-medium text-[#1E1040]">My courses</h1>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">My courses</h1>
             <p className="text-sm text-purple-900/50 mt-1">{courses.length} course{courses.length !== 1 ? "s" : ""} this semester</p>
           </div>
           {atLimit ? (
@@ -136,7 +136,7 @@ export default function CoursesPage() {
 
         {/* Free tier usage bar */}
         {!isPro && (
-          <div className="bg-white rounded-2xl border border-purple-100 p-4 mb-6">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-[#1E1040] font-medium">Free plan · Course slots</span>
               <span className={`text-sm font-medium ${atLimit ? "text-red-500" : nearLimit ? "text-amber-500" : "text-purple-600"}`}>
@@ -169,7 +169,7 @@ export default function CoursesPage() {
         )}
 
         {courses.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-purple-100 py-20 text-center">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card py-20 text-center">
             <div className="text-5xl mb-4">📚</div>
             <h2 className="text-lg font-medium text-[#1E1040] mb-2">No courses yet</h2>
             <p className="text-sm text-purple-900/50 mb-6">Add your first course to start tracking your grades</p>
@@ -182,7 +182,7 @@ export default function CoursesPage() {
             {courses.map((course) => {
               const grade = course.live_grade ?? course.current_grade ?? 0;
               return (
-                <div key={course.id} className="bg-white rounded-2xl border border-purple-100 p-5">
+                <div key={course.id} className="bg-white rounded-xl border border-ink-200 shadow-card p-5">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-3 h-3 rounded-full flex-shrink-0 mt-1" style={{ background: course.color }} />
@@ -205,7 +205,7 @@ export default function CoursesPage() {
                     <div className="text-right">
                       {grade > 0 ? (
                         <>
-                          <div className={`text-2xl font-medium ${getGradeColor(grade)}`}>{grade}%</div>
+                          <div className={`font-display text-3xl font-bold tnum ${grade >= 70 ? "text-good" : grade >= 60 ? "text-warn" : "text-bad"}`}>{grade}%</div>
                           <div className="text-xs text-purple-900/40">{getLetterGrade(grade)}</div>
                         </>
                       ) : (
