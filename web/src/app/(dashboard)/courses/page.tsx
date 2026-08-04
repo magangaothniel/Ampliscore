@@ -112,10 +112,18 @@ export default function CoursesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this course? This cannot be undone.")) return;
     const supabase = createClient();
-    await supabase.from("courses").delete().eq("id", id);
-      invalidate("courses");
-      invalidate("categories");
-      invalidate("assignments");
+    const previousCourses = courses;
+    setCourses(courses.filter((c: any) => c.id !== id));
+
+    const { error } = await supabase.from("courses").delete().eq("id", id);
+    if (error) {
+      setCourses(previousCourses);
+      alert("Could not delete that course. Please try again.");
+      return;
+    }
+    invalidate("courses");
+    invalidate("categories");
+    invalidate("assignments");
     fetchCourses();
   };
 

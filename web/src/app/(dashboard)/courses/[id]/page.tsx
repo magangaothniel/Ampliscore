@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor } from "@/lib/utils";
 import AIGradePredictor from "@/components/AIGradePredictor";
 
@@ -25,6 +26,8 @@ export default function CourseDetailPage() {
 
   useEffect(() => { fetchAll(); }, [id]);
 
+  const [optimisticError, setOptimisticError] = useState("");
+
   const fetchAll = async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -39,6 +42,26 @@ export default function CourseDetailPage() {
     setCategories(catData || []);
     setAssignments(assignData || []);
     setLoading(false);
+  };
+
+  // Same maths as calculateCourseGrade, but takes the rows explicitly so it
+  // can run against a list that has not been committed to state yet.
+  const calculateCourseGradeFrom = (rows: any[]) => {
+    if (categories.length === 0) return 0;
+    let weighted = 0;
+    let totalWeight = 0;
+    for (const cat of categories) {
+      const catA = rows.filter((a: any) => a.category_id === cat.id && a.completed);
+      if (catA.length > 0) {
+        const earned = catA.reduce((sm: number, a: any) => sm + (a.grade || 0), 0);
+        const possible = catA.reduce((sm: number, a: any) => sm + (a.max_grade || 100), 0);
+        if (possible > 0) {
+          weighted += (earned / possible) * 100 * cat.weight;
+          totalWeight += cat.weight;
+        }
+      }
+    }
+    return totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0;
   };
 
   const calculateCourseGrade = () => {
@@ -95,11 +118,15 @@ export default function CourseDetailPage() {
 
   const handleAddAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     const supabase = createClient();
     const gradeVal = parseFloat(assignForm.grade);
     const maxVal = parseFloat(assignForm.max_grade);
-    await supabase.from("assignments").insert({
+
+    // Show it straight away. The write is almost always going to succeed, and
+    // waiting on the round trip is what makes the app feel slow.
+    const tempId = `temp-${Date.now()}`;
+    const optimisticRow = {
+      id: tempId,
       course_id: id,
       user_id: userId,
       category_id: assignForm.category_id,
@@ -107,20 +134,61 @@ export default function CourseDetailPage() {
       grade: gradeVal,
       max_grade: maxVal,
       completed: assignForm.completed,
-    });
-    const currentGrade = calculateCourseGrade();
-  const hasAnyGrades = assignments.filter(a => a.completed).length > 0;
-    await supabase.from("courses").update({ current_grade: currentGrade }).eq("id", id);
+      created_at: new Date().toISOString(),
+    };
+    const previous = assignments;
+    setAssignments([optimisticRow, ...assignments]);
     setAssignForm({ name: "", grade: "", max_grade: "100", category_id: "", completed: true });
     setShowAssignModal(false);
-    fetchAll();
-    setSaving(false);
+    setOptimisticError("");
+
+    const { data: inserted, error } = await supabase
+      .from("assignments")
+      .insert({
+        course_id: id,
+        user_id: userId,
+        category_id: optimisticRow.category_id,
+        name: optimisticRow.name,
+        grade: gradeVal,
+        max_grade: maxVal,
+        completed: optimisticRow.completed,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      setAssignments(previous);
+      setOptimisticError("That grade did not save. Please try again.");
+      return;
+    }
+
+    // Swap the temporary row for the real one so later edits and deletes
+    // target a real database id.
+    setAssignments((rows) => rows.map((r) => (r.id === tempId ? inserted : r)));
+    invalidate("assignments");
+    invalidate("courses");
+
+    const updatedGrade = calculateCourseGradeFrom([inserted, ...previous]);
+    await supabase.from("courses").update({ current_grade: updatedGrade }).eq("id", id);
   };
 
   const handleDeleteAssignment = async (assignId: string) => {
     const supabase = createClient();
-    await supabase.from("assignments").delete().eq("id", assignId);
-    fetchAll();
+    const previous = assignments;
+    setAssignments(assignments.filter((a) => a.id !== assignId));
+    setOptimisticError("");
+
+    const { error } = await supabase.from("assignments").delete().eq("id", assignId);
+    if (error) {
+      setAssignments(previous);
+      setOptimisticError("Could not delete that. Please try again.");
+      return;
+    }
+    invalidate("assignments");
+    invalidate("courses");
+
+    const updatedGrade = calculateCourseGradeFrom(previous.filter((a) => a.id !== assignId));
+    await supabase.from("courses").update({ current_grade: updatedGrade }).eq("id", id);
   };
 
   const currentGrade = calculateCourseGrade();
@@ -143,6 +211,11 @@ export default function CourseDetailPage() {
     <main className="min-h-screen bg-[#F5F3FF]">
 
       <div className="max-w-5xl mx-auto px-6 py-8">
+        {optimisticError && (
+          <div className="mb-4 bg-white border border-ink-200 text-bad text-sm px-4 py-3 rounded-lg">
+            {optimisticError}
+          </div>
+        )}
         {/* Course Header */}
         <div className="bg-white rounded-2xl border border-purple-100 p-6 mb-6">
           <div className="flex items-start justify-between">
