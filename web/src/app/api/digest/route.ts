@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { createHmac } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { weeklyDigestEmail } from "@/lib/emailTemplate";
 import { calculateGPA } from "@/lib/utils";
@@ -80,7 +81,18 @@ export async function POST(req: NextRequest) {
 
         if (!email) { results.push({ id: profile.id, status: "skipped - no email" }); continue; }
 
-        const html = weeklyDigestEmail({ firstName, gpa, atRiskCourses: atRisk, courses: liveCourses });
+        if (profile.digest_enabled === false) {
+          results.push({ id: profile.id, status: "skipped - unsubscribed" });
+          continue;
+        }
+
+        const sig = createHmac("sha256", process.env.DIGEST_SECRET || "")
+          .update(profile.id)
+          .digest("hex")
+          .slice(0, 32);
+        const unsubscribeUrl = `https://ampliscore.app/api/digest/unsubscribe?u=${profile.id}&t=${sig}`;
+
+        const html = weeklyDigestEmail({ firstName, gpa, atRiskCourses: atRisk, courses: liveCourses, unsubscribeUrl });
 
         const { error } = await resend.emails.send({
           from: "Ampliscore <digest@ampliscore.app>",

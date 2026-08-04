@@ -1,9 +1,11 @@
 export function weeklyDigestEmail({
+  unsubscribeUrl,
   firstName,
   gpa,
   atRiskCourses,
   courses,
 }: {
+  unsubscribeUrl: string;
   firstName: string;
   gpa: number;
   atRiskCourses: { name: string; grade: number }[];
@@ -67,7 +69,7 @@ export function weeklyDigestEmail({
 
       <!-- CTA -->
       <div style="text-align:center;margin-top:32px;">
-        <a href="https://ampliscore.vercel.app/dashboard" 
+        <a href="https://ampliscore.app/dashboard" 
            style="background:#7C3AED;color:white;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:600;font-size:14px;display:inline-block;">
           View full dashboard →
         </a>
@@ -76,7 +78,10 @@ export function weeklyDigestEmail({
 
     <!-- Footer -->
     <div style="padding:20px 32px;border-top:1px solid #F3F0FF;text-align:center;">
-      <p style="color:#9CA3AF;font-size:12px;margin:0;">© 2026 Ampliscore · <a href="https://ampliscore.vercel.app" style="color:#7C3AED;">ampliscore.vercel.app</a></p>
+      <p style="color:#6B6480;font-size:12px;margin:0 0 8px 0;">You are receiving this because you have an Ampliscore account.</p>
+      <p style="color:#6B6480;font-size:12px;margin:0 0 8px 0;"><a href="${unsubscribeUrl}" style="color:#7C3AED;">Unsubscribe from the weekly summary</a></p>
+      <p style="color:#8E88A3;font-size:11px;margin:0;">© 2026 Ampliscore · <a href="https://ampliscore.app" style="color:#7C3AED;">ampliscore.app</a></p>
+      <p style="color:#8E88A3;font-size:11px;margin:6px 0 0 0;">AMPLISCORE_POSTAL_ADDRESS</p>
     </div>
   </div>
 </body>
