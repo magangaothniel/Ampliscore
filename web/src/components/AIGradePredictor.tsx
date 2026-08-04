@@ -35,22 +35,7 @@ export default function AIGradePredictor({ course, categories, assignments, isPr
       return { name: cat.name, weight: cat.weight, currentPct: pct, completedCount: catAssignments.length, incompleteCount: incomplete.length };
     });
 
-    const prompt = `You are an academic grade predictor for a college student. Analyze their course data and give a helpful, specific prediction.
 
-Course: ${course.name} (${course.code || ""})
-Professor: ${course.professor || "Unknown"}
-Student's target grade: ${targetGrade}%
-
-Grade categories and current performance:
-${categoryData.map(c => `- ${c.name} (${c.weight}% of grade): ${c.currentPct !== null ? `${c.currentPct.toFixed(1)}% current (${c.completedCount} assignments done, ${c.incompleteCount} remaining)` : `No grades yet (${c.incompleteCount} assignments remaining)`}`).join("\n")}
-
-Give a concise analysis with:
-1. Their projected final grade based on current trajectory
-2. Whether their target of ${targetGrade}% is realistic
-3. Exactly what they need to score on remaining work in each category to hit their target
-4. One specific actionable tip
-
-Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.`;
 
     try {
       const res = await fetch("/api/predict", {
@@ -59,7 +44,13 @@ Be encouraging but honest. Keep it under 200 words. Use plain text, no markdown.
           "Content-Type": "application/json",
           "Authorization": `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
+        body: JSON.stringify({
+          courseName: course.name,
+          courseCode: course.code || "",
+          professor: course.professor || "",
+          targetGrade,
+          categories: categoryData,
+        }),
       });
 
       const data = await res.json();
