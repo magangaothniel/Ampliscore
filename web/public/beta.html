@@ -229,11 +229,17 @@ textarea{resize:vertical;min-height:90px}
         document.getElementById('betaForm').style.display = 'none';
         document.getElementById('successScreen').style.display = 'block';
         try {
-          fetch('/api/beta/notify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email })
-          });
+          fetch('/api/beta/token?email=' + encodeURIComponent(email))
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (!d || !d.token) return;
+              fetch('/api/beta/notify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, token: d.token })
+              });
+            })
+            .catch(function () { });
         } catch (e) { }
       } else {
         var errText = await res.text();

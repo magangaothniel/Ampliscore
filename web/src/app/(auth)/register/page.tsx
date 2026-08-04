@@ -46,16 +46,17 @@ function RegisterForm() {
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { full_name: form.fullName, university: form.university } },
+      options: {
+        data: {
+          full_name: form.fullName,
+          university: form.university,
+          // The referral code travels with signup metadata and is applied by a
+          // database trigger. There is no endpoint for anyone to call directly.
+          referred_by: refCode ? refCode.toUpperCase() : null,
+        },
+      },
     });
     if (error) { setError(error.message); setLoading(false); return; }
-    if (refCode && data.user) {
-      await fetch("/api/referral/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newUserId: data.user.id, refCode }),
-      });
-    }
     router.push("/dashboard");
   };
 

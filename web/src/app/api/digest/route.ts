@@ -35,7 +35,7 @@ function computeLiveGrade(course: any, allCats: any[], allAssigns: any[]) {
 export async function POST(req: NextRequest) {
   try {
     const { secret, userId } = await req.json();
-    if (secret !== process.env.DIGEST_SECRET && secret !== "test") {
+    if (secret !== process.env.DIGEST_SECRET) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

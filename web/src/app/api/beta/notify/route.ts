@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac } from "crypto";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ALERT_TO = "magangaothniel@gmail.com";
@@ -16,6 +17,16 @@ export async function POST(req: NextRequest) {
   const email = String(body?.email || "").slice(0, 200);
   if (!email) {
     return NextResponse.json({ error: "Missing email" }, { status: 400 });
+  }
+
+  // Without this the route is an open door: anyone could POST a guessed
+  // address and receive that applicant's full application by email.
+  const expected = createHmac("sha256", process.env.DIGEST_SECRET || "")
+    .update(email.toLowerCase())
+    .digest("hex")
+    .slice(0, 24);
+  if (String(body?.token || "") !== expected) {
+    return NextResponse.json({ error: "Not allowed" }, { status: 403 });
   }
 
   // Read the row back from the database rather than trusting the client body,
