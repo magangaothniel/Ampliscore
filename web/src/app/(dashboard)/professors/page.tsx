@@ -49,6 +49,7 @@ export default function ProfessorsPage() {
   const [university, setUniversity] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [search, setSearch] = useState("");
   const [reportTarget, setReportTarget] = useState<any>(null);
   const [reportReason, setReportReason] = useState("");
@@ -111,36 +112,62 @@ export default function ProfessorsPage() {
     if (form.rating === 0) { alert("Please select a rating"); return; }
     setSaving(true);
     const supabase = createClient();
-    await supabase.from("professor_ratings").insert({
-      user_id: userId,
-      professor_name: form.professor_name,
-      university,
-      course_code: form.course_code,
-      rating: form.rating,
-      difficulty: form.difficulty,
-      review: form.review,
-      would_take_again: form.would_take_again,
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { setSubmitError("Please sign in again."); setSaving(false); return; }
+
+    const res = await fetch("/api/ratings/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        professor_name: form.professor_name,
+        university,
+        course_code: form.course_code,
+        rating: form.rating,
+        difficulty: form.difficulty,
+        review: form.review,
+        success_tips: form.success_tips,
+        would_take_again: form.would_take_again,
+      }),
     });
-    setForm({ professor_name: "", course_code: "", rating: 0, difficulty: 0, review: "", would_take_again: true });
+
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}));
+      setSubmitError(j.error || "Could not post that review.");
+      setSaving(false);
+      return;
+    }
+
+    setForm({ professor_name: "", course_code: "", rating: 0, difficulty: 0, review: "", success_tips: "", would_take_again: true });
+    setSubmitError("");
     setShowModal(false);
     fetchData();
     setSaving(false);
   };
 
-  const grouped = ratings.reduce((acc: any, r) => {
-    const key = r.professor_name;
+  // Two professors can share a name at different schools. Grouping on the name
+  // alone merged them into one profile, which is wrong and gets worse as more
+  // schools join.
+  const grouped = ratings.filter((r: any) => !r.hidden).reduce((acc: any, r) => {
+    const key = `${r.professor_name}|||${r.university || "Unknown school"}`;
     if (!acc[key]) acc[key] = [];
     acc[key].push(r);
     return acc;
   }, {});
 
-  const professors = Object.entries(grouped).map(([name, reviews]: any) => ({
-    name,
+  const professors = Object.entries(grouped).map(([key, reviews]: any) => ({
+    name: key.split("|||")[0],
+    school: key.split("|||")[1],
     avgRating: reviews.reduce((s: number, r: any) => s + r.rating, 0) / reviews.length,
     avgDifficulty: reviews.reduce((s: number, r: any) => s + (r.difficulty || 0), 0) / reviews.length,
     wouldTakeAgain: Math.round((reviews.filter((r: any) => r.would_take_again).length / reviews.length) * 100),
     reviews,
-  })).filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+  })).filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.school.toLowerCase().includes(search.toLowerCase())
+  );
 
   if (loading) return (
     <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
@@ -182,10 +209,11 @@ export default function ProfessorsPage() {
         ) : (
           <div className="space-y-4">
             {professors.map((prof) => (
-              <div key={prof.name} className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
+              <div key={`${prof.name}|${prof.school}`} className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
                 <div className="flex items-start justify-between p-5 border-b border-purple-50">
                   <div>
                     <h3 className="font-medium text-ink-900 text-lg">{prof.name}</h3>
+                    <p className="text-xs text-ink-600">{prof.school}</p>
                     <p className="text-xs text-ink-400 mt-0.5">{prof.reviews.length} review{prof.reviews.length !== 1 ? "s" : ""}</p>
                   </div>
                   <div className="flex items-center gap-6 text-right">
@@ -221,6 +249,14 @@ export default function ProfessorsPage() {
                         </span>
                       </div>
                       {review.review && <p className="text-sm text-ink-600 leading-relaxed">{review.review}</p>}
+                      {review.success_tips && (
+                        <div className="mt-3 bg-brand-50 border border-ink-200 rounded-lg p-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-brand-700 mb-1">
+                            Tips for success
+                          </p>
+                          <p className="text-sm text-ink-600 leading-relaxed">{review.success_tips}</p>
+                        </div>
+                      )}
                       <button
                         onClick={() => setReportTarget(review)}
                         className="mt-2 text-xs text-ink-400 hover:text-purple-600 transition-colors"
@@ -304,6 +340,29 @@ export default function ProfessorsPage() {
                   </button>
                 </div>
               </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wide text-ink-600 mb-1.5">
+                  Tips for success <span className="normal-case font-normal text-ink-400">(optional)</span>
+                </label>
+                <textarea
+                  value={form.success_tips}
+                  onChange={(e) => setForm({ ...form, success_tips: e.target.value })}
+                  rows={3}
+                  maxLength={800}
+                  placeholder="What actually worked in this class? Go to office hours, do the practice exams, skip the textbook..."
+                  className="w-full px-4 py-2.5 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
+                />
+                <p className="text-xs text-ink-600 mt-1.5">
+                  This is shown separately from your review so advice does not get lost in an opinion.
+                </p>
+              </div>
+
+              {submitError && (
+                <div className="bg-white border border-ink-200 text-bad text-sm px-4 py-3 rounded-lg">
+                  {submitError}
+                </div>
+              )}
+
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
