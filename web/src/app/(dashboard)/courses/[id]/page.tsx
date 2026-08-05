@@ -196,19 +196,19 @@ export default function CourseDetailPage() {
   const totalWeight = categories.reduce((sum, c) => sum + c.weight, 0);
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
-      <div className="text-purple-600 font-medium">Loading...</div>
+    <div className="min-h-screen bg-brand-50 flex items-center justify-center">
+      <div className="text-brand-600 font-medium">Loading...</div>
     </div>
   );
 
   if (!course) return (
-    <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
+    <div className="min-h-screen bg-brand-50 flex items-center justify-center">
       <div className="text-bad">Course not found</div>
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-[#F5F3FF]">
+    <main className="min-h-screen bg-brand-50">
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         {optimisticError && (
@@ -217,12 +217,12 @@ export default function CourseDetailPage() {
           </div>
         )}
         {/* Course Header */}
-        <div className="bg-white rounded-2xl border border-purple-100 p-6 mb-6">
+        <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6 mb-6">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 rounded-full" style={{ background: course.color }} />
               <div>
-                <h1 className="text-2xl font-medium text-ink-900">{course.name}</h1>
+                <h1 className="font-display text-2xl font-bold tracking-tight text-ink-900">{course.name}</h1>
                 <p className="text-sm text-ink-400">{course.code} · {course.professor} · {course.semester} {course.year}</p>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function CourseDetailPage() {
               <div className="text-sm text-ink-400">{hasAnyGrades ? getLetterGrade(currentGrade) : "No grades yet"}</div>
             </div>
           </div>
-          <div className="mt-4 w-full bg-purple-50 rounded-full h-3">
+          <div className="mt-4 w-full bg-brand-50 rounded-full h-3">
             <div
               className="h-3 rounded-full transition-all"
               style={{
@@ -249,18 +249,18 @@ export default function CourseDetailPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Categories */}
-          <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-purple-50">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-ink-100">
               <h2 className="font-medium text-ink-900">Grade categories</h2>
-              <button onClick={() => setShowCatModal(true)} className="text-sm text-purple-600 hover:underline">+ Add</button>
+              <button onClick={() => setShowCatModal(true)} className="text-sm text-brand-600 hover:underline">+ Add</button>
             </div>
             {categories.length === 0 ? (
               <div className="py-10 text-center">
                 <p className="text-sm text-ink-400 mb-3">No categories yet</p>
-                <button onClick={() => setShowCatModal(true)} className="text-sm text-purple-600 hover:underline">Add a category</button>
+                <button onClick={() => setShowCatModal(true)} className="text-sm text-brand-600 hover:underline">Add a category</button>
               </div>
             ) : (
-              <div className="divide-y divide-purple-50">
+              <div className="divide-y divide-ink-100">
                 {categories.map(cat => {
                   const catAssignments = assignments.filter(a => a.category_id === cat.id && a.completed);
                   const avg = catAssignments.length > 0
@@ -282,7 +282,7 @@ export default function CourseDetailPage() {
                         </div>
                         <button
                           onClick={() => { setEditingCat(cat); setEditCatForm({ name: cat.name, weight: String(cat.weight) }); }}
-                          className="text-xs text-purple-400 hover:text-purple-600 px-1.5 py-0.5 rounded hover:bg-purple-50"
+                          className="text-xs text-purple-400 hover:text-brand-600 px-1.5 py-0.5 rounded hover:bg-brand-50"
                         >✏️</button>
                         <button
                           onClick={() => handleDeleteCategory(cat.id)}
@@ -297,13 +297,13 @@ export default function CourseDetailPage() {
           </div>
 
           {/* Assignments */}
-          <div className="bg-white rounded-2xl border border-purple-100 overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-purple-50">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-ink-100">
               <h2 className="font-medium text-ink-900">Grades</h2>
               <button
                 onClick={() => setShowAssignModal(true)}
                 disabled={categories.length === 0}
-                className="text-sm text-purple-600 hover:underline disabled:text-ink-400 disabled:cursor-not-allowed"
+                className="text-sm text-brand-600 hover:underline disabled:text-ink-400 disabled:cursor-not-allowed"
               >
                 + Add grade
               </button>
@@ -314,7 +314,7 @@ export default function CourseDetailPage() {
                 <p className="text-xs text-ink-400">Add categories first, then grades</p>
               </div>
             ) : (
-              <div className="divide-y divide-purple-50 max-h-80 overflow-y-auto">
+              <div className="divide-y divide-ink-100 max-h-80 overflow-y-auto">
                 {assignments.map(a => {
                   const pct = Math.round((a.grade / a.max_grade) * 100);
                   const cat = categories.find(c => c.id === a.category_id);
@@ -367,7 +367,7 @@ export default function CourseDetailPage() {
                   onChange={(e) => setCatForm({ ...catForm, name: e.target.value })}
                   placeholder="e.g. Homework, Midterm, Final"
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               <div>
@@ -378,13 +378,13 @@ export default function CourseDetailPage() {
                   onChange={(e) => setCatForm({ ...catForm, weight: e.target.value })}
                   placeholder="e.g. 30"
                   min="1" max="100" required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               <p className="text-xs text-ink-400">Current total: {totalWeight}% — remaining: {100 - totalWeight}%</p>
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setShowCatModal(false)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
+                <button type="button" onClick={() => setShowCatModal(false)} className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">
                   {saving ? "Adding..." : "Add"}
                 </button>
               </div>
@@ -410,7 +410,7 @@ export default function CourseDetailPage() {
                   onChange={(e) => setAssignForm({ ...assignForm, name: e.target.value })}
                   placeholder="e.g. Homework 1, Midterm"
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               <div>
@@ -419,7 +419,7 @@ export default function CourseDetailPage() {
                   value={assignForm.category_id}
                   onChange={(e) => setAssignForm({ ...assignForm, category_id: e.target.value })}
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 >
                   <option value="">Select category</option>
                   {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -434,7 +434,7 @@ export default function CourseDetailPage() {
                     onChange={(e) => setAssignForm({ ...assignForm, grade: e.target.value })}
                     placeholder="e.g. 85"
                     required min="0"
-                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                    className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                   />
                 </div>
                 <div>
@@ -445,13 +445,13 @@ export default function CourseDetailPage() {
                     onChange={(e) => setAssignForm({ ...assignForm, max_grade: e.target.value })}
                     placeholder="100"
                     required min="1"
-                    className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                    className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                   />
                 </div>
               </div>
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setShowAssignModal(false)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
+                <button type="button" onClick={() => setShowAssignModal(false)} className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">
                   {saving ? "Saving..." : "Add grade"}
                 </button>
               </div>
@@ -476,7 +476,7 @@ export default function CourseDetailPage() {
                   value={editCatForm.name}
                   onChange={(e) => setEditCatForm({ ...editCatForm, name: e.target.value })}
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               <div>
@@ -486,12 +486,12 @@ export default function CourseDetailPage() {
                   value={editCatForm.weight}
                   onChange={(e) => setEditCatForm({ ...editCatForm, weight: e.target.value })}
                   min="1" max="100" required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setEditingCat(null)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">Cancel</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50">
+                <button type="button" onClick={() => setEditingCat(null)} className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">Cancel</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">
                   {saving ? "Saving..." : "Save"}
                 </button>
               </div>

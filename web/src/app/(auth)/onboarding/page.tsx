@@ -78,21 +78,21 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F5F3FF] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
       <div className="w-full max-w-lg">
 
         {/* Progress dots */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {STEPS.map((s, i) => (
-            <div key={s} className={`h-2 rounded-full transition-all ${i === step ? "w-8 bg-purple-600" : i < step ? "w-2 bg-purple-400" : "w-2 bg-purple-200"}`} />
+            <div key={s} className={`h-2 rounded-full transition-all ${i === step ? "w-8 bg-brand-600" : i < step ? "w-2 bg-purple-400" : "w-2 bg-purple-200"}`} />
           ))}
         </div>
 
         {/* Step 0 — Welcome */}
         {step === 0 && (
-          <div className="bg-white rounded-2xl border border-purple-100 p-8 text-center">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card p-8 text-center">
             <Logo />
-            <h1 className="text-2xl font-medium text-ink-900 mt-4 mb-2">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-ink-900 mt-4 mb-2">
               Welcome to Ampliscore{form.full_name ? `, ${form.full_name.split(" ")[0]}` : ""}! 👋
             </h1>
             <p className="text-ink-600 text-sm mb-6 leading-relaxed">
@@ -105,7 +105,7 @@ export default function OnboardingPage() {
                 { icon: "⭐", text: "Rate your professors" },
                 { icon: "🧮", text: "Plan your GPA" },
               ].map(f => (
-                <div key={f.text} className="flex items-center gap-2 bg-purple-50 rounded-xl p-3">
+                <div key={f.text} className="flex items-center gap-2 bg-brand-50 rounded-xl p-3">
                   <span>{f.icon}</span>
                   <span className="text-xs text-ink-600 font-medium">{f.text}</span>
                 </div>
@@ -113,7 +113,7 @@ export default function OnboardingPage() {
             </div>
             <button
               onClick={() => setStep(1)}
-              className="w-full bg-purple-600 text-white py-3 rounded-xl font-medium hover:bg-purple-700 transition-colors"
+              className="w-full bg-brand-600 text-white h-12 rounded-lg font-medium hover:bg-brand-700 transition-colors"
             >
               Let's get started →
             </button>
@@ -122,7 +122,7 @@ export default function OnboardingPage() {
 
         {/* Step 1 — University */}
         {step === 1 && (
-          <div className="bg-white rounded-2xl border border-purple-100 p-8">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card p-8">
             <div className="text-3xl mb-4">🎓</div>
             <h2 className="text-xl font-medium text-ink-900 mb-1">Where do you go to school?</h2>
             <p className="text-sm text-ink-600 mb-6">This helps us show you professor ratings from your campus.</p>
@@ -133,7 +133,7 @@ export default function OnboardingPage() {
                   type="text" value={form.full_name}
                   onChange={(e) => setForm({ ...form, full_name: e.target.value })}
                   placeholder="Your full name"
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               <div>
@@ -142,18 +142,18 @@ export default function OnboardingPage() {
                   type="text" value={form.university}
                   onChange={(e) => setForm({ ...form, university: e.target.value })}
                   placeholder="e.g. University of Michigan"
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setStep(0)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">
+              <button onClick={() => setStep(0)} className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">
                 Back
               </button>
               <button
                 onClick={() => form.university && setStep(2)}
                 disabled={!form.university}
-                className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-40"
+                className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-40"
               >
                 Continue →
               </button>
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
 
         {/* Step 2 — Major & Year */}
         {step === 2 && (
-          <div className="bg-white rounded-2xl border border-purple-100 p-8">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card p-8">
             <div className="text-3xl mb-4">��</div>
             <h2 className="text-xl font-medium text-ink-900 mb-1">What are you studying?</h2>
             <p className="text-sm text-ink-600 mb-6">Optional — helps us give you better recommendations.</p>
@@ -174,7 +174,7 @@ export default function OnboardingPage() {
                   type="text" value={form.major}
                   onChange={(e) => setForm({ ...form, major: e.target.value })}
                   placeholder="e.g. Computer Science"
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               <div>
@@ -182,7 +182,7 @@ export default function OnboardingPage() {
                 <select
                   value={form.year_of_study}
                   onChange={(e) => setForm({ ...form, year_of_study: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 >
                   <option value="">Select year</option>
                   <option value="1">Freshman (1st year)</option>
@@ -194,13 +194,13 @@ export default function OnboardingPage() {
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <button onClick={() => setStep(1)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">
+              <button onClick={() => setStep(1)} className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">
                 Back
               </button>
               <button
                 onClick={handleSaveProfile}
                 disabled={saving}
-                className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-50"
+                className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Continue →"}
               </button>
@@ -210,7 +210,7 @@ export default function OnboardingPage() {
 
         {/* Step 3 — Tour */}
         {step === 3 && (
-          <div className="bg-white rounded-2xl border border-purple-100 p-8">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card p-8">
             <div className="text-center mb-6">
               <div className="text-4xl mb-2">{TOUR_STEPS[tourStep].icon}</div>
               <h2 className="text-xl font-medium text-ink-900 mb-2">{TOUR_STEPS[tourStep].title}</h2>
@@ -220,27 +220,27 @@ export default function OnboardingPage() {
             {/* Tour progress */}
             <div className="flex gap-1.5 justify-center mb-6">
               {TOUR_STEPS.map((_, i) => (
-                <div key={i} className={`h-1.5 rounded-full transition-all ${i === tourStep ? "w-6 bg-purple-600" : i < tourStep ? "w-3 bg-purple-400" : "w-3 bg-purple-100"}`} />
+                <div key={i} className={`h-1.5 rounded-full transition-all ${i === tourStep ? "w-6 bg-brand-600" : i < tourStep ? "w-3 bg-purple-400" : "w-3 bg-purple-100"}`} />
               ))}
             </div>
 
             <div className="flex gap-3">
               {tourStep > 0 && (
-                <button onClick={() => setTourStep(t => t - 1)} className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">
+                <button onClick={() => setTourStep(t => t - 1)} className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">
                   Back
                 </button>
               )}
               {tourStep < TOUR_STEPS.length - 1 ? (
                 <button
                   onClick={() => setTourStep(t => t + 1)}
-                  className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700"
+                  className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700"
                 >
                   Next →
                 </button>
               ) : (
                 <button
                   onClick={handleFinish}
-                  className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700"
+                  className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700"
                 >
                   Go to my dashboard 🚀
                 </button>

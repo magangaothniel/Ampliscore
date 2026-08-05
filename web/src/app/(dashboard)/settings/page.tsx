@@ -72,7 +72,7 @@ export default function SettingsPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
+    <div className="min-h-screen bg-brand-50 flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -84,45 +84,45 @@ export default function SettingsPage() {
           <h1 className="text-2xl font-semibold text-ink-900">Settings</h1>
           <p className="text-sm text-ink-600 mt-1">Manage your account and preferences</p>
         </div>
-        <Link href="/profile" className="text-sm text-purple-600 hover:underline">← Profile</Link>
+        <Link href="/profile" className="text-sm text-brand-600 hover:underline">← Profile</Link>
       </div>
 
       {successMsg && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">{successMsg}</div>}
       {errorMsg && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{errorMsg}</div>}
 
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-4">Change password</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-ink-900 mb-1.5">New password</label>
             <input type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm(f => ({ ...f, newPassword: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Min 8 characters" />
+              className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100" placeholder="Min 8 characters" />
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-900 mb-1.5">Confirm password</label>
             <input type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm(f => ({ ...f, confirmPassword: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Repeat new password" />
+              className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100" placeholder="Repeat new password" />
           </div>
           <button type="submit" disabled={saving}
-            className="w-full py-2.5 border border-purple-200 text-purple-700 text-sm font-medium rounded-xl hover:bg-purple-50 transition-colors disabled:opacity-50">
+            className="w-full py-2.5 border border-ink-200 text-brand-700 text-sm font-medium rounded-xl hover:bg-brand-50 transition-colors disabled:opacity-50">
             {saving ? "Updating..." : "Update password"}
           </button>
         </form>
       </div>
 
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-4">Legal</h2>
         <div className="space-y-3">
-          <Link href="/terms" target="_blank" className="flex items-center justify-between py-2 text-sm text-ink-900 hover:text-purple-600 transition-colors">
+          <Link href="/terms" target="_blank" className="flex items-center justify-between py-2 text-sm text-ink-900 hover:text-brand-600 transition-colors">
             <span>Terms of Service</span>
             <span className="text-ink-400">→</span>
           </Link>
-          <div className="h-px bg-purple-50" />
-          <Link href="/privacy" target="_blank" className="flex items-center justify-between py-2 text-sm text-ink-900 hover:text-purple-600 transition-colors">
+          <div className="h-px bg-brand-50" />
+          <Link href="/privacy" target="_blank" className="flex items-center justify-between py-2 text-sm text-ink-900 hover:text-brand-600 transition-colors">
             <span>Privacy Policy</span>
             <span className="text-ink-400">→</span>
           </Link>
-          <div className="h-px bg-purple-50" />
+          <div className="h-px bg-brand-50" />
           <div className="flex items-center justify-between py-2 text-sm text-ink-400">
             <span>Terms accepted</span>
             <span className="text-good font-medium">✓ Yes</span>
@@ -130,7 +130,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-4">Subscription</h2>
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -138,36 +138,36 @@ export default function SettingsPage() {
             <div className="text-xs text-ink-400 mt-0.5">{profile?.is_pro ? "$4.99/month · Billed monthly" : "Up to 4 courses"}</div>
           </div>
           {!profile?.is_pro && (
-            <Link href="/upgrade" className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors">
+            <Link href="/upgrade" className="bg-brand-600 text-white px-4 h-10 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
               Upgrade →
             </Link>
           )}
         </div>
         {profile?.is_pro && (
-          <div className="border-t border-purple-50 pt-4">
+          <div className="border-t border-ink-100 pt-4">
             <p className="text-xs text-ink-400 mb-3">You can cancel anytime. Your Pro access continues until the end of your billing period.</p>
             <button onClick={handleManageSubscription}
-              className="border border-purple-200 text-purple-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+              className="border border-ink-200 text-brand-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-50 transition-colors">
               Manage or cancel subscription →
             </button>
           </div>
         )}
       </div>
 
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-1">Sign out</h2>
         <p className="text-sm text-ink-600 mb-4">Sign out of your Ampliscore account on this device.</p>
         <button onClick={handleSignOut}
-          className="border border-purple-200 text-purple-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+          className="border border-ink-200 text-brand-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-50 transition-colors">
           Sign out
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-1">Close account</h2>
         <p className="text-sm text-ink-600 mb-4">Your data belongs to you. Closing your account will permanently delete your courses, grades, and all associated data.</p>
         <button onClick={() => setShowDeleteModal(true)}
-          className="border border-purple-200 text-ink-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+          className="border border-ink-200 text-ink-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-50 transition-colors">
           Close my account
         </button>
       </div>
@@ -182,17 +182,17 @@ export default function SettingsPage() {
             <h2 className="text-lg font-medium text-ink-900 mb-2">Close your account?</h2>
             <p className="text-sm text-ink-600 mb-4">This will permanently delete your courses, grades, and ratings. This cannot be undone.</p>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-ink-900 mb-1.5">Type <span className="font-mono text-purple-600">DELETE</span> to confirm</label>
+              <label className="block text-sm font-medium text-ink-900 mb-1.5">Type <span className="font-mono text-brand-600">DELETE</span> to confirm</label>
               <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100" />
             </div>
             <div className="flex gap-3">
               <button onClick={() => { setShowDeleteModal(false); setDeleteConfirm(""); }}
-                className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">
+                className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">
                 Cancel
               </button>
               <button onClick={handleDeleteAccount} disabled={deleteConfirm !== "DELETE" || deleting}
-                className="flex-1 bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 disabled:opacity-40 transition-colors">
+                className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-40 transition-colors">
                 {deleting ? "Closing..." : "Close account"}
               </button>
             </div>

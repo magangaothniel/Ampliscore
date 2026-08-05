@@ -70,16 +70,16 @@ export default function UpgradePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F5F3FF]">
+    <main className="min-h-screen bg-brand-50">
 
       <div className="max-w-5xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 text-xs font-medium px-4 py-2 rounded-full mb-4">
+          <div className="inline-flex items-center gap-2 bg-purple-100 text-brand-700 text-xs font-medium px-4 py-2 rounded-full mb-4">
             ⚡ Upgrade to Pro
           </div>
           <h1 className="text-4xl font-medium text-ink-900 mb-4">
             Know exactly where you stand.<br/>
-            <span className="text-purple-600">Never get blindsided again.</span>
+            <span className="text-brand-600">Never get blindsided again.</span>
           </h1>
           <p className="text-lg text-ink-600 max-w-xl mx-auto">
             Pro students catch failing grades 3 weeks earlier, hit their target GPA 2x more often, and spend less time stressing about finals.
@@ -87,9 +87,9 @@ export default function UpgradePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 max-w-3xl mx-auto">
-          <div className="bg-white rounded-2xl border border-purple-100 p-6">
+          <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
             <h2 className="text-lg font-medium text-ink-900 mb-1">Free</h2>
-            <div className="text-3xl font-medium text-ink-900 mb-1">$0<span className="text-sm text-purple-400 font-normal">/month</span></div>
+            <div className="font-display text-3xl font-bold tracking-tight text-ink-900 mb-1">$0<span className="text-sm text-purple-400 font-normal">/month</span></div>
             <p className="text-sm text-ink-400 mb-6">Good for getting started</p>
             <div className="space-y-3 mb-6">
               {FREE_FEATURES.map((f) => (
@@ -99,10 +99,10 @@ export default function UpgradePage() {
                 </div>
               ))}
             </div>
-            <div className="border border-purple-200 text-purple-600 py-2.5 rounded-xl text-sm font-medium text-center">Current plan</div>
+            <div className="border border-ink-200 text-brand-600 py-2.5 rounded-xl text-sm font-medium text-center">Current plan</div>
           </div>
 
-          <div className="bg-purple-600 rounded-2xl p-6 relative">
+          <div className="bg-brand-600 rounded-2xl p-6 relative">
             <div className="absolute top-4 right-4 bg-white/20 text-white text-xs font-medium px-3 py-1 rounded-full">Most popular</div>
             <h2 className="text-lg font-medium text-white mb-1">Pro</h2>
             <div className="text-3xl font-medium text-white mb-1">$4.99<span className="text-sm text-purple-300 font-normal">/month</span></div>
@@ -117,7 +117,7 @@ export default function UpgradePage() {
             </div>
             {error && <div className="bg-red-100 text-bad text-xs px-3 py-2 rounded-xl mb-3">{error}</div>}
             <button onClick={handleUpgrade} disabled={loading}
-              className="w-full bg-white text-purple-700 py-3 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors disabled:opacity-50">
+              className="w-full bg-white text-brand-700 py-3 rounded-xl text-sm font-medium hover:bg-brand-50 transition-colors disabled:opacity-50">
               {loading ? "Redirecting to checkout..." : "Upgrade to Pro — $4.99/mo"}
             </button>
             <p className="text-xs text-purple-300 text-center mt-3">Cancel anytime. No hidden fees.</p>
@@ -125,7 +125,7 @@ export default function UpgradePage() {
         </div>
 
         <div className="mb-16">
-          <h2 className="text-2xl font-medium text-ink-900 text-center mb-8">What you unlock with Pro</h2>
+          <h2 className="font-display text-2xl font-bold tracking-tight text-ink-900 text-center mb-8">What you unlock with Pro</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { icon: "🤖", title: "AI grade predictor", desc: "See your exact final grade before you sit the exam. Know what score you need on every remaining assignment." },
@@ -133,7 +133,7 @@ export default function UpgradePage() {
               { icon: "🧮", title: "GPA what-if planner", desc: "Drag a slider and watch your GPA update in real time. Plan your semester before it happens." },
               { icon: "📁", title: "Transcript tracker", desc: "Every semester, every grade, your full academic history in one place." },
             ].map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl border border-purple-100 p-5">
+              <div key={f.title} className="bg-white rounded-xl border border-ink-200 shadow-card p-5">
                 <div className="text-2xl mb-3">{f.icon}</div>
                 <h3 className="font-medium text-ink-900 mb-2 text-sm">{f.title}</h3>
                 <p className="text-xs text-ink-600 leading-relaxed">{f.desc}</p>
@@ -143,10 +143,10 @@ export default function UpgradePage() {
         </div>
 
         <div className="mb-16">
-          <h2 className="text-2xl font-medium text-ink-900 text-center mb-8">What students are saying</h2>
+          <h2 className="font-display text-2xl font-bold tracking-tight text-ink-900 text-center mb-8">What students are saying</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-white rounded-2xl border border-purple-100 p-5">
+              <div key={t.name} className="bg-white rounded-xl border border-ink-200 shadow-card p-5">
                 <div className="text-amber-400 mb-3 text-sm">★★★★★</div>
                 <p className="text-sm text-ink-600 leading-relaxed mb-4">"{t.text}"</p>
                 <div>
@@ -159,7 +159,7 @@ export default function UpgradePage() {
         </div>
 
         <div className="max-w-2xl mx-auto mb-12">
-          <h2 className="text-2xl font-medium text-ink-900 text-center mb-8">Common questions</h2>
+          <h2 className="font-display text-2xl font-bold tracking-tight text-ink-900 text-center mb-8">Common questions</h2>
           <div className="space-y-4">
             {[
               { q: "Can I cancel anytime?", a: "Yes — cancel with one click from your account settings. No questions asked, no penalties." },
@@ -167,7 +167,7 @@ export default function UpgradePage() {
               { q: "Is my payment information secure?", a: "100%. Payments are processed by Stripe, the same system used by Amazon and Google. We never see your card details." },
               { q: "Do I need Pro to use professor ratings?", a: "No — professor ratings are free for everyone. Pro unlocks the grade tracking and GPA planning features." },
             ].map((item) => (
-              <div key={item.q} className="bg-white rounded-2xl border border-purple-100 p-5">
+              <div key={item.q} className="bg-white rounded-xl border border-ink-200 shadow-card p-5">
                 <h3 className="font-medium text-ink-900 mb-2 text-sm">{item.q}</h3>
                 <p className="text-sm text-ink-600 leading-relaxed">{item.a}</p>
               </div>
@@ -175,11 +175,11 @@ export default function UpgradePage() {
           </div>
         </div>
 
-        <div className="bg-purple-600 rounded-2xl p-8 text-center">
+        <div className="bg-brand-600 rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-medium text-white mb-2">Ready to take control of your GPA?</h2>
           <p className="text-purple-200 text-sm mb-6">Join thousands of students who never get surprised by their grades.</p>
           <button onClick={handleUpgrade} disabled={loading}
-            className="bg-white text-purple-700 px-8 py-3 rounded-xl font-medium hover:bg-purple-50 transition-colors disabled:opacity-50 text-sm">
+            className="bg-white text-brand-700 px-8 py-3 rounded-xl font-medium hover:bg-brand-50 transition-colors disabled:opacity-50 text-sm">
             {loading ? "Redirecting..." : "Get Ampliscore Pro — $4.99/mo"}
           </button>
           <p className="text-purple-300 text-xs mt-3">Cancel anytime · Secure payment via Stripe</p>

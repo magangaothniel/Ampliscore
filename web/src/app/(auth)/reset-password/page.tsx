@@ -43,23 +43,23 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F5F3FF] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-brand-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center justify-center gap-2 mb-6">
             <Logo />
-            <span className="text-lg font-medium text-ink-900">ampli<span className="text-purple-600">score</span></span>
+            <span className="text-lg font-medium text-ink-900">ampli<span className="text-brand-600">score</span></span>
           </Link>
-          <h1 className="text-2xl font-medium text-ink-900">Reset your password</h1>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-ink-900">Reset your password</h1>
           <p className="text-sm text-ink-600 mt-1">We'll send you a link to reset it</p>
         </div>
-        <div className="bg-white rounded-2xl border border-purple-100 p-8">
+        <div className="bg-white rounded-xl border border-ink-200 shadow-card p-8">
           {sent ? (
             <div className="text-center">
               <div className="text-4xl mb-4">📧</div>
               <h2 className="text-lg font-medium text-ink-900 mb-2">Check your email</h2>
               <p className="text-sm text-ink-600 mb-6">We sent a password reset link to <strong>{email}</strong></p>
-              <Link href="/login" className="text-purple-600 text-sm font-medium hover:underline">← Back to login</Link>
+              <Link href="/login" className="text-brand-600 text-sm font-medium hover:underline">← Back to login</Link>
             </div>
           ) : (
             <form onSubmit={handleReset} className="space-y-4">
@@ -68,16 +68,16 @@ export default function ResetPasswordPage() {
                 <input
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@university.edu" required
-                  className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30"
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                 />
               </div>
               {error && <div className="bg-red-50 text-bad text-sm px-4 py-3 rounded-xl border border-red-100">{error}</div>}
               <button type="submit" disabled={loading}
-                className="w-full bg-purple-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50">
+                className="w-full bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors disabled:opacity-50">
                 {loading ? "Sending..." : "Send reset link"}
               </button>
               <p className="text-center text-sm text-ink-600">
-                <Link href="/login" className="text-purple-600 hover:underline">← Back to login</Link>
+                <Link href="/login" className="text-brand-600 hover:underline">← Back to login</Link>
               </p>
             </form>
           )}

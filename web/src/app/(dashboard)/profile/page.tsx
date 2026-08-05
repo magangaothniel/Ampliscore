@@ -105,7 +105,7 @@ export default function ProfilePage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen bg-[#F5F3FF] flex items-center justify-center">
+    <div className="min-h-screen bg-brand-50 flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
     </div>
   );
@@ -125,14 +125,14 @@ export default function ProfilePage() {
       )}
 
       {/* Avatar */}
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-4">Profile picture</h2>
         <div className="flex items-center gap-5">
           <div className="relative">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-purple-100" />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-purple-600 flex items-center justify-center text-white text-2xl font-semibold">
+              <div className="w-20 h-20 rounded-full bg-brand-600 flex items-center justify-center text-white text-2xl font-semibold">
                 {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
               </div>
             )}
@@ -145,7 +145,7 @@ export default function ProfilePage() {
           <div className="space-y-2">
             <button onClick={() => fileInputRef.current?.click()}
               disabled={uploadingAvatar}
-              className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50">
+              className="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50">
               {uploadingAvatar ? "Uploading..." : "Upload photo"}
             </button>
             <p className="text-xs text-ink-400">JPG, PNG or WebP · Max 2MB</p>
@@ -155,34 +155,34 @@ export default function ProfilePage() {
       </div>
 
       {/* Profile info */}
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-4">Personal information</h2>
         <form onSubmit={handleSave} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-ink-900 mb-1.5">Full name</label>
             <input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Your name" />
+              className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100" placeholder="Your name" />
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-900 mb-1.5">Email</label>
             <input value={profile?.email || ""} disabled
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-100 text-sm bg-purple-50 text-ink-400 cursor-not-allowed" />
+              className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm bg-brand-50 text-ink-400 cursor-not-allowed" />
           </div>
           <div>
             <label className="block text-sm font-medium text-ink-900 mb-1.5">University</label>
             <input value={form.university} onChange={e => setForm(f => ({ ...f, university: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="e.g. Kansas State University" />
+              className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100" placeholder="e.g. Kansas State University" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-ink-900 mb-1.5">Major</label>
               <input value={form.major} onChange={e => setForm(f => ({ ...f, major: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="e.g. Computer Science" />
+                className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100" placeholder="e.g. Computer Science" />
             </div>
             <div>
               <label className="block text-sm font-medium text-ink-900 mb-1.5">Year</label>
               <select value={form.year_of_study} onChange={e => setForm(f => ({ ...f, year_of_study: e.target.value }))}
-                className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white">
+                className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 bg-white">
                 <option value="">Select year</option>
                 <option value="1">Freshman</option>
                 <option value="2">Sophomore</option>
@@ -193,7 +193,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <button type="submit" disabled={saving}
-            className="w-full py-2.5 bg-purple-600 text-white text-sm font-medium rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50">
+            className="w-full py-2.5 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50">
             {saving ? "Saving..." : "Save changes"}
           </button>
         </form>
@@ -202,41 +202,41 @@ export default function ProfilePage() {
 
 
       {/* Referral */}
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-1">Refer a friend</h2>
         <p className="text-sm text-ink-600 mb-4">Get 1 month Pro free for every 3 friends who sign up</p>
-        <div className="bg-purple-50 rounded-xl p-4 mb-4">
+        <div className="bg-brand-50 rounded-xl p-4 mb-4">
           <div className="text-xs text-ink-400 mb-1">Your referral link</div>
           <div className="flex items-center gap-2">
-            <div className="text-sm font-medium text-purple-700 flex-1 truncate">
+            <div className="text-sm font-medium text-brand-700 flex-1 truncate">
               ampliscore.vercel.app/register?ref={profile?.referral_code || '...'}
             </div>
             <button
               onClick={() => { navigator.clipboard.writeText(`https://ampliscore.vercel.app/register?ref=${profile?.referral_code}`); setSuccessMsg('Link copied!'); setTimeout(() => setSuccessMsg(''), 2000); }}
-              className="text-xs bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-colors flex-shrink-0"
+              className="text-xs bg-brand-600 text-white px-3 py-1.5 rounded-lg hover:bg-brand-700 transition-colors flex-shrink-0"
             >
               Copy
             </button>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex-1 bg-purple-50 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-purple-600">{profile?.referral_count || 0}</div>
+          <div className="flex-1 bg-brand-50 rounded-xl p-3 text-center">
+            <div className="text-2xl font-bold text-brand-600">{profile?.referral_count || 0}</div>
             <div className="text-xs text-ink-400">Friends referred</div>
           </div>
-          <div className="flex-1 bg-purple-50 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-purple-600">{Math.max(0, 3 - (profile?.referral_count || 0))}</div>
+          <div className="flex-1 bg-brand-50 rounded-xl p-3 text-center">
+            <div className="text-2xl font-bold text-brand-600">{Math.max(0, 3 - (profile?.referral_count || 0))}</div>
             <div className="text-xs text-ink-400">Until free Pro</div>
           </div>
         </div>
       </div>
 
       {/* Account deletion */}
-      <div className="bg-white rounded-2xl border border-purple-100 p-6">
+      <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
         <h2 className="font-medium text-ink-900 mb-1">Close account</h2>
         <p className="text-sm text-ink-600 mb-4">Your data belongs to you. Closing your account will permanently delete your courses, grades, and all associated data.</p>
         <button onClick={() => setShowDeleteModal(true)}
-          className="border border-purple-200 text-ink-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-purple-50 transition-colors">
+          className="border border-ink-200 text-ink-600 px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-50 transition-colors">
           Close my account
         </button>
       </div>
@@ -259,7 +259,7 @@ export default function ProfilePage() {
             </div>
             <div className="flex gap-3">
               <button onClick={() => { setShowDeleteModal(false); setDeleteConfirm(""); }}
-                className="flex-1 border border-purple-200 text-purple-700 py-2.5 rounded-xl text-sm font-medium hover:bg-purple-50">
+                className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">
                 Cancel
               </button>
               <button onClick={handleDeleteAccount} disabled={deleteConfirm !== "DELETE" || deleting}
