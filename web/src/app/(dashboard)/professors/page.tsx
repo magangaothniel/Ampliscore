@@ -87,6 +87,7 @@ export default function ProfessorsPage() {
     rating: 0,
     difficulty: 0,
     review: "",
+    success_tips: "",
     would_take_again: true,
   });
 
