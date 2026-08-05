@@ -14,7 +14,7 @@ export default function TermsPage() {
         </div>
         <div className="bg-white rounded-2xl border border-purple-100 p-8 md:p-12">
           <h1 className="text-3xl font-bold text-ink-900 mb-2">Terms of Service</h1>
-          <p className="text-sm text-ink-400 mb-8">Last updated: May 25, 2026</p>
+          <p className="text-sm text-ink-400 mb-8">Last updated: August 4, 2026</p>
 
           <div className="prose prose-purple max-w-none space-y-6 text-sm text-ink-600 leading-relaxed">
 
@@ -55,36 +55,67 @@ export default function TermsPage() {
 
             <section>
               <h2 className="text-lg font-semibold text-ink-900 mb-2">8. Subscription and Payments</h2>
-              <p>Ampliscore offers a free tier and a Pro subscription. Pro subscriptions are billed monthly. You may cancel at any time. Refunds are handled on a case-by-case basis. Ampliscore reserves the right to change pricing with 30 days notice. Payments are processed securely through Stripe.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">What you get, and what it costs</h3>
+              <p>Ampliscore has a free plan and a paid plan called Pro. The free plan supports up to 4 courses and does not expire. Pro costs $4.99 per month and adds unlimited courses, AI grade prediction, the GPA planner, at-risk alerts, and the weekly email summary. There is no free trial of Pro; the free plan is how you try Ampliscore.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">Automatic renewal</h3>
+              <p>Pro renews automatically every month at $4.99 and will keep renewing until you cancel it. Your card is charged on the same day each month, starting on the day you subscribe. We do not send a reminder before each renewal. You can see your next renewal date any time in Settings.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">Cancelling</h3>
+              <p>You can cancel at any time from Settings, which opens the Stripe billing portal. Cancelling stops future charges. It does not end your access immediately: you keep Pro until the end of the period you have already paid for, and then the account returns to the free plan. Cancelling takes a few clicks and never requires emailing us or talking to anyone.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">What happens to your data on the free plan</h3>
+              <p>Nothing is deleted when Pro ends. Your courses, grades, and history stay exactly as they are. If you have more than 4 courses, they all remain visible and you keep access to your data, but you will not be able to add new courses until you are back under the limit or subscribe again. Pro-only features stop working until you resubscribe.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">Refunds</h3>
+              <p>If Ampliscore is not working as described, email magangaothniel@gmail.com and we will refund you. We generally do not refund a month that has already been used, but we would rather sort out a genuine problem than keep $4.99, so ask.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">Failed payments</h3>
+              <p>If a payment fails, Stripe will retry it over the following days. If it keeps failing, the subscription ends and the account returns to the free plan. Your data is not affected.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">Price changes</h3>
+              <p>If the price of Pro changes, existing subscribers will be told by email at least 30 days beforehand, and the new price only applies from the renewal after that notice. You can cancel before it takes effect.</p>
+
+              <h3 className="font-medium text-ink-900 mt-4 mb-1">Payment processing</h3>
+              <p>Payments are handled by Stripe. Ampliscore never sees or stores your card number. Prices are in US dollars and do not include any tax that may apply where you live. Initiating a chargeback rather than asking for a refund may result in the account being suspended, so please email first.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-ink-900 mb-2">9. Intellectual Property</h2>
+              <h2 className="text-lg font-semibold text-ink-900 mb-2">9. User Content and Copyright</h2>
+              <p>Ampliscore lets you submit content, including professor ratings, written reviews, and tips for success. You keep ownership of what you submit. By submitting it, you grant Ampliscore a non-exclusive, royalty-free licence to display and distribute that content within the Service.</p>
+              <p className="mt-2">You are responsible for what you submit. Do not submit content that is false, defamatory, harassing, or that infringes anyone&apos;s copyright or other rights. Ratings must reflect your genuine experience in a class you actually took. Reviews are automatically screened, and content containing slurs or threats is refused.</p>
+              <p className="mt-2">We may remove any content at our discretion, including content reported through the report link on each review. If a review of yours is removed for breaking these rules, you will not be able to post new reviews for 14 days. Repeatedly removed content may result in losing access to reviews permanently.</p>
+              <p className="mt-2">If you believe content on Ampliscore infringes your copyright, email magangaothniel@gmail.com with a description of the work, where the content appears on Ampliscore, your contact information, a statement that you believe in good faith the use is not authorised, a statement under penalty of perjury that your notice is accurate and that you are authorised to act for the owner, and your signature. We remove content that is the subject of a valid notice and terminate the accounts of repeat infringers.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-ink-900 mb-2">10. Intellectual Property</h2>
               <p>All content, design, and code in Ampliscore is the property of Ampliscore and is protected by copyright law. You may not copy, reproduce, or distribute any part of the Service without written permission.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-ink-900 mb-2">10. Disclaimer of Warranties</h2>
+              <h2 className="text-lg font-semibold text-ink-900 mb-2">11. Disclaimer of Warranties</h2>
               <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. AMPLISCORE DOES NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR COMPLETELY SECURE. YOUR USE OF THE SERVICE IS AT YOUR OWN RISK.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-ink-900 mb-2">11. Limitation of Liability</h2>
+              <h2 className="text-lg font-semibold text-ink-900 mb-2">12. Limitation of Liability</h2>
               <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, AMPLISCORE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE, INCLUDING BUT NOT LIMITED TO ACADEMIC DECISIONS MADE BASED ON APP DATA.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-ink-900 mb-2">12. Data Deletion</h2>
+              <h2 className="text-lg font-semibold text-ink-900 mb-2">13. Data Deletion</h2>
               <p>You may request deletion of your account and all associated data at any time by contacting us through the app or emailing magangaothniel@gmail.com. We will process deletion requests within 30 days.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-ink-900 mb-2">13. Changes to Terms</h2>
+              <h2 className="text-lg font-semibold text-ink-900 mb-2">14. Changes to Terms</h2>
               <p>Ampliscore reserves the right to modify these Terms at any time. We will notify users of material changes via email or in-app notification. Continued use of the Service after changes constitutes acceptance of the new Terms.</p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-ink-900 mb-2">14. Contact</h2>
+              <h2 className="text-lg font-semibold text-ink-900 mb-2">15. Contact</h2>
               <p>For questions about these Terms, contact us at <a href="mailto:magangaothniel@gmail.com" className="text-purple-600 hover:underline">magangaothniel@gmail.com</a>.</p>
             </section>
 
