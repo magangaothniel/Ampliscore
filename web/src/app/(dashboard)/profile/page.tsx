@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 
 export default function ProfilePage() {
+  const [referralCopied, setReferralCopied] = useState(false);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -203,32 +204,67 @@ export default function ProfilePage() {
 
       {/* Referral */}
       <div className="bg-white rounded-xl border border-ink-200 shadow-card p-6">
-        <h2 className="font-medium text-ink-900 mb-1">Refer a friend</h2>
-        <p className="text-sm text-ink-600 mb-4">Get 1 month Pro free for every 3 friends who sign up</p>
-        <div className="bg-brand-50 rounded-xl p-4 mb-4">
-          <div className="text-xs text-ink-400 mb-1">Your referral link</div>
-          <div className="flex items-center gap-2">
-            <div className="text-sm font-medium text-brand-700 flex-1 truncate">
-              ampliscore.vercel.app/register?ref={profile?.referral_code || '...'}
+        <h2 className="font-display text-lg font-bold text-ink-900 mb-1">Refer a friend</h2>
+        <p className="text-sm text-ink-600 mb-5">
+          Three friends sign up, you get Pro free. They get a free account either way.
+        </p>
+
+        <div className="mb-5">
+          <div className="text-xs font-semibold uppercase tracking-wide text-ink-600 mb-2">
+            Your referral link
+          </div>
+          <div className="flex items-stretch gap-2">
+            <div className="flex-1 min-w-0 bg-brand-50 border border-ink-200 rounded-lg px-3 flex items-center">
+              <span className="text-sm text-ink-900 truncate font-mono">
+                ampliscore.app/register?ref={profile?.referral_code || "..."}
+              </span>
             </div>
             <button
-              onClick={() => { navigator.clipboard.writeText(`https://ampliscore.vercel.app/register?ref=${profile?.referral_code}`); setSuccessMsg('Link copied!'); setTimeout(() => setSuccessMsg(''), 2000); }}
-              className="text-xs bg-brand-600 text-white px-3 py-1.5 rounded-lg hover:bg-brand-700 transition-colors flex-shrink-0"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `https://ampliscore.app/register?ref=${profile?.referral_code}`
+                );
+                setReferralCopied(true);
+                setTimeout(() => setReferralCopied(false), 2000);
+              }}
+              disabled={!profile?.referral_code}
+              className={`h-10 px-4 rounded-lg text-sm font-medium transition-colors flex-shrink-0 ${
+                referralCopied
+                  ? "bg-good text-white"
+                  : "bg-brand-600 text-white hover:bg-brand-700"
+              } disabled:opacity-50`}
             >
-              Copy
+              {referralCopied ? "Copied" : "Copy link"}
             </button>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 bg-brand-50 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-brand-600">{profile?.referral_count || 0}</div>
-            <div className="text-xs text-ink-400">Friends referred</div>
-          </div>
-          <div className="flex-1 bg-brand-50 rounded-xl p-3 text-center">
-            <div className="text-2xl font-bold text-brand-600">{Math.max(0, 3 - (profile?.referral_count || 0))}</div>
-            <div className="text-xs text-ink-400">Until free Pro</div>
-          </div>
-        </div>
+
+        {(() => {
+          const referred = profile?.referral_count || 0;
+          const left = Math.max(0, 3 - referred);
+          return (
+            <div>
+              <div className="flex items-baseline justify-between mb-2">
+                <span className="text-sm text-ink-600">
+                  {referred} of 3 friends signed up
+                </span>
+                <span className="text-sm font-medium text-ink-900">
+                  {left === 0 ? "Pro unlocked" : `${left} to go`}
+                </span>
+              </div>
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={`h-2 flex-1 rounded-full ${
+                      i < referred ? "bg-brand-600" : "bg-ink-100"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Account deletion */}

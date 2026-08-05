@@ -211,6 +211,15 @@ export default function CourseDetailPage() {
     <main className="min-h-screen bg-brand-50">
 
       <div className="max-w-5xl mx-auto px-6 py-8">
+        <Link
+          href="/courses"
+          className="inline-flex items-center gap-1.5 text-sm text-ink-600 hover:text-ink-900 mb-5 transition-colors"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Back to courses
+        </Link>
         {optimisticError && (
           <div className="mb-4 bg-white border border-ink-200 text-bad text-sm px-4 py-3 rounded-lg">
             {optimisticError}

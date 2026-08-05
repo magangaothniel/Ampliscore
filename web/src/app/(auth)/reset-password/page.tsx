@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
     setError("");
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://ampliscore.vercel.app/update-password",
+      redirectTo: "https://ampliscore.app/update-password",
     });
     if (error) setError(error.message);
     else setSent(true);

@@ -52,7 +52,7 @@ export default function LoginPage() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "https://ampliscore.vercel.app/auth/confirm",
+        redirectTo: "https://ampliscore.app/auth/confirm",
       },
     });
   };

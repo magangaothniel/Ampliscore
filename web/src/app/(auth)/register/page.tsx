@@ -65,7 +65,7 @@ function RegisterForm() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: "https://ampliscore.vercel.app/auth/confirm" },
+      options: { redirectTo: "https://ampliscore.app/auth/confirm" },
     });
   };
 

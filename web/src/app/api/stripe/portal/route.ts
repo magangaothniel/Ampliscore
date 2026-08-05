@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: "https://ampliscore.vercel.app/settings",
+      return_url: "https://ampliscore.app/settings",
     });
 
     return NextResponse.json({ url: session.url });
