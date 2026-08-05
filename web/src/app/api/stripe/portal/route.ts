@@ -19,8 +19,11 @@ export async function POST(req: NextRequest) {
 
     const customerId = customers.data[0].id;
 
-    // Save it for future use
-    await supabase.from("profiles").update({ stripe_customer_id: customerId }).eq("id", user.id);
+    // Deliberately not writing stripe_customer_id here. This route runs as the
+    // signed in user, and the profiles trigger reverts privileged columns for
+    // anyone but the service role, so the write would be silently discarded.
+    // The webhook sets the id at checkout, and this route looks the customer
+    // up by email every time, so nothing depends on it being stored.
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
