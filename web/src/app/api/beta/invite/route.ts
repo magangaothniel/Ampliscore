@@ -170,3 +170,39 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ sent: results.length, results });
 }
+
+// Visiting the URL is the same as posting to it. Kept manual: putting this on
+// a deploy hook would re-send the invite on every push.
+export async function GET(req: NextRequest) {
+  const res = await POST(req);
+  const body = await res.json();
+
+  const rows = (body.results || body.recipients || [])
+    .map((r: any) =>
+      typeof r === "string"
+        ? `<li style="color:#5B5470;font-size:14px;">${r}</li>`
+        : `<li style="color:${r.status === "sent" ? "#0A7350" : "#BE1B1B"};font-size:14px;">${r.to} — ${r.status}</li>`
+    )
+    .join("");
+
+  const heading = body.dryRun
+    ? `Dry run: ${body.wouldSend} invite(s) would be sent`
+    : body.error
+    ? body.error
+    : `Sent ${body.sent} invite(s)`;
+
+  return new NextResponse(
+    `<!DOCTYPE html><html><head><meta charset="utf-8">
+     <meta name="viewport" content="width=device-width,initial-scale=1">
+     <title>Beta invites · Ampliscore</title></head>
+     <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#F5F3FF;margin:0;padding:48px 16px;">
+       <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #E5E2EF;border-radius:12px;padding:32px;">
+         <p style="font-size:20px;font-weight:600;margin:0 0 20px 0;color:#241A3E;">ampli<span style="color:#7C3AED;">score</span></p>
+         <h1 style="font-size:18px;color:#241A3E;margin:0 0 14px 0;">${heading}</h1>
+         ${rows ? `<ul style="margin:0;padding-left:20px;line-height:1.9;">${rows}</ul>` : ""}
+         ${body.dryRun ? `<p style="color:#6B6480;font-size:13px;margin-top:20px;">Nothing was sent. Remove <code>&dry=1</code> from the URL to send for real.</p>` : ""}
+       </div>
+     </body></html>`,
+    { status: res.status, headers: { "Content-Type": "text/html" } }
+  );
+}
