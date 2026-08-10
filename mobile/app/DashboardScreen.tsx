@@ -61,6 +61,7 @@ export default function DashboardScreen({ navigation }: any) {
   async function fetchData() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
+      console.log("USER ID:", user?.id, "EMAIL:", user?.email)
       if (!user) return
 
       const [profileRes, coursesRes] = await Promise.all([
