@@ -325,7 +325,47 @@ export default function CourseDetailPage() {
             )}
           </div>
 
-          {/* Assignments */}
+          {/* Card: upcoming work. Its own box, because nothing here has a grade
+              yet and filing it under "Grades" reads as a pile of zeros. */}
+          {assignments.filter((a: any) => !a.completed).length > 0 && (
+            <div className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden mb-5">
+              <div className="flex items-center justify-between px-5 py-4 border-b border-ink-100">
+                <h2 className="font-medium text-ink-900">Upcoming work</h2>
+                <span className="text-xs text-ink-400">Not counted in your grade yet</span>
+              </div>
+              <div className="divide-y divide-ink-100 max-h-64 overflow-y-auto">
+                {assignments
+                  .filter((a: any) => !a.completed)
+                  .sort((x: any, y: any) => new Date(x.due_date || 0).getTime() - new Date(y.due_date || 0).getTime())
+                  .map((a: any) => {
+                    const cat = categories.find((c: any) => c.id === a.category_id);
+                    const due = a.due_date ? new Date(a.due_date) : null;
+                    return (
+                      <div key={a.id} className="flex items-center justify-between px-5 py-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium text-ink-900 flex items-center gap-2">
+                            <span className="truncate">{a.name}</span>
+                            {a.is_exam && <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded flex-shrink-0">Exam</span>}
+                          </div>
+                          <div className="text-xs text-ink-400">
+                            {cat?.name || "Uncategorised"}
+                            {due ? " \u00B7 due " + due.toLocaleDateString(undefined, { month: "short", day: "numeric" }) : ""}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteAssignment(a.id)}
+                          className="text-ink-400 hover:text-bad transition-colors flex-shrink-0"
+                        >
+                          x
+                        </button>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
+          {/* Grades */}
           <div className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-ink-100">
               <h2 className="font-medium text-ink-900">Grades</h2>
@@ -334,68 +374,40 @@ export default function CourseDetailPage() {
                 disabled={categories.length === 0}
                 className="text-sm text-brand-600 hover:underline disabled:text-ink-400 disabled:cursor-not-allowed"
               >
-                + Add grade
+                + Add
               </button>
             </div>
-            {assignments.length === 0 ? (
+            {assignments.filter((a: any) => a.completed).length === 0 ? (
               <div className="py-10 text-center">
-                <p className="text-sm text-ink-400 mb-1">Nothing here yet</p>
-                <p className="text-xs text-ink-400">Add categories first, then grades or upcoming work</p>
+                <p className="text-sm text-ink-400 mb-1">No grades yet</p>
+                <p className="text-xs text-ink-400">Add categories first, then grades</p>
               </div>
             ) : (
-              <div className="max-h-80 overflow-y-auto">
-                {([
-                  { key: "upcoming", label: "Upcoming work", rows: assignments.filter((a: any) => !a.completed) },
-                  { key: "graded", label: "Graded", rows: assignments.filter((a: any) => a.completed) },
-                ] as const).map((group) => group.rows.length === 0 ? null : (
-                  <div key={group.key}>
-                    <div className="px-5 py-2 bg-brand-50/60 text-[11px] font-semibold uppercase tracking-wide text-ink-400 border-y border-ink-100">
-                      {group.label} <span className="text-ink-300">{group.rows.length}</span>
+              <div className="divide-y divide-ink-100 max-h-80 overflow-y-auto">
+                {assignments.filter((a: any) => a.completed).map((a: any) => {
+                  const pct = Math.round((a.grade / a.max_grade) * 100);
+                  const cat = categories.find((c: any) => c.id === a.category_id);
+                  return (
+                    <div key={a.id} className="flex items-center justify-between px-5 py-3">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-ink-900 truncate">{a.name}</div>
+                        <div className="text-xs text-ink-400">{cat?.name || "Uncategorised"}</div>
+                      </div>
+                      <div className="flex items-center gap-3 flex-shrink-0">
+                        <div className="text-right">
+                          <div className={`text-sm font-medium ${getGradeColor(pct)}`}>{a.grade}/{a.max_grade}</div>
+                          <div className="text-xs text-ink-400">{pct}%</div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteAssignment(a.id)}
+                          className="text-ink-400 hover:text-bad transition-colors"
+                        >
+                          x
+                        </button>
+                      </div>
                     </div>
-                    <div className="divide-y divide-ink-100">
-                      {group.rows.map((a: any) => {
-                        const cat = categories.find((c: any) => c.id === a.category_id);
-                        const pct = Math.round((a.grade / a.max_grade) * 100);
-                        const due = a.due_date ? new Date(a.due_date) : null;
-                        return (
-                          <div key={a.id} className="flex items-center justify-between px-5 py-3">
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium text-ink-900 flex items-center gap-2">
-                                <span className="truncate">{a.name}</span>
-                                {a.is_exam && <span className="text-[10px] font-semibold uppercase tracking-wide text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded flex-shrink-0">Exam</span>}
-                              </div>
-                              <div className="text-xs text-ink-400">
-                                {cat?.name || "Unknown"}
-                                {due && ` !·  due ${due.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 flex-shrink-0">
-                              <div className="text-right">
-                                {a.completed ? (
-                                  <>
-                                    <div className={`text-sm font-medium ${getGradeColor(pct)}`}>{a.grade}/{a.max_grade}</div>
-                                    <div className="text-xs text-ink-400">{pct}%</div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <div className="text-sm font-medium text-ink-300 tnum">—/{a.max_grade}</div>
-                                    <div className="text-xs text-ink-400">not graded</div>
-                                  </>
-                                )}
-                              </div>
-                              <button
-                                onClick={() => handleDeleteAssignment(a.id)}
-                                className="text-ink-400 hover:text-bad transition-colors"
-                              >
-                                ×
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -484,12 +496,12 @@ export default function CourseDetailPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Your score</label>
+                  <label className="block text-sm font-medium text-ink-900 mb-1.5">Score <span className="text-ink-400 font-normal">(optional)</span></label>
                   <input
                     type="number"
                     value={assignForm.grade}
                     onChange={(e) => setAssignForm({ ...assignForm, grade: e.target.value })}
-                    placeholder="Leave blank if not graded yet"
+                    placeholder="Blank = not graded"
                     min="0"
                     className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                   />
