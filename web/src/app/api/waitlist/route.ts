@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { waitlistWelcomeHtml } from "@/lib/waitlistWelcome";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ALERT_TO = "magangaothniel@gmail.com";
@@ -64,32 +65,16 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: "Ampliscore <noreply@ampliscore.app>",
       to: email,
-      subject: "You are on the Ampliscore waitlist",
-      html: `
-        <div style="background:#F5F3FF;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-          <div style="max-width:480px;margin:0 auto;background:#fff;border:1px solid #E5E2EF;border-radius:12px;padding:32px;">
-            <p style="font-size:22px;font-weight:600;margin:0 0 4px 0;"><span style="color:#241A3E;">ampli</span><span style="color:#7C3AED;">score</span></p>
-            <p style="color:#6B6480;font-size:13px;margin:0 0 24px 0;">Know where you stand.</p>
-            <h1 style="color:#241A3E;font-size:20px;margin:0 0 12px 0;">You are on the list</h1>
-            <p style="color:#5B5470;font-size:15px;line-height:1.6;margin:0 0 20px 0;">
-              Thanks ${esc(name.split(" ")[0])}. We will email you the day Ampliscore
-              lands on ${platforms.includes("ios") ? "the App Store" : "Google Play"},
-              with a link to download it.
-            </p>
-            <p style="color:#5B5470;font-size:15px;line-height:1.6;margin:0 0 20px 0;">
-              You do not have to wait, though. The web version works right now and
-              your account carries over.
-            </p>
-            <a href="https://ampliscore.app/register" style="display:inline-block;background:#7C3AED;color:#fff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 28px;border-radius:8px;">Start tracking today</a>
-            <p style="color:#6B6480;font-size:12px;line-height:1.6;margin:26px 0 0 0;">
-              You are getting this because you joined the waitlist at ampliscore.app.
-              <a href="https://ampliscore.app/api/waitlist/leave?e=${encodeURIComponent(email)}&t=${unsubToken}" style="color:#7C3AED;">Leave the list</a>
-            </p>
-          </div>
-        </div>`,
+      replyTo: ALERT_TO,
+      subject: "Here is what you signed up for",
+      html: waitlistWelcomeHtml(name, email, unsubToken),
     });
+    await admin
+      .from("waitlist")
+      .update({ welcomed_at: new Date().toISOString() })
+      .eq("email", email);
   } catch (e) {
-    console.error("Waitlist confirmation failed:", e);
+    console.error("Waitlist welcome failed:", e);
   }
 
   // Tell the operator
