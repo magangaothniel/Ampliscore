@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { createHmac } from "crypto";
+import { inviteHtml, generateBetaCode } from "@/lib/betaInvite";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const ALERT_TO = "magangaothniel@gmail.com";
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
     .select("*")
     .eq("email", email)
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (!row) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -95,5 +96,50 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email failed" }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  // Auto-invite. Everything below is best effort on purpose: the operator
+  // alert has already been sent, so a failure here must not turn into a 500
+  // that makes the client think the whole signup broke.
+  let invited = false;
+  try {
+    // One code per applicant, ever. A retried request must not mint a second.
+    const { data: existing } = await admin
+      .from("beta_codes")
+      .select("code")
+      .eq("issued_to", email)
+      .limit(1)
+      .maybeSingle();
+
+    if (!existing) {
+      let code: string | null = null;
+
+      // code is almost certainly unique-constrained, so collide and retry
+      // rather than trusting a single draw.
+      for (let attempt = 0; attempt < 5 && !code; attempt++) {
+        const candidate = generateBetaCode();
+        const { error } = await admin
+          .from("beta_codes")
+          .insert({ code: candidate, issued_to: email });
+        if (!error) code = candidate;
+        else if (!String(error.message).toLowerCase().includes("duplicate")) {
+          console.error("beta_codes insert failed:", error.message);
+          break;
+        }
+      }
+
+      if (code) {
+        await resend.emails.send({
+          from: "Ampliscore <noreply@ampliscore.app>",
+          to: email,
+          replyTo: ALERT_TO,
+          subject: "Your Ampliscore beta code",
+          html: inviteHtml(row.first_name || "there", code),
+        });
+        invited = true;
+      }
+    }
+  } catch (e) {
+    console.error("Auto-invite failed:", e);
+  }
+
+  return NextResponse.json({ success: true, invited });
 }
