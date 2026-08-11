@@ -336,7 +336,7 @@ export default function CourseDetailPage() {
                   disabled={categories.length === 0}
                   className="text-sm text-brand-600 hover:underline disabled:text-ink-400 disabled:cursor-not-allowed"
                 >
-                  + Add upcoming
+                  + Add assignment
                 </button>
               </div>
               <p className="px-5 pt-3 text-xs text-ink-400">
