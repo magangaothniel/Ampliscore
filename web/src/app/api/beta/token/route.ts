@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   const { data } = await admin
     .from("beta_testers")
-    .select("id, created_at")
+    .select("id, submitted_at")
     .eq("email", email)
     .limit(1)
     .single();
