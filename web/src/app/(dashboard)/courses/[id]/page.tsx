@@ -19,7 +19,7 @@ export default function CourseDetailPage() {
   const [showCatModal, setShowCatModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [catForm, setCatForm] = useState({ name: "", weight: "" });
-  const [assignForm, setAssignForm] = useState({ name: "", grade: "", max_grade: "100", category_id: "", completed: true });
+  const [assignForm, setAssignForm] = useState({ name: "", grade: "", max_grade: "100", category_id: "", completed: true, due_date: "", is_exam: false });
   const [saving, setSaving] = useState(false);
   const [editingCat, setEditingCat] = useState<any>(null);
   const [editCatForm, setEditCatForm] = useState({ name: "", weight: "" });
@@ -119,8 +119,24 @@ export default function CourseDetailPage() {
   const handleAddAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
-    const gradeVal = parseFloat(assignForm.grade);
-    const maxVal = parseFloat(assignForm.max_grade);
+    // A blank score means the work has not been graded yet. Those rows are
+    // stored with completed:false, which every grade calculation already skips.
+    const isUpcoming = assignForm.grade.trim() === "";
+    const gradeVal = isUpcoming ? 0 : parseFloat(assignForm.grade);
+    const maxVal = parseFloat(assignForm.max_grade) || 100;
+
+    if (isUpcoming && !assignForm.due_date) {
+      setOptimisticError("Add a score, or a due date if it is not graded yet.");
+      return;
+    }
+    if (!isUpcoming && Number.isNaN(gradeVal)) {
+      setOptimisticError("That score does not look like a number.");
+      return;
+    }
+
+    const dueIso = assignForm.due_date
+      ? new Date(`${assignForm.due_date}T23:59:00`).toISOString()
+      : null;
 
     // Show it straight away. The write is almost always going to succeed, and
     // waiting on the round trip is what makes the app feel slow.
@@ -133,12 +149,14 @@ export default function CourseDetailPage() {
       name: assignForm.name,
       grade: gradeVal,
       max_grade: maxVal,
-      completed: assignForm.completed,
+      completed: !isUpcoming,
+      due_date: dueIso,
+      is_exam: assignForm.is_exam,
       created_at: new Date().toISOString(),
     };
     const previous = assignments;
     setAssignments([optimisticRow, ...assignments]);
-    setAssignForm({ name: "", grade: "", max_grade: "100", category_id: "", completed: true });
+    setAssignForm({ name: "", grade: "", max_grade: "100", category_id: "", completed: true, due_date: "", is_exam: false });
     setShowAssignModal(false);
     setOptimisticError("");
 
@@ -152,6 +170,8 @@ export default function CourseDetailPage() {
         grade: gradeVal,
         max_grade: maxVal,
         completed: optimisticRow.completed,
+        due_date: dueIso,
+        is_exam: assignForm.is_exam,
       })
       .select()
       .single();
@@ -441,8 +461,8 @@ export default function CourseDetailPage() {
                     type="number"
                     value={assignForm.grade}
                     onChange={(e) => setAssignForm({ ...assignForm, grade: e.target.value })}
-                    placeholder="e.g. 85"
-                    required min="0"
+                    placeholder="Leave blank if not graded yet"
+                    min="0"
                     className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                   />
                 </div>
@@ -458,6 +478,27 @@ export default function CourseDetailPage() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-ink-900 mb-1.5">Due date <span className="text-ink-400 font-normal">(optional)</span></label>
+                <input
+                  type="date"
+                  value={assignForm.due_date}
+                  onChange={(e) => setAssignForm({ ...assignForm, due_date: e.target.value })}
+                  className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
+                />
+                <p className="text-xs text-ink-400 mt-1.5">
+                  Add a date and this shows on your calendar with a reminder 24 hours before.
+                </p>
+              </div>
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={assignForm.is_exam}
+                  onChange={(e) => setAssignForm({ ...assignForm, is_exam: e.target.checked })}
+                  className="h-4 w-4 rounded border-ink-200 text-brand-600 focus:ring-brand-100"
+                />
+                <span className="text-sm text-ink-900">This is an exam</span>
+              </label>
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowAssignModal(false)} className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-50">
