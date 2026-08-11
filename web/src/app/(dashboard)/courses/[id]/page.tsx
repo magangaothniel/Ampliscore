@@ -311,8 +311,8 @@ export default function CourseDetailPage() {
                         </div>
                         <button
                           onClick={() => { setEditingCat(cat); setEditCatForm({ name: cat.name, weight: String(cat.weight) }); }}
-                          className="text-xs text-purple-400 hover:text-brand-600 px-1.5 py-0.5 rounded hover:bg-brand-50"
-                        >✏️</button>
+                          className="text-xs font-medium text-brand-600 hover:underline px-1.5 py-0.5 rounded"
+                        >Edit</button>
                         <button
                           onClick={() => handleDeleteCategory(cat.id)}
                           className="text-ink-400 hover:text-bad transition-colors"
@@ -331,8 +331,17 @@ export default function CourseDetailPage() {
             <div className="bg-white rounded-xl border border-ink-200 shadow-card overflow-hidden mb-5">
               <div className="flex items-center justify-between px-5 py-4 border-b border-ink-100">
                 <h2 className="font-medium text-ink-900">Upcoming work</h2>
-                <span className="text-xs text-ink-400">Not counted in your grade yet</span>
+                <button
+                  onClick={() => setShowAssignModal(true)}
+                  disabled={categories.length === 0}
+                  className="text-sm text-brand-600 hover:underline disabled:text-ink-400 disabled:cursor-not-allowed"
+                >
+                  + Add upcoming
+                </button>
               </div>
+              <p className="px-5 pt-3 text-xs text-ink-400">
+                Not counted in your grade yet. Shows on your calendar.
+              </p>
               <div className="divide-y divide-ink-100 max-h-64 overflow-y-auto">
                 {assignments
                   .filter((a: any) => !a.completed)
@@ -356,7 +365,7 @@ export default function CourseDetailPage() {
                           onClick={() => handleDeleteAssignment(a.id)}
                           className="text-ink-400 hover:text-bad transition-colors flex-shrink-0"
                         >
-                          x
+                          ×
                         </button>
                       </div>
                     );
@@ -402,7 +411,7 @@ export default function CourseDetailPage() {
                           onClick={() => handleDeleteAssignment(a.id)}
                           className="text-ink-400 hover:text-bad transition-colors"
                         >
-                          x
+                          ×
                         </button>
                       </div>
                     </div>
@@ -501,7 +510,7 @@ export default function CourseDetailPage() {
                     type="number"
                     value={assignForm.grade}
                     onChange={(e) => setAssignForm({ ...assignForm, grade: e.target.value })}
-                    placeholder="Blank = not graded"
+                    placeholder="Blank"
                     min="0"
                     className="w-full px-4 h-11 rounded-lg border border-ink-200 text-sm bg-white focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100 transition-colors"
                   />
