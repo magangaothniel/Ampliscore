@@ -13,6 +13,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not allowed" }, { status: 403 });
   }
 
+  // Preview mode: send one copy to the operator and stop. Never reads or
+  // stamps the waitlist, so it is safe to run at any time.
+  if (req.nextUrl.searchParams.get("preview") === "1") {
+    const previewToken = createHmac("sha256", process.env.DIGEST_SECRET || "")
+      .update(ALERT_TO.toLowerCase())
+      .digest("hex")
+      .slice(0, 32);
+
+    try {
+      await resend.emails.send({
+        from: "Ampliscore <noreply@ampliscore.app>",
+        to: ALERT_TO,
+        replyTo: ALERT_TO,
+        subject: "[preview] Here is what you signed up for",
+        html: waitlistWelcomeHtml("Othniel", ALERT_TO, previewToken),
+      });
+    } catch (e: any) {
+      return NextResponse.json({ error: e?.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ preview: true, sentTo: ALERT_TO });
+  }
+
   const dryRun = req.nextUrl.searchParams.get("dry") === "1";
   const limit = Math.min(
     Number(req.nextUrl.searchParams.get("limit") || 50) || 50,
