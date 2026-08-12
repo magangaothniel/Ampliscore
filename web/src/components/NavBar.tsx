@@ -30,7 +30,6 @@ const NAV_LINKS = [
   { label: "Courses", href: "/courses", id: "tour-courses" },
   { label: "Professors", href: "/professors", id: "tour-professors" },
   { label: "Calendar", href: "/calendar", id: "tour-calendar" },
-  { label: "Calendar", href: "/calendar", id: "tour-calendar" },
   { label: "GPA Planner", href: "/gpa", id: "tour-gpa" },
 ];
 
