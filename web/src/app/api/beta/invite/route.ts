@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac } from "crypto";
 import { inviteHtml } from "@/lib/betaInvite";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -33,13 +34,18 @@ export async function POST(req: NextRequest) {
 
   const { data: testers } = await admin
     .from("beta_testers")
-    .select("first_name, email");
+    .select("first_name, email, emails_enabled");
 
   const nameFor = new Map((testers || []).map((t: any) => [t.email, t.first_name]));
-
-  const targets = (codes || []).filter((c: any) =>
-    onlyMe ? c.issued_to === OPERATOR : true
+  const optedOut = new Set(
+    (testers || [])
+      .filter((t: any) => t.emails_enabled === false)
+      .map((t: any) => String(t.email || "").toLowerCase())
   );
+
+  const targets = (codes || [])
+    .filter((c: any) => !optedOut.has(String(c.issued_to || "").toLowerCase()))
+    .filter((c: any) => (onlyMe ? c.issued_to === OPERATOR : true));
 
   if (dryRun) {
     return NextResponse.json({
@@ -58,7 +64,15 @@ export async function POST(req: NextRequest) {
         to: c.issued_to,
         replyTo: OPERATOR,
         subject: "Your Ampliscore beta code",
-        html: inviteHtml(first, c.code),
+        html: inviteHtml(
+          first,
+          c.code,
+          createHmac("sha256", process.env.DIGEST_SECRET || "")
+            .update(String(c.issued_to).toLowerCase())
+            .digest("hex")
+            .slice(0, 32),
+          c.issued_to
+        ),
       });
       results.push({ to: c.issued_to, status: "sent" });
     } catch (e) {

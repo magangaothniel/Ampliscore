@@ -2,15 +2,16 @@ import { createClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-function sign(userId: string) {
+function sign(value: string) {
   return createHmac("sha256", process.env.DIGEST_SECRET || "")
-    .update(userId)
+    .update(value)
     .digest("hex")
     .slice(0, 32);
 }
 
 export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("u") || "";
+  const email = req.nextUrl.searchParams.get("e") || "";
   const token = req.nextUrl.searchParams.get("t") || "";
 
   const page = (title: string, body: string) =>
@@ -28,15 +29,46 @@ export async function GET(req: NextRequest) {
       { headers: { "Content-Type": "text/html" } }
     );
 
-  if (!id || token !== sign(id)) {
-    return page("Link not valid", "This unsubscribe link is invalid or has expired. You can also turn the weekly email off in your account settings.");
-  }
-
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
+
+  // Beta mail goes to people who applied but may not have an account yet, so
+  // those links are keyed by email rather than by profile id.
+  if (email) {
+    if (token !== sign(email.toLowerCase())) {
+      return page(
+        "Link not valid",
+        "This unsubscribe link is invalid or has expired. Email magangaothniel@gmail.com and we will remove you manually."
+      );
+    }
+
+    const { error } = await admin
+      .from("beta_testers")
+      .update({ emails_enabled: false })
+      .eq("email", email);
+
+    if (error) {
+      return page(
+        "Something went wrong",
+        "We could not update your preferences. Please email magangaothniel@gmail.com and we will remove you manually."
+      );
+    }
+
+    return page(
+      "You are unsubscribed",
+      "You will not get any more email about the Ampliscore beta. If you already redeemed a code, your account and your grades are untouched."
+    );
+  }
+
+  if (!id || token !== sign(id)) {
+    return page(
+      "Link not valid",
+      "This unsubscribe link is invalid or has expired. You can also turn the weekly email off in your account settings."
+    );
+  }
 
   const { error } = await admin
     .from("profiles")
@@ -44,7 +76,10 @@ export async function GET(req: NextRequest) {
     .eq("id", id);
 
   if (error) {
-    return page("Something went wrong", "We could not update your preferences. Please email magangaothniel@gmail.com and we will remove you manually.");
+    return page(
+      "Something went wrong",
+      "We could not update your preferences. Please email magangaothniel@gmail.com and we will remove you manually."
+    );
   }
 
   return page(

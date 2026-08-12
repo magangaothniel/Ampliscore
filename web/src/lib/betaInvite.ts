@@ -15,8 +15,9 @@ export function generateBetaCode(): string {
 const esc = (s: any) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-export function inviteHtml(firstName: string, code: string) {
+export function inviteHtml(firstName: string, code: string, unsubToken = "", email = "") {
   const redeem = `https://ampliscore.app/redeem?code=${encodeURIComponent(code)}`;
+  const unsub = `https://ampliscore.app/api/digest/unsubscribe?e=${encodeURIComponent(email)}&t=${unsubToken}`;
   return `
   <div style="background:#F5F3FF;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #E5E2EF;border-radius:12px;padding:32px;">
@@ -93,7 +94,7 @@ export function inviteHtml(firstName: string, code: string) {
 
       <p style="color:#8E88A3;font-size:11px;line-height:1.6;margin:26px 0 0 0;border-top:1px solid #F1EFF7;padding-top:16px;">
         You are getting this because you applied to test Ampliscore at
-        ampliscore.app. Reply to this email if you would rather not take part.
+        ampliscore.app. <a href="${unsub}" style="color:#7C3AED;">Unsubscribe</a>
       </p>
     </div>
   </div>`;

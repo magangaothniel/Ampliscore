@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { createHmac } from "crypto";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const OPERATOR = "magangaothniel@gmail.com";
@@ -8,7 +9,7 @@ const OPERATOR = "magangaothniel@gmail.com";
 const esc = (s: any) =>
   String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function html(firstName: string) {
+function html(firstName: string, unsub: string) {
   return `
   <div style="background:#F5F3FF;padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:500px;margin:0 auto;background:#fff;border:1px solid #E5E2EF;border-radius:12px;padding:32px;">
@@ -40,8 +41,8 @@ function html(firstName: string) {
       <p style="color:#5B5470;font-size:14px;line-height:1.6;margin:14px 0 0 0;">Othniel</p>
 
       <p style="color:#8E88A3;font-size:11px;line-height:1.6;margin:26px 0 0 0;border-top:1px solid #F1EFF7;padding-top:16px;">
-        You are getting this because you are testing Ampliscore. Reply if you
-        would rather not hear from me again.
+        You are getting this because you are testing Ampliscore.
+        <a href="${unsub}" style="color:#7C3AED;">Unsubscribe</a>
       </p>
     </div>
   </div>`;
@@ -61,13 +62,15 @@ async function send(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  const { data: testers } = await admin.from("beta_testers").select("first_name, email");
+  const { data: testers } = await admin.from("beta_testers").select("first_name, email, emails_enabled");
   const { data: already } = await admin.from("beta_feedback").select("email");
   const done = new Set((already || []).map((r: any) => (r.email || "").toLowerCase()));
 
   // Skip anyone who has already filled the form in. Nobody wants a reminder
   // for something they have done.
-  let targets = (testers || []).filter((t: any) => !done.has((t.email || "").toLowerCase()));
+  let targets = (testers || [])
+    .filter((t: any) => t.emails_enabled !== false)
+    .filter((t: any) => !done.has((t.email || "").toLowerCase()));
   if (onlyMe) targets = targets.filter((t: any) => t.email === OPERATOR);
 
   if (dry) {
@@ -82,7 +85,10 @@ async function send(req: NextRequest) {
         to: t.email,
         replyTo: OPERATOR,
         subject: "How has Ampliscore been?",
-        html: html(String(t.first_name || "there").split(" ")[0]),
+        html: html(
+          String(t.first_name || "there").split(" ")[0],
+          `https://ampliscore.app/api/digest/unsubscribe?e=${encodeURIComponent(t.email)}&t=${createHmac("sha256", process.env.DIGEST_SECRET || "").update(String(t.email).toLowerCase()).digest("hex").slice(0, 32)}`
+        ),
       });
       results.push({ to: t.email, status: "sent" });
     } catch (e) {
