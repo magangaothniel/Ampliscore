@@ -89,7 +89,12 @@ export async function POST(req: NextRequest) {
         from: "Ampliscore <noreply@ampliscore.app>",
         to: OPERATOR,
         subject: `[copy] Beta invite sent to ${results.length} tester(s)`,
-        html: inviteHtml("Othniel", "AMPLI-SAMPLE"),
+        html: inviteHtml(
+          "Othniel",
+          "AMPLI-SAMPLE",
+          createHmac("sha256", process.env.DIGEST_SECRET || "").update(OPERATOR.toLowerCase()).digest("hex").slice(0, 32),
+          OPERATOR
+        ),
       });
     } catch (e) {
       console.error("Operator copy failed:", e);
