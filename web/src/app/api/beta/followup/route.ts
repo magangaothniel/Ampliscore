@@ -107,6 +107,20 @@ async function send(req: NextRequest) {
     }
     await new Promise((r) => setTimeout(r, 600));
   }
+  // Copy to the operator so you see exactly what went out.
+  if (!onlyMe && results.length > 0) {
+    try {
+      await resend.emails.send({
+        from: "Ampliscore <noreply@ampliscore.app>",
+        to: OPERATOR,
+        subject: `[copy] Feedback request sent to ${results.length} tester(s)`,
+        html: html("Othniel", "https://ampliscore.app"),
+      });
+    } catch (e) {
+      console.error("Operator copy failed:", e);
+    }
+  }
+
   return { status: 200, body: { sent: results.length, results } };
 }
 
