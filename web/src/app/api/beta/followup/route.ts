@@ -64,12 +64,23 @@ async function send(req: NextRequest) {
 
   const { data: testers } = await admin.from("beta_testers").select("first_name, email, emails_enabled");
   const { data: already } = await admin.from("beta_feedback").select("email");
+
+  // Only ask people who actually opened the app. Asking someone how it has
+  // been when they never redeemed their code is a bad email.
+  const { data: redeemed } = await admin
+    .from("beta_codes")
+    .select("issued_to")
+    .not("redeemed_at", "is", null);
+  const opened = new Set(
+    (redeemed || []).map((r: any) => String(r.issued_to || "").toLowerCase())
+  );
   const done = new Set((already || []).map((r: any) => (r.email || "").toLowerCase()));
 
   // Skip anyone who has already filled the form in. Nobody wants a reminder
   // for something they have done.
   let targets = (testers || [])
     .filter((t: any) => t.emails_enabled !== false)
+    .filter((t: any) => opened.has(String(t.email || "").toLowerCase()))
     .filter((t: any) => !done.has((t.email || "").toLowerCase()));
   if (onlyMe) targets = targets.filter((t: any) => t.email === OPERATOR);
 
