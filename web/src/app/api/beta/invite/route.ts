@@ -25,8 +25,9 @@ export async function POST(req: NextRequest) {
   // Only codes that have not been sent and not been used.
   const { data: codes, error } = await admin
     .from("beta_codes")
-    .select("code, issued_to, redeemed_at")
-    .is("redeemed_at", null);
+    .select("code, issued_to, redeemed_at, sent_at")
+    .is("redeemed_at", null)
+    .is("sent_at", null);
 
   if (error) {
     return NextResponse.json({ error: "Could not read codes." }, { status: 500 });
@@ -74,6 +75,7 @@ export async function POST(req: NextRequest) {
           c.issued_to
         ),
       });
+      await admin.from("beta_codes").update({ sent_at: new Date().toISOString() }).eq("code", c.code);
       results.push({ to: c.issued_to, status: "sent" });
     } catch (e) {
       results.push({ to: c.issued_to, status: "failed", detail: String(e).slice(0, 120) });
