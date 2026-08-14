@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import ScheduleImport from "@/components/ScheduleImport";
 import { cached, invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor } from "@/lib/utils";
 
@@ -297,11 +298,18 @@ export default function CoursesPage() {
       {/* Add Course Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-ink-900">Add a course</h2>
               <button onClick={() => setShowModal(false)} aria-label="Close dialog" title="Close dialog" className="text-ink-400 hover:text-purple-900 text-xl">×</button>
             </div>
+            <ScheduleImport
+              userId={userId}
+              semester={form.semester}
+              year={form.year}
+              slotsLeft={isPro ? 99 : Math.max(0, FREE_LIMIT - courses.length)}
+              onImported={() => { setShowModal(false); fetchCourses(); }}
+            />
             <form onSubmit={handleAddCourse} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-ink-900 mb-1.5">Course name *</label>
