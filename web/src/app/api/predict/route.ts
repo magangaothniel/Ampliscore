@@ -17,6 +17,12 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
   if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Unverified addresses are what make scripted account creation free, so the
+  // endpoints that cost money require a confirmed email.
+  if (!user.email_confirmed_at) {
+    return NextResponse.json({ error: "Confirm your email address first." }, { status: 403 });
+  }
+
   // Get profile
   const { data: profile } = await supabase.from("profiles").select("is_pro, is_beta, ai_predictions_used, ai_predictions_reset_date").eq("id", user.id).single();
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });

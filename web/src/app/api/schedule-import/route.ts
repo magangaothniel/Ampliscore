@@ -48,6 +48,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Unverified addresses are what make scripted account creation free, so the
+  // endpoints that cost money require a confirmed email.
+  if (!user.email_confirmed_at) {
+    return NextResponse.json({ error: "Confirm your email address first." }, { status: 403 });
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("schedule_imports_used, schedule_imports_reset_date")
