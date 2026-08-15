@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
 const ALERT_TO = "magangaothniel@gmail.com";
 const COOLDOWN_MINUTES = 60;
 

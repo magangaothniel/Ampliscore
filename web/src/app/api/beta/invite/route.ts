@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHmac } from "crypto";
 import { inviteHtml } from "@/lib/betaInvite";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
 const OPERATOR = "magangaothniel@gmail.com";
 
 export async function POST(req: NextRequest) {

@@ -4,7 +4,7 @@ import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { waitlistWelcomeHtml } from "@/lib/waitlistWelcome";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
 const ALERT_TO = "magangaothniel@gmail.com";
 
 export async function POST(req: NextRequest) {
