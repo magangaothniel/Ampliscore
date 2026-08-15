@@ -18,7 +18,7 @@ function Logo() {
       <g transform="translate(32,34) scale(0.78) translate(-32,-29)">
         <path d="M32 11 L59 23.5 L32 36 L5 23.5 Z" stroke="url(#capG)" strokeWidth="4.6" strokeLinejoin="round" />
         <path d="M16.5 29 L16.5 41.5 C16.5 46.8 47.5 46.8 47.5 41.5 L47.5 29" stroke="url(#capG)" strokeWidth="4.6" strokeLinecap="round" />
-        <path d="M59 23.5 L59 43" stroke="url(#capG)" strokeWidth="4" strokeLinecap="round" />
+        <path d="M59 23.5 L59 43" stroke="url(#capG)" strokeWidth="5.5" strokeLinecap="round" />
         <circle cx="59" cy="45.6" r="4.9" fill="#7C3AED" />
       </g>
     </svg>
