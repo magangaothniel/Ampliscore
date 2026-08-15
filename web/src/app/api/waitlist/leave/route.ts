@@ -36,7 +36,12 @@ export async function GET(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  await admin.from("waitlist").delete().eq("email", email);
+  // Flag, never delete. A deleted row cannot be recovered and takes the
+  // signup record with it.
+  await admin
+    .from("waitlist")
+    .update({ unsubscribed_at: new Date().toISOString() })
+    .eq("email", email);
 
   return page(
     "You are off the list",
