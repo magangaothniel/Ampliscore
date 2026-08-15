@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
     .from("waitlist")
     .select("name, email")
     .is("welcomed_at", null)
+    .is("unsubscribed_at", null)
     .order("created_at", { ascending: true })
     .limit(limit);
 

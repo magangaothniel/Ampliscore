@@ -10,11 +10,19 @@ function sign(value: string) {
 }
 
 export async function GET(req: NextRequest) {
+  return handle(req, false);
+}
+
+export async function POST(req: NextRequest) {
+  return handle(req, true);
+}
+
+async function handle(req: NextRequest, commit: boolean) {
   const id = req.nextUrl.searchParams.get("u") || "";
   const email = req.nextUrl.searchParams.get("e") || "";
   const token = req.nextUrl.searchParams.get("t") || "";
 
-  const page = (title: string, body: string) =>
+  const page = (title: string, body: string, confirm = false) =>
     new NextResponse(
       `<!DOCTYPE html><html><head><meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -23,7 +31,12 @@ export async function GET(req: NextRequest) {
         <div style="max-width:440px;margin:0 auto;background:#fff;border:1px solid #E5E2EF;border-radius:12px;padding:32px;">
           <p style="font-size:20px;font-weight:600;margin:0 0 16px 0;color:#241A3E;">ampli<span style="color:#7C3AED;">score</span></p>
           <h1 style="font-size:18px;color:#241A3E;margin:0 0 8px 0;">${title}</h1>
-          <p style="color:#5B5470;font-size:15px;line-height:1.6;margin:0;">${body}</p>
+          <p style="color:#5B5470;font-size:15px;line-height:1.6;margin:0;">${body}</p>${confirm ? `
+          <form method="POST" style="margin-top:20px;">
+            <button type="submit" style="width:100%;background:#7C3AED;color:#fff;border:0;font-size:15px;font-weight:600;padding:14px;border-radius:8px;cursor:pointer;">
+              Yes, unsubscribe me
+            </button>
+          </form>` : ""}
         </div>
       </body></html>`,
       { headers: { "Content-Type": "text/html" } }
@@ -42,6 +55,14 @@ export async function GET(req: NextRequest) {
       return page(
         "Link not valid",
         "This unsubscribe link is invalid or has expired. Email magangaothniel@gmail.com and we will remove you manually."
+      );
+    }
+
+    if (!commit) {
+      return page(
+        "Unsubscribe from Ampliscore?",
+        "You will stop getting email about the beta. Your account and grades stay as they are.",
+        true
       );
     }
 
@@ -67,6 +88,14 @@ export async function GET(req: NextRequest) {
     return page(
       "Link not valid",
       "This unsubscribe link is invalid or has expired. You can also turn the weekly email off in your account settings."
+    );
+  }
+
+  if (!commit) {
+    return page(
+      "Unsubscribe from Ampliscore?",
+      "You will stop getting the weekly grade summary and due date reminders. Your account and grades stay as they are.",
+      true
     );
   }
 
