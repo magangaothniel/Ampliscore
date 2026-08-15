@@ -9,7 +9,7 @@ function Logo() {
   return (
     <svg aria-hidden="true" width="40" height="40" viewBox="0 0 64 64" fill="none">
       <defs>
-        <linearGradient id="capG_onboarding" x1="0" y1="64" x2="64" y2="0">
+        <linearGradient id="capG_onboarding" gradientUnits="userSpaceOnUse" x1="0" y1="64" x2="64" y2="0">
           <stop offset="0" stopColor="#5B21B6" />
           <stop offset="1" stopColor="#7C3AED" />
         </linearGradient>
