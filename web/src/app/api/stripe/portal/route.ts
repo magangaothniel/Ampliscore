@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_build_placeholder");
 
 export async function POST(req: NextRequest) {
   try {
