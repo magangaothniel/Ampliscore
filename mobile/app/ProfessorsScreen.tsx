@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TextInput,
   TouchableOpacity, Modal, Alert, ActivityIndicator
 } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
 
 type Rating = {
@@ -13,19 +14,34 @@ type Rating = {
   rating: number
   difficulty: number
   would_take_again: boolean
-  comment: string
+  review: string | null
+  success_tips: string | null
   created_at: string
 }
 
-function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
+function Stars({ rating, size = 18 }: { rating: number; size?: number }) {
   return (
     <View style={{ flexDirection: 'row', gap: 2 }}>
       {[1, 2, 3, 4, 5].map(i => (
-        <View key={i} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: i <= rating ? '#F59E0B' : '#E9D5FF' }} />
+        <Ionicons
+          key={i}
+          name={i <= Math.round(rating) ? 'star' : 'star-outline'}
+          size={size}
+          color={i <= Math.round(rating) ? '#F59E0B' : '#DDD6FE'}
+        />
       ))}
     </View>
   )
 }
+
+const REPORT_REASONS: [string, string][] = [
+  ['inaccurate', 'Inaccurate or misleading'],
+  ['offensive', 'Offensive language'],
+  ['harassment', 'Targets or harasses someone'],
+  ['spam', 'Spam or advertising'],
+  ['not_a_review', 'Not about the professor'],
+  ['other', 'Something else'],
+]
 
 export default function ProfessorsScreen() {
   const [ratings, setRatings] = useState<Rating[]>([])
@@ -40,17 +56,25 @@ export default function ProfessorsScreen() {
   const [rating, setRating] = useState(5)
   const [difficulty, setDifficulty] = useState(3)
   const [wouldTakeAgain, setWouldTakeAgain] = useState(true)
-  const [comment, setComment] = useState('')
+  const [review, setReview] = useState('')
+  const [successTips, setSuccessTips] = useState('')
+
+  const [reportTarget, setReportTarget] = useState<Rating | null>(null)
+  const [reportReason, setReportReason] = useState('')
+  const [reportDetails, setReportDetails] = useState('')
+  const [reportSending, setReportSending] = useState(false)
+  const [reportDone, setReportDone] = useState(false)
 
   useEffect(() => { fetchRatings() }, [])
 
   async function fetchRatings() {
     setLoading(true)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('professor_ratings')
       .select('*')
       .order('created_at', { ascending: false })
-    if (data) setRatings(data)
+    if (error) console.error('RATINGS ERROR:', error.message)
+    setRatings(data ?? [])
     setLoading(false)
   }
 
@@ -67,7 +91,8 @@ export default function ProfessorsScreen() {
       rating,
       difficulty,
       would_take_again: wouldTakeAgain,
-      comment: comment.trim(),
+      review: review.trim(),
+      success_tips: successTips.trim(),
     })
     if (error) Alert.alert('Error', error.message)
     else {
@@ -78,9 +103,49 @@ export default function ProfessorsScreen() {
     setSaving(false)
   }
 
+  async function submitReport() {
+    if (!reportReason) return Alert.alert('Pick a reason', 'Please choose why you are reporting this review.')
+    if (reportDetails.length > 1000) return Alert.alert('Too long', 'Details must be under 1000 characters.')
+    if (!reportTarget) return
+    setReportSending(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setReportSending(false)
+        return Alert.alert('Signed out', 'Please sign in again.')
+      }
+      const res = await fetch('https://ampliscore.app/api/ratings/report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          rating_id: reportTarget.id,
+          reason: reportReason,
+          details: reportDetails,
+        }),
+      })
+      if (res.ok) {
+        setReportDone(true)
+      } else {
+        const j = await res.json().catch(() => ({} as any))
+        Alert.alert('Could not submit', j.error || 'Please try again.')
+      }
+    } catch (e: any) {
+      Alert.alert('Network error', 'Could not reach the server. Check your connection.')
+    } finally {
+      setReportSending(false)
+    }
+  }
+
+  function closeReport() {
+    setReportTarget(null); setReportReason(''); setReportDetails(''); setReportDone(false)
+  }
+
   function resetForm() {
     setProfName(''); setUniversity(''); setCourseCode('')
-    setRating(5); setDifficulty(3); setWouldTakeAgain(true); setComment('')
+    setRating(5); setDifficulty(3); setWouldTakeAgain(true); setReview(''); setSuccessTips('')
   }
 
   const filtered = ratings.filter(r =>
@@ -147,7 +212,17 @@ export default function ProfessorsScreen() {
                   </View>
                 )}
               </View>
-              {r.comment ? <Text style={styles.comment}>"{r.comment}"</Text> : null}
+              {r.review ? <Text style={styles.comment}>{r.review}</Text> : null}
+              {r.success_tips ? (
+                <View style={styles.tipsBox}>
+                  <Text style={styles.tipsLabel}>How to succeed</Text>
+                  <Text style={styles.tipsText}>{r.success_tips}</Text>
+                </View>
+              ) : null}
+              <TouchableOpacity style={styles.reportBtn} onPress={() => setReportTarget(r)}>
+                <Ionicons name="flag-outline" size={13} color="#8E88A3" />
+                <Text style={styles.reportBtnText}>Report</Text>
+              </TouchableOpacity>
             </View>
           ))}
           <View style={{ height: 40 }} />
@@ -200,8 +275,11 @@ export default function ProfessorsScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.label}>Comment</Text>
-            <TextInput style={[styles.input, styles.commentInput]} placeholder="Share your experience..." placeholderTextColor="#C4B5FD" value={comment} onChangeText={setComment} multiline numberOfLines={4} />
+            <Text style={styles.label}>Review</Text>
+            <TextInput style={[styles.input, styles.commentInput]} placeholder="Share your experience..." placeholderTextColor="#C4B5FD" value={review} onChangeText={setReview} multiline numberOfLines={4} />
+
+            <Text style={styles.label}>How to succeed in this class</Text>
+            <TextInput style={[styles.input, styles.commentInput]} placeholder="Tips for future students..." placeholderTextColor="#C4B5FD" value={successTips} onChangeText={setSuccessTips} multiline numberOfLines={3} />
 
             <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={submitRating} disabled={saving}>
               {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Submit rating</Text>}
@@ -209,11 +287,85 @@ export default function ProfessorsScreen() {
           </ScrollView>
         </View>
       </Modal>
+
+      <Modal visible={!!reportTarget} animationType="slide" presentationStyle="pageSheet" onRequestClose={closeReport}>
+        <View style={styles.modal}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Report this review</Text>
+            <TouchableOpacity onPress={closeReport}>
+              <Text style={styles.modalClose}>Close</Text>
+            </TouchableOpacity>
+          </View>
+
+          {reportDone ? (
+            <View style={styles.center}>
+              <Ionicons name="checkmark-circle" size={44} color="#16a34a" />
+              <Text style={styles.emptyTitle}>Report submitted</Text>
+              <Text style={styles.emptySub}>Thanks. We'll review this shortly.</Text>
+              <TouchableOpacity style={styles.emptyBtn} onPress={closeReport}>
+                <Text style={styles.emptyBtnText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
+              <Text style={styles.sub}>Tell us what's wrong with it.</Text>
+
+              <View style={{ marginTop: 16 }}>
+                {REPORT_REASONS.map(([value, label]) => (
+                  <TouchableOpacity
+                    key={value}
+                    style={[styles.reasonRow, reportReason === value && styles.reasonRowActive]}
+                    onPress={() => setReportReason(value)}
+                  >
+                    <Ionicons
+                      name={reportReason === value ? 'radio-button-on' : 'radio-button-off'}
+                      size={18}
+                      color={reportReason === value ? '#7C3AED' : '#C4B5FD'}
+                    />
+                    <Text style={[styles.reasonText, reportReason === value && styles.reasonTextActive]}>{label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.label}>Details (optional)</Text>
+              <TextInput
+                style={[styles.input, styles.commentInput]}
+                placeholder="Anything else we should know?"
+                placeholderTextColor="#C4B5FD"
+                value={reportDetails}
+                onChangeText={setReportDetails}
+                multiline
+                numberOfLines={4}
+                maxLength={1000}
+              />
+              <Text style={styles.charCount}>{reportDetails.length}/1000</Text>
+
+              <TouchableOpacity
+                style={[styles.saveBtn, reportSending && { opacity: 0.6 }]}
+                onPress={submitReport}
+                disabled={reportSending}
+              >
+                {reportSending ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Submit report</Text>}
+              </TouchableOpacity>
+            </ScrollView>
+          )}
+        </View>
+      </Modal>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  tipsBox: { backgroundColor: '#F5F3FF', borderRadius: 12, padding: 12, marginTop: 10 },
+  tipsLabel: { fontSize: 11, fontWeight: '700', color: '#7C3AED', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
+  tipsText: { fontSize: 14, color: '#5B5470', lineHeight: 20 },
+  reportBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', marginTop: 12, paddingVertical: 4 },
+  reportBtnText: { fontSize: 12, color: '#8E88A3' },
+  reasonRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1, borderColor: '#EDE9FE', marginBottom: 8 },
+  reasonRowActive: { borderColor: '#7C3AED', backgroundColor: '#F5F3FF' },
+  reasonText: { fontSize: 14, color: '#5B5470' },
+  reasonTextActive: { color: '#2E1065', fontWeight: '600' },
+  charCount: { fontSize: 11, color: '#8E88A3', textAlign: 'right', marginTop: -8, marginBottom: 8 },
   container: { flex: 1, backgroundColor: '#F5F3FF' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 12 },
