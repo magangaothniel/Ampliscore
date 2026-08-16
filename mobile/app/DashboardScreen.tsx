@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 type Course = {
   id: string
   name: string
-  course_code: string
+  code: string
   professor: string
   credits: number
   current_grade: number | null
@@ -61,16 +61,18 @@ export default function DashboardScreen({ navigation }: any) {
   async function fetchData() {
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      console.log("USER ID:", user?.id, "EMAIL:", user?.email)
       if (!user) return
 
       const [profileRes, coursesRes] = await Promise.all([
         supabase.from('profiles').select('full_name, is_pro').eq('id', user.id).single(),
-        supabase.from('courses').select('id, name, course_code, professor, credits, current_grade').eq('user_id', user.id).order('created_at', { ascending: false })
+        supabase.from('courses').select('id, name, code, professor, credits, current_grade').eq('user_id', user.id).order('created_at', { ascending: false })
       ])
 
+      if (profileRes.error) console.error('PROFILE ERROR:', profileRes.error.message)
+      if (coursesRes.error) console.error('COURSES ERROR:', coursesRes.error.message)
+
       if (profileRes.data) setProfile(profileRes.data)
-      if (coursesRes.data) setCourses(coursesRes.data)
+      setCourses(coursesRes.data ?? [])
     } catch (e) {
       console.error(e)
     } finally {
@@ -105,7 +107,7 @@ export default function DashboardScreen({ navigation }: any) {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>Hey {firstName} 👋</Text>
+          <Text style={styles.greeting}>Hey {firstName}</Text>
           <Text style={styles.subGreeting}>Here's how your semester is looking</Text>
         </View>
         <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.signOutBtn}>
@@ -167,7 +169,7 @@ export default function DashboardScreen({ navigation }: any) {
                 <View style={styles.courseDot} />
                 <View>
                   <Text style={styles.courseName}>{course.name}</Text>
-                  <Text style={styles.courseSub}>{course.course_code} · {course.professor || 'No professor'}</Text>
+                  <Text style={styles.courseSub}>{course.code} · {course.professor || 'No professor'}</Text>
                 </View>
               </View>
               {course.current_grade !== null ? (

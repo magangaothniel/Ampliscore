@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, InputAccessoryView, Keyboard, Platform } from 'react-native'
 import { supabase } from '../lib/supabase'
 
 type Course = {
@@ -41,6 +41,8 @@ function getGradeColor(pct: number): string {
   if (pct >= 70) return '#d97706'
   return '#dc2626'
 }
+
+const ACCESSORY_ID = 'gpaTargetDone'
 
 export default function GPAPlannerScreen() {
   const [courses, setCourses] = useState<Course[]>([])
@@ -100,7 +102,12 @@ export default function GPAPlannerScreen() {
   )
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+      keyboardDismissMode="on-drag"
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.header}>
         <Text style={styles.title}>GPA Planner</Text>
         <Text style={styles.sub}>Simulate your semester outcome</Text>
@@ -128,6 +135,9 @@ export default function GPAPlannerScreen() {
           onChangeText={setTargetGPA}
           keyboardType="decimal-pad"
           maxLength={4}
+          returnKeyType="done"
+          inputAccessoryViewID={ACCESSORY_ID}
+          onSubmitEditing={() => Keyboard.dismiss()}
         />
         <View style={[styles.trackBadge, { backgroundColor: onTrack ? '#DCFCE7' : '#FEE2E2' }]}>
           <Text style={[styles.trackText, { color: onTrack ? '#16a34a' : '#dc2626' }]}>
@@ -178,11 +188,22 @@ export default function GPAPlannerScreen() {
         </View>
       )}
       <View style={{ height: 40 }} />
+      {Platform.OS === 'ios' && (
+        <InputAccessoryView nativeID={ACCESSORY_ID}>
+          <View style={styles.accessoryBar}>
+            <TouchableOpacity onPress={() => Keyboard.dismiss()}>
+              <Text style={styles.accessoryDone}>Done</Text>
+            </TouchableOpacity>
+          </View>
+        </InputAccessoryView>
+      )}
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
+  accessoryBar: { backgroundColor: '#EDE9FE', paddingVertical: 10, paddingHorizontal: 16, alignItems: 'flex-end', borderTopWidth: 1, borderTopColor: '#DDD6FE' },
+  accessoryDone: { color: '#7C3AED', fontSize: 16, fontWeight: '600' },
   container: { flex: 1, backgroundColor: '#F5F3FF' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F3FF' },
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },

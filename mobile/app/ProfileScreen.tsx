@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image, Linking } from 'react-native'
+import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
 
 type Profile = {
   full_name: string | null
+  avatar_url: string | null
   is_pro: boolean
   referral_code: string | null
   referral_count: number
@@ -39,6 +41,16 @@ export default function ProfileScreen() {
     </View>
   )
 
+  const WEB = 'https://ampliscore.app'
+
+  function openWeb(path: string) {
+    WebBrowser.openBrowserAsync(`${WEB}${path}`)
+  }
+
+  function openSupport() {
+    Linking.openURL('mailto:magangaothniel@gmail.com?subject=Ampliscore%20support')
+  }
+
   const shortCode = profile?.referral_code ? profile.referral_code.slice(0, 8).toUpperCase() : '—'
 
   return (
@@ -48,11 +60,15 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.avatarSection}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>
-            {profile?.full_name?.charAt(0)?.toUpperCase() || email.charAt(0).toUpperCase()}
-          </Text>
-        </View>
+        {profile?.avatar_url ? (
+          <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
+        ) : (
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {profile?.full_name?.charAt(0)?.toUpperCase() || email.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        )}
         <Text style={styles.name}>{profile?.full_name || 'Student'}</Text>
         <Text style={styles.emailText}>{email}</Text>
         {profile?.is_pro ? (
@@ -74,30 +90,30 @@ export default function ProfileScreen() {
       </View>
 
       {!profile?.is_pro && (
-        <View style={styles.upgradeBanner}>
+        <TouchableOpacity style={styles.upgradeBanner} onPress={() => openWeb('/upgrade')}>
           <Text style={styles.upgradeTitle}>✦ Upgrade to Pro</Text>
           <Text style={styles.upgradeSub}>AI grade predictor, unlimited courses & more</Text>
           <Text style={styles.upgradePrice}>$4.99/month</Text>
-        </View>
+        </TouchableOpacity>
       )}
 
       <View style={styles.menu}>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => openWeb('/profile')}>
           <Ionicons name="person-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Edit profile</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => openWeb('/settings')}>
           <Ionicons name="notifications-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Notifications</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => openWeb('/settings')}>
           <Ionicons name="lock-closed-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Privacy & security</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]}>
+        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={openSupport}>
           <Ionicons name="help-circle-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Help & support</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
@@ -120,6 +136,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '700', color: '#1E1333' },
   avatarSection: { alignItems: 'center', paddingVertical: 24 },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#7C3AED', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  avatarImage: { width: 80, height: 80, borderRadius: 40, marginBottom: 12, backgroundColor: '#EDE9FE' },
   avatarText: { fontSize: 32, fontWeight: '700', color: '#fff' },
   name: { fontSize: 20, fontWeight: '700', color: '#1E1333', marginBottom: 4 },
   emailText: { fontSize: 14, color: '#A78BFA', marginBottom: 10 },
