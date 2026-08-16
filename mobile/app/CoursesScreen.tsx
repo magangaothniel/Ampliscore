@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 type Course = {
   id: string
   name: string
-  course_code: string
+  code: string
   professor: string
   credits: number
   current_grade: number | null
@@ -57,7 +57,7 @@ export default function CoursesScreen({ navigation }: any) {
     if (!user) return
     const { data, error } = await supabase
       .from('courses')
-      .select('id, name, course_code, professor, credits, current_grade')
+      .select('id, name, code, professor, credits, current_grade, color')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
     if (data) setCourses(data)
@@ -72,7 +72,7 @@ export default function CoursesScreen({ navigation }: any) {
     const { error } = await supabase.from('courses').insert({
       user_id: user.id,
       name: name.trim(),
-      course_code: code.trim(),
+      code: code.trim(),
       professor: professor.trim(),
       credits: parseInt(credits) || 3,
       semester: semester.trim(),
@@ -142,7 +142,7 @@ export default function CoursesScreen({ navigation }: any) {
                   <View style={styles.courseDot} />
                   <View>
                     <Text style={styles.courseName}>{course.name}</Text>
-                    <Text style={styles.courseMeta}>{course.course_code}{course.professor ? ` · ${course.professor}` : ''}</Text>
+                    <Text style={styles.courseMeta}>{course.code}{course.professor ? ` · ${course.professor}` : ''}</Text>
                   </View>
                 </View>
                 {course.current_grade !== null ? (
