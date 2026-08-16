@@ -3,9 +3,6 @@ name: Publish update
 on:
   push:
     branches: ['main']
-    paths:
-      - 'mobile/**'
-      - '!mobile/**/*.md'
 
 concurrency:
   cancel_in_progress: true
