@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image, Linking } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image, Linking, Share } from 'react-native'
 import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
@@ -53,6 +53,17 @@ export default function ProfileScreen() {
 
   const shortCode = profile?.referral_code ? profile.referral_code.slice(0, 8).toUpperCase() : '—'
 
+  async function shareReferralCode() {
+    if (!profile?.referral_code) return
+    try {
+      await Share.share({
+        message: `Track your GPA with Ampliscore. Use my code ${shortCode} when you sign up: https://ampliscore.app`,
+      })
+    } catch (e) {
+      // user cancelled the share sheet; nothing to do
+    }
+  }
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
@@ -84,7 +95,10 @@ export default function ProfileScreen() {
           <Text style={styles.statLabel}>Referrals</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statVal}>{shortCode}</Text>
+          <TouchableOpacity onPress={shareReferralCode} disabled={!profile?.referral_code}>
+              <Text style={styles.statVal}>{shortCode}</Text>
+              {profile?.referral_code ? <Text style={styles.copyHint}>Tap to share</Text> : null}
+            </TouchableOpacity>
           <Text style={styles.statLabel}>Referral code</Text>
         </View>
       </View>
@@ -130,6 +144,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  copyHint: { fontSize: 11, color: '#A78BFA', marginTop: 2, textAlign: 'center' },
   container: { flex: 1, backgroundColor: '#F5F3FF' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F5F3FF' },
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 10 },

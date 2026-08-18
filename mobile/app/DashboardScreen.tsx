@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { getLetterGrade, getGradeTextColor } from '../lib/grades'
 
 type Course = {
   id: string
@@ -14,26 +15,6 @@ type Course = {
 type Profile = {
   full_name: string | null
   is_pro: boolean
-}
-
-function getLetterGrade(pct: number): string {
-  if (pct >= 93) return 'A'
-  if (pct >= 90) return 'A-'
-  if (pct >= 87) return 'B+'
-  if (pct >= 83) return 'B'
-  if (pct >= 80) return 'B-'
-  if (pct >= 77) return 'C+'
-  if (pct >= 73) return 'C'
-  if (pct >= 70) return 'C-'
-  if (pct >= 60) return 'D'
-  return 'F'
-}
-
-function getGradeColor(pct: number): string {
-  if (pct >= 90) return '#16a34a'
-  if (pct >= 80) return '#7C3AED'
-  if (pct >= 70) return '#d97706'
-  return '#dc2626'
 }
 
 function getGPA(pct: number): number {
@@ -135,7 +116,7 @@ export default function DashboardScreen({ navigation }: any) {
       {avgGrade !== null && (
         <View style={styles.avgBanner}>
           <Text style={styles.avgLabel}>Semester average</Text>
-          <Text style={[styles.avgValue, { color: getGradeColor(avgGrade) }]}>
+          <Text style={[styles.avgValue, { color: getGradeTextColor(avgGrade) }]}>
             {avgGrade}% · {getLetterGrade(avgGrade)}
           </Text>
         </View>
@@ -174,7 +155,7 @@ export default function DashboardScreen({ navigation }: any) {
               </View>
               {course.current_grade !== null ? (
                 <View style={styles.courseGradeWrap}>
-                  <Text style={[styles.courseGrade, { color: getGradeColor(course.current_grade) }]}>
+                  <Text style={[styles.courseGrade, { color: getGradeTextColor(course.current_grade) }]}>
                     {Math.round(course.current_grade)}%
                   </Text>
                   <Text style={styles.courseLetter}>{getLetterGrade(course.current_grade)}</Text>

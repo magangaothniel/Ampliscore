@@ -4,6 +4,7 @@ import {
   TextInput, Modal, Alert, ActivityIndicator
 } from 'react-native'
 import { supabase } from '../lib/supabase'
+import { getLetterGrade, getGradeTextColor, getGradeBarColor } from '../lib/grades'
 
 type Course = {
   id: string
@@ -12,26 +13,6 @@ type Course = {
   professor: string
   credits: number
   current_grade: number | null
-}
-
-function getLetterGrade(pct: number): string {
-  if (pct >= 93) return 'A'
-  if (pct >= 90) return 'A-'
-  if (pct >= 87) return 'B+'
-  if (pct >= 83) return 'B'
-  if (pct >= 80) return 'B-'
-  if (pct >= 77) return 'C+'
-  if (pct >= 73) return 'C'
-  if (pct >= 70) return 'C-'
-  if (pct >= 60) return 'D'
-  return 'F'
-}
-
-function getGradeColor(pct: number): string {
-  if (pct >= 90) return '#16a34a'
-  if (pct >= 80) return '#7C3AED'
-  if (pct >= 70) return '#d97706'
-  return '#dc2626'
 }
 
 export default function CoursesScreen({ navigation }: any) {
@@ -147,7 +128,7 @@ export default function CoursesScreen({ navigation }: any) {
                 </View>
                 {course.current_grade !== null ? (
                   <View style={styles.gradeWrap}>
-                    <Text style={[styles.gradeText, { color: getGradeColor(course.current_grade) }]}>
+                    <Text style={[styles.gradeText, { color: getGradeTextColor(course.current_grade) }]}>
                       {Math.round(course.current_grade)}%
                     </Text>
                     <Text style={styles.letterGrade}>{getLetterGrade(course.current_grade)}</Text>
@@ -163,7 +144,7 @@ export default function CoursesScreen({ navigation }: any) {
                   styles.progressBar,
                   {
                     width: course.current_grade !== null ? `${Math.min(course.current_grade, 100)}%` : '0%',
-                    backgroundColor: course.current_grade !== null ? getGradeColor(course.current_grade) : '#E9D5FF'
+                    backgroundColor: course.current_grade !== null ? getGradeBarColor(course.current_grade) : '#E9D5FF'
                   }
                 ]} />
               </View>
