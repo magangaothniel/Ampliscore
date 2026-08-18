@@ -184,7 +184,7 @@ export default function DashboardScreen({ navigation }: any) {
             <TouchableOpacity
               key={course.id}
               style={styles.courseCard}
-              onPress={() => navigation.navigate('Courses')}
+              onPress={() => navigation.navigate('CourseDetail', { courseId: course.id })}
             >
               <View style={styles.courseLeft}>
                 <View style={styles.courseDot} />

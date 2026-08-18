@@ -166,6 +166,7 @@ export default function CoursesScreen({ navigation }: any) {
             <TouchableOpacity
               key={course.id}
               style={styles.courseCard}
+              onPress={() => navigation.navigate('CourseDetail', { courseId: course.id })}
               onLongPress={() => deleteCourse(course.id)}
             >
               <View style={styles.courseTop}>

@@ -15,6 +15,7 @@ import CoursesScreen from './app/CoursesScreen'
 import GPAPlannerScreen from './app/GPAPlannerScreen'
 import ProfessorsScreen from './app/ProfessorsScreen'
 import ProfileScreen from './app/ProfileScreen'
+import CourseDetailScreen from './app/CourseDetailScreen'
 import LoadingScreen from './app/LoadingScreen'
 
 SplashScreen.preventAutoHideAsync()
@@ -113,7 +114,14 @@ export default function App() {
       <StatusBar style="dark" />
       <Stack.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
         {session ? (
-          <Stack.Screen name="Main" component={MainTabs} />
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen
+              name="CourseDetail"
+              component={CourseDetailScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
