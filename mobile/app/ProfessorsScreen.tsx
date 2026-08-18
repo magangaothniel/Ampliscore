@@ -69,9 +69,13 @@ export default function ProfessorsScreen() {
 
   async function fetchRatings() {
     setLoading(true)
+    // Web hides moderated reviews client-side; do it in the query here so
+    // hidden rows never reach the device at all. Without this, reports get
+    // actioned on web and the review still shows on mobile.
     const { data, error } = await supabase
       .from('professor_ratings')
       .select('*')
+      .or('hidden.is.null,hidden.eq.false')
       .order('created_at', { ascending: false })
     if (error) console.error('RATINGS ERROR:', error.message)
     setRatings(data ?? [])
