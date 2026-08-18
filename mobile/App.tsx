@@ -16,6 +16,7 @@ import GPAPlannerScreen from './app/GPAPlannerScreen'
 import ProfessorsScreen from './app/ProfessorsScreen'
 import ProfileScreen from './app/ProfileScreen'
 import CourseDetailScreen from './app/CourseDetailScreen'
+import SupportScreen from './app/SupportScreen'
 import LoadingScreen from './app/LoadingScreen'
 
 SplashScreen.preventAutoHideAsync()
@@ -119,6 +120,11 @@ export default function App() {
             <Stack.Screen
               name="CourseDetail"
               component={CourseDetailScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="Support"
+              component={SupportScreen}
               options={{ animation: 'slide_from_right' }}
             />
           </>

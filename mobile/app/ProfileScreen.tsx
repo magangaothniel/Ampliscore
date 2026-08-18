@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image, Linking, Share } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image, Share } from 'react-native'
 import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
@@ -12,7 +12,7 @@ type Profile = {
   referral_count: number
 }
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }: any) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
@@ -48,7 +48,7 @@ export default function ProfileScreen() {
   }
 
   function openSupport() {
-    Linking.openURL('mailto:magangaothniel@gmail.com?subject=Ampliscore%20support')
+    navigation.navigate('Support')
   }
 
   const shortCode = profile?.referral_code ? profile.referral_code.slice(0, 8).toUpperCase() : '—'
