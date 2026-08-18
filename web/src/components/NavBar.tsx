@@ -110,6 +110,9 @@ export default function NavBar({ profile }: { profile: any }) {
                   <Link href="/settings" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-900 hover:bg-purple-50">
                      Settings
                   </Link>
+                  <Link href="/help" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-900 hover:bg-purple-50">
+                     Help &amp; support
+                  </Link>
                   {!profile?.is_pro && (
                     <Link href="/upgrade" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-600 font-medium hover:bg-purple-50">
                        Upgrade to Pro
@@ -156,6 +159,9 @@ export default function NavBar({ profile }: { profile: any }) {
             </Link>
             <Link href="/settings" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-ink-900 hover:bg-purple-50">
                Settings
+            </Link>
+            <Link href="/help" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-ink-900 hover:bg-purple-50">
+               Help &amp; support
             </Link>
             <button onClick={handleSignOut} className="flex items-center w-full px-2 py-2.5 rounded-xl text-sm text-bad hover:bg-red-50">
                Sign out
