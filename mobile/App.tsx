@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { StatusBar } from 'expo-status-bar'
 import { Session } from '@supabase/supabase-js'
 import * as SplashScreen from 'expo-splash-screen'
+import * as Updates from 'expo-updates'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from './lib/supabase'
 import LoginScreen from './app/LoginScreen'
@@ -67,6 +68,32 @@ function MainTabs() {
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Updates land on the next launch by default, which means every change needs
+  // two force quits to show up. Check on mount instead and reload straight
+  // away, but only inside a short window after startup so a download that
+  // finishes late doesn't yank the app out from under someone mid-task.
+  useEffect(() => {
+    const startedAt = Date.now()
+    const AUTO_RELOAD_WINDOW_MS = 10000
+
+    async function syncUpdates() {
+      if (__DEV__ || !Updates.isEnabled) return
+      try {
+        const check = await Updates.checkForUpdateAsync()
+        if (!check.isAvailable) return
+        await Updates.fetchUpdateAsync()
+        if (Date.now() - startedAt < AUTO_RELOAD_WINDOW_MS) {
+          await Updates.reloadAsync()
+        }
+      } catch {
+        // Offline, or the update server is unreachable. Keep running the
+        // bundle we already have rather than blocking startup.
+      }
+    }
+
+    syncUpdates()
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
