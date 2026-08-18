@@ -2,6 +2,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
+import * as SecureStore from 'expo-secure-store'
+import OnboardingTour from './OnboardingTour'
+import ProUpsellModal from './ProUpsellModal'
 
 type Course = {
   id: string
@@ -15,7 +18,11 @@ type Course = {
 type Profile = {
   full_name: string | null
   is_pro: boolean
+  has_taken_tour: boolean | null
 }
+
+const UPSELL_SEEN_KEY = 'pro_upsell_last_shown'
+const UPSELL_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000
 
 function getGPA(pct: number): number {
   if (pct >= 93) return 4.0
@@ -34,6 +41,8 @@ export default function DashboardScreen({ navigation }: any) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
+  const [showTour, setShowTour] = useState(false)
+  const [showUpsell, setShowUpsell] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -45,19 +54,49 @@ export default function DashboardScreen({ navigation }: any) {
       if (!user) return
 
       const [profileRes, coursesRes] = await Promise.all([
-        supabase.from('profiles').select('full_name, is_pro').eq('id', user.id).single(),
+        supabase.from('profiles').select('full_name, is_pro, has_taken_tour').eq('id', user.id).single(),
         supabase.from('courses').select('id, name, code, professor, credits, current_grade').eq('user_id', user.id).order('created_at', { ascending: false })
       ])
 
       if (profileRes.error) console.error('PROFILE ERROR:', profileRes.error.message)
       if (coursesRes.error) console.error('COURSES ERROR:', coursesRes.error.message)
 
-      if (profileRes.data) setProfile(profileRes.data)
+      if (profileRes.data) {
+        setProfile(profileRes.data)
+        if (!profileRes.data.has_taken_tour) setShowTour(true)
+      }
       setCourses(coursesRes.data ?? [])
     } catch (e) {
       console.error(e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // The tour runs once. Finishing or skipping it both count, so someone who
+  // skips isn't asked again every launch.
+  async function finishTour() {
+    setShowTour(false)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) await supabase.from('profiles').update({ has_taken_tour: true }).eq('id', user.id)
+    } catch (e) {
+      console.error('TOUR FLAG ERROR:', e)
+    }
+    maybeShowUpsell()
+  }
+
+  // Soft prompt only. Pro users never see it, and it's capped to once a week
+  // so dismissing it actually sticks.
+  async function maybeShowUpsell() {
+    if (profile?.is_pro) return
+    try {
+      const last = await SecureStore.getItemAsync(UPSELL_SEEN_KEY)
+      if (last && Date.now() - Number(last) < UPSELL_COOLDOWN_MS) return
+      await SecureStore.setItemAsync(UPSELL_SEEN_KEY, String(Date.now()))
+      setShowUpsell(true)
+    } catch (e) {
+      // SecureStore unavailable; skip rather than nag on every open.
     }
   }
 
@@ -84,6 +123,7 @@ export default function DashboardScreen({ navigation }: any) {
   }
 
   return (
+    <>
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
@@ -178,6 +218,10 @@ export default function DashboardScreen({ navigation }: any) {
 
       <View style={{ height: 40 }} />
     </ScrollView>
+
+    <OnboardingTour visible={showTour} onDone={finishTour} />
+    <ProUpsellModal visible={showUpsell} reason="intro" onClose={() => setShowUpsell(false)} />
+    </>
   )
 }
 
