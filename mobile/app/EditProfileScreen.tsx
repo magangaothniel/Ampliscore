@@ -8,7 +8,16 @@ import { Ionicons } from '@expo/vector-icons'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../lib/supabase'
 
-const YEARS = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate']
+// year_of_study is an integer column, 1 through 5. Store the number, show the
+// label. Sending the label is what produced "invalid input syntax for type
+// integer".
+const YEARS: { value: number; label: string }[] = [
+  { value: 1, label: 'Freshman' },
+  { value: 2, label: 'Sophomore' },
+  { value: 3, label: 'Junior' },
+  { value: 4, label: 'Senior' },
+  { value: 5, label: 'Graduate' },
+]
 
 export default function EditProfileScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true)
@@ -19,7 +28,7 @@ export default function EditProfileScreen({ navigation }: any) {
   const [fullName, setFullName] = useState('')
   const [university, setUniversity] = useState('')
   const [major, setMajor] = useState('')
-  const [year, setYear] = useState('')
+  const [year, setYear] = useState<number | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -40,7 +49,7 @@ export default function EditProfileScreen({ navigation }: any) {
         setFullName(data.full_name ?? '')
         setUniversity(data.university ?? '')
         setMajor(data.major ?? '')
-        setYear(data.year_of_study ?? '')
+        setYear(data.year_of_study ?? null)
         setAvatarUrl(data.avatar_url ?? null)
       }
     } finally {
@@ -59,7 +68,7 @@ export default function EditProfileScreen({ navigation }: any) {
         full_name: fullName.trim(),
         university: university.trim(),
         major: major.trim(),
-        year_of_study: year || null,
+        year_of_study: year,
       }).eq('id', user.id)
 
       if (error) return Alert.alert('Error', error.message)
@@ -119,7 +128,9 @@ export default function EditProfileScreen({ navigation }: any) {
         <View style={[styles.input, styles.readonly]}>
           <Text style={styles.readonlyText}>{email}</Text>
         </View>
-        <Text style={styles.hint}>Email is tied to how you sign in and can't be changed here.</Text>
+        <Text style={styles.hint}>
+          Email is tied to how you sign in. To change it, visit www.ampliscore.app on the web.
+        </Text>
 
         <Text style={styles.label}>University</Text>
         <TextInput style={styles.input} value={university} onChangeText={setUniversity} placeholder="Kansas State University" placeholderTextColor="#C4B5FD" />
@@ -131,11 +142,11 @@ export default function EditProfileScreen({ navigation }: any) {
         <View style={styles.chipWrap}>
           {YEARS.map(y => (
             <TouchableOpacity
-              key={y}
-              style={[styles.chip, year === y && styles.chipActive]}
-              onPress={() => setYear(year === y ? '' : y)}
+              key={y.value}
+              style={[styles.chip, year === y.value && styles.chipActive]}
+              onPress={() => setYear(year === y.value ? null : y.value)}
             >
-              <Text style={[styles.chipText, year === y && styles.chipTextActive]}>{y}</Text>
+              <Text style={[styles.chipText, year === y.value && styles.chipTextActive]}>{y.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
