@@ -78,12 +78,25 @@ export async function GET(req: NextRequest) {
     .order("last_seen_at", { ascending: false })
     .limit(20);
 
-  const { data: openReports } = await db
+  const { data: rawReports } = await db
     .from("rating_reports")
     .select("*")
     .eq("status", "open")
     .order("created_at", { ascending: false })
     .limit(20);
+
+  // Attach the reported review itself. Done as a second query rather than a
+  // join so this doesn't depend on a foreign key existing between the tables.
+  let openReports = rawReports ?? [];
+  if (openReports.length > 0) {
+    const ids = openReports.map((r: any) => r.rating_id).filter(Boolean);
+    const { data: rated } = await db
+      .from("professor_ratings")
+      .select("id, professor_name, university, course_code, rating, difficulty, review, success_tips, hidden, created_at")
+      .in("id", ids);
+    const byId = new Map((rated ?? []).map((r: any) => [r.id, r]));
+    openReports = openReports.map((r: any) => ({ ...r, rating: byId.get(r.rating_id) ?? null }));
+  }
 
   const { data: support } = await db
     .from("support_requests")

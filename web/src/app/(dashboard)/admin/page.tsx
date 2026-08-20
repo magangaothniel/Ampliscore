@@ -53,6 +53,17 @@ export default function AdminPage() {
   if (!data) return null;
 
   const s = data.stats;
+  const needsAction = data.support.length + data.openReports.length + data.openErrors.length;
+
+  // Jump to whichever list actually has something in it, most urgent first.
+  function jumpToAction() {
+    const target =
+      data.support.length > 0 ? "sec-support"
+      : data.openReports.length > 0 ? "sec-reports"
+      : data.openErrors.length > 0 ? "sec-errors"
+      : null;
+    if (target) document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
@@ -71,12 +82,14 @@ export default function AdminPage() {
         <Stat label="Ratings" value={s.ratings} />
         <Stat
           label="Needs action"
-          value={data.support.length + data.openReports.length + data.openErrors.length}
-          alert={data.support.length + data.openReports.length + data.openErrors.length > 0}
+          value={needsAction}
+          alert={needsAction > 0}
+          onClick={needsAction > 0 ? jumpToAction : undefined}
+          sub={needsAction > 0 ? "Tap to jump" : "All clear"}
         />
       </div>
 
-      <Section title={`Support requests (${data.support.length})`}>
+      <Section id="sec-support" title={`Support requests (${data.support.length})`}>
         {data.support.length === 0 ? (
           <Empty>Nothing waiting.</Empty>
         ) : (
@@ -105,16 +118,48 @@ export default function AdminPage() {
         )}
       </Section>
 
-      <Section title={`Rating reports (${data.openReports.length})`}>
+      <Section id="sec-reports" title={`Rating reports (${data.openReports.length})`}>
         {data.openReports.length === 0 ? (
           <Empty>No open reports.</Empty>
         ) : (
           data.openReports.map((r) => (
             <Row key={r.id}>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-ink-900">{r.reason}</p>
-                {r.details && <p className="text-sm text-ink-600 mt-1">{r.details}</p>}
-                <p className="text-xs text-ink-400 mt-1">rating {r.rating_id}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] font-bold uppercase tracking-wide bg-red-50 text-bad px-2 py-0.5 rounded">
+                    {r.reason}
+                  </span>
+                  {r.rating?.hidden && (
+                    <span className="text-[11px] text-ink-400">already hidden</span>
+                  )}
+                </div>
+                {r.details && <p className="text-sm text-ink-600 mt-2">{r.details}</p>}
+
+                {r.rating ? (
+                  <div className="mt-3 rounded-xl bg-purple-50/60 border border-purple-100 p-3">
+                    <p className="text-xs text-ink-400">
+                      {r.rating.professor_name}
+                      {r.rating.university ? ` · ${r.rating.university}` : ""}
+                      {r.rating.course_code ? ` · ${r.rating.course_code}` : ""}
+                    </p>
+                    <p className="text-xs text-ink-400 mt-0.5">
+                      {r.rating.rating}/5 · difficulty {r.rating.difficulty}/5
+                    </p>
+                    {r.rating.review && (
+                      <p className="text-sm text-ink-900 mt-2 whitespace-pre-wrap">{r.rating.review}</p>
+                    )}
+                    {r.rating.success_tips && (
+                      <p className="text-sm text-ink-600 mt-2 whitespace-pre-wrap">
+                        <span className="text-xs font-semibold text-purple-600 uppercase tracking-wide">Tips </span>
+                        {r.rating.success_tips}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink-400 mt-2">
+                    Review not found. It may have been deleted already.
+                  </p>
+                )}
               </div>
               <div className="flex flex-col gap-1.5">
                 <Action
@@ -133,7 +178,7 @@ export default function AdminPage() {
         )}
       </Section>
 
-      <Section title={`Open errors (${data.openErrors.length})`}>
+      <Section id="sec-errors" title={`Open errors (${data.openErrors.length})`}>
         {data.openErrors.length === 0 ? (
           <Empty>Nothing broken that we know of.</Empty>
         ) : (
@@ -173,25 +218,27 @@ export default function AdminPage() {
   );
 }
 
-function Stat({ label, value, sub, accent, alert }: any) {
+function Stat({ label, value, sub, accent, alert, onClick }: any) {
+  const Tag: any = onClick ? "button" : "div";
   return (
-    <div
-      className={`rounded-2xl border p-4 ${
+    <Tag
+      onClick={onClick}
+      className={`rounded-2xl border p-4 text-left w-full ${
         alert ? "border-amber-300 bg-amber-50" : "border-ink-200 bg-white"
-      }`}
+      } ${onClick ? "hover:border-amber-400 cursor-pointer transition-colors" : ""}`}
     >
       <p className="text-xs text-ink-400 uppercase tracking-wide">{label}</p>
       <p className={`font-display text-2xl font-bold mt-1 ${accent ? "text-purple-600" : "text-ink-900"}`}>
         {value ?? "—"}
       </p>
       {sub && <p className="text-xs text-ink-400 mt-0.5">{sub}</p>}
-    </div>
+    </Tag>
   );
 }
 
-function Section({ title, children }: any) {
+function Section({ title, children, id }: any) {
   return (
-    <section className="mt-10">
+    <section id={id} className="mt-10 scroll-mt-6">
       <h2 className="text-lg font-semibold text-ink-900 mb-3">{title}</h2>
       <div className="rounded-2xl border border-ink-200 bg-white divide-y divide-purple-50 overflow-hidden">
         {children}
