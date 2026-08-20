@@ -33,6 +33,8 @@ const NAV_LINKS = [
   { label: "GPA Planner", href: "/gpa", id: "tour-gpa" },
 ];
 
+const ADMIN_LINK = { label: "Admin", href: "/admin", id: "nav-admin" };
+
 function Avatar({ profile, size = "sm" }: { profile: any; size?: "sm" | "lg" }) {
   const dim = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
   if (profile?.avatar_url) {
@@ -46,6 +48,7 @@ function Avatar({ profile, size = "sm" }: { profile: any; size?: "sm" | "lg" }) 
 }
 
 export default function NavBar({ profile }: { profile: any }) {
+  const links = profile?.is_admin ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
@@ -77,7 +80,7 @@ export default function NavBar({ profile }: { profile: any }) {
           <span className="text-lg font-medium text-ink-900">ampli<span className="text-purple-600">score</span></span>
         </Link>
         <div className="hidden md:flex items-center gap-6">
-          {NAV_LINKS.map(link => (
+          {links.map(link => (
             <Link key={link.href} href={link.href} id={link.id}
               className={`text-sm font-medium transition-colors ${pathname === link.href ? "text-purple-600" : "text-ink-600 hover:text-purple-600"}`}>
               {link.label}
@@ -113,11 +116,6 @@ export default function NavBar({ profile }: { profile: any }) {
                   <Link href="/help" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-900 hover:bg-purple-50">
                      Help &amp; support
                   </Link>
-                  {profile?.is_admin && (
-                    <Link href="/admin" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-600 font-medium hover:bg-purple-50">
-                       Admin
-                    </Link>
-                  )}
                   {!profile?.is_pro && (
                     <Link href="/upgrade" onClick={() => setDropdownOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-purple-600 font-medium hover:bg-purple-50">
                        Upgrade to Pro
@@ -148,7 +146,7 @@ export default function NavBar({ profile }: { profile: any }) {
               <div className="text-xs text-ink-400">{profile?.university || "No university set"}</div>
             </div>
           </div>
-          {NAV_LINKS.map(link => (
+          {links.map(link => (
             <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)}
               className={`flex items-center px-2 py-2.5 rounded-xl text-sm font-medium transition-colors ${pathname === link.href ? "bg-purple-50 text-purple-600" : "text-ink-900 hover:bg-purple-50"}`}>
               {link.label}
@@ -168,11 +166,6 @@ export default function NavBar({ profile }: { profile: any }) {
             <Link href="/help" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-ink-900 hover:bg-purple-50">
                Help &amp; support
             </Link>
-            {profile?.is_admin && (
-              <Link href="/admin" onClick={() => setMenuOpen(false)} className="flex items-center px-2 py-2.5 rounded-xl text-sm text-purple-600 font-medium hover:bg-purple-50">
-                 Admin
-              </Link>
-            )}
             <button onClick={handleSignOut} className="flex items-center w-full px-2 py-2.5 rounded-xl text-sm text-bad hover:bg-red-50">
                Sign out
             </button>
