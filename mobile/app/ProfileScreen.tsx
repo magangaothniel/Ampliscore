@@ -112,17 +112,17 @@ export default function ProfileScreen({ navigation }: any) {
       )}
 
       <View style={styles.menu}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => openWeb('/profile')}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EditProfile')}>
           <Ionicons name="person-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Edit profile</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => openWeb('/settings')}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Notifications')}>
           <Ionicons name="notifications-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Notifications</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => openWeb('/settings')}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('PrivacySecurity')}>
           <Ionicons name="lock-closed-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Privacy & security</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />

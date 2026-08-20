@@ -1,13 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_build_placeholder");
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createServerSupabaseClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // Web sends cookies; the mobile app has none and sends a Bearer token
+    // instead. Accept either.
+    const authHeader = req.headers.get("authorization");
+    let user = null;
+
+    if (authHeader?.startsWith("Bearer ")) {
+      const anon = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+      const { data } = await anon.auth.getUser(authHeader.slice(7));
+      user = data.user;
+    } else {
+      const supabase = await createServerSupabaseClient();
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    }
+
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // Look up customer by email directly — works for ALL users

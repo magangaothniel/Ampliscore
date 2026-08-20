@@ -19,6 +19,9 @@ import CourseDetailScreen from './app/CourseDetailScreen'
 import SupportScreen from './app/SupportScreen'
 import CalendarScreen from './app/CalendarScreen'
 import AdminScreen from './app/AdminScreen'
+import EditProfileScreen from './app/EditProfileScreen'
+import NotificationsScreen from './app/NotificationsScreen'
+import PrivacySecurityScreen from './app/PrivacySecurityScreen'
 import LoadingScreen from './app/LoadingScreen'
 
 SplashScreen.preventAutoHideAsync()
@@ -149,6 +152,21 @@ export default function App() {
             <Stack.Screen
               name="Support"
               component={SupportScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="PrivacySecurity"
+              component={PrivacySecurityScreen}
               options={{ animation: 'slide_from_right' }}
             />
           </>
