@@ -17,6 +17,8 @@ import ProfessorsScreen from './app/ProfessorsScreen'
 import ProfileScreen from './app/ProfileScreen'
 import CourseDetailScreen from './app/CourseDetailScreen'
 import SupportScreen from './app/SupportScreen'
+import CalendarScreen from './app/CalendarScreen'
+import AdminScreen from './app/AdminScreen'
 import LoadingScreen from './app/LoadingScreen'
 
 SplashScreen.preventAutoHideAsync()
@@ -27,6 +29,24 @@ const Tab = createBottomTabNavigator()
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name']
 
 function MainTabs() {
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        const { data } = await supabase
+          .from('profiles').select('is_admin').eq('id', user.id).single()
+        if (active) setIsAdmin(!!data?.is_admin)
+      } catch {
+        // Not an admin, or offline. Either way the tab stays hidden.
+      }
+    })()
+    return () => { active = false }
+  }, [])
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -36,8 +56,10 @@ function MainTabs() {
             Dashboard: { active: 'grid', inactive: 'grid-outline' },
             Courses: { active: 'book', inactive: 'book-outline' },
             Professors: { active: 'star', inactive: 'star-outline' },
+            Calendar: { active: 'calendar', inactive: 'calendar-outline' },
             'GPA Planner': { active: 'trending-up', inactive: 'trending-up-outline' },
             Profile: { active: 'person', inactive: 'person-outline' },
+            Admin: { active: 'shield-checkmark', inactive: 'shield-checkmark-outline' },
           }
           const icon = icons[route.name]
           return <Ionicons name={focused ? icon.active : icon.inactive} size={22} color={color} />
@@ -61,8 +83,10 @@ function MainTabs() {
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Courses" component={CoursesScreen} />
       <Tab.Screen name="Professors" component={ProfessorsScreen} />
+      <Tab.Screen name="Calendar" component={CalendarScreen} />
       <Tab.Screen name="GPA Planner" component={GPAPlannerScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
+      {isAdmin && <Tab.Screen name="Admin" component={AdminScreen} />}
     </Tab.Navigator>
   )
 }
