@@ -52,15 +52,16 @@ export default function AdminPage() {
   if (denied) return <div className="max-w-5xl mx-auto px-4 py-16 text-ink-600">Not authorised.</div>;
   if (!data) return null;
 
-  const s = data.stats;
-  const needsAction = data.support.length + data.openReports.length + data.openErrors.length;
+  const d = data;
+  const s = d.stats;
+  const needsAction = d.support.length + d.openReports.length + d.openErrors.length;
 
   // Jump to whichever list actually has something in it, most urgent first.
   function jumpToAction() {
     const target =
-      data.support.length > 0 ? "sec-support"
-      : data.openReports.length > 0 ? "sec-reports"
-      : data.openErrors.length > 0 ? "sec-errors"
+      d.support.length > 0 ? "sec-support"
+      : d.openReports.length > 0 ? "sec-reports"
+      : d.openErrors.length > 0 ? "sec-errors"
       : null;
     if (target) document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
@@ -89,11 +90,11 @@ export default function AdminPage() {
         />
       </div>
 
-      <Section id="sec-support" title={`Support requests (${data.support.length})`}>
-        {data.support.length === 0 ? (
+      <Section id="sec-support" title={`Support requests (${d.support.length})`}>
+        {d.support.length === 0 ? (
           <Empty>Nothing waiting.</Empty>
         ) : (
-          data.support.map((r) => (
+          d.support.map((r) => (
             <Row key={r.id}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -118,11 +119,11 @@ export default function AdminPage() {
         )}
       </Section>
 
-      <Section id="sec-reports" title={`Rating reports (${data.openReports.length})`}>
-        {data.openReports.length === 0 ? (
+      <Section id="sec-reports" title={`Rating reports (${d.openReports.length})`}>
+        {d.openReports.length === 0 ? (
           <Empty>No open reports.</Empty>
         ) : (
-          data.openReports.map((r) => (
+          d.openReports.map((r) => (
             <Row key={r.id}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -178,11 +179,11 @@ export default function AdminPage() {
         )}
       </Section>
 
-      <Section id="sec-errors" title={`Open errors (${data.openErrors.length})`}>
-        {data.openErrors.length === 0 ? (
+      <Section id="sec-errors" title={`Open errors (${d.openErrors.length})`}>
+        {d.openErrors.length === 0 ? (
           <Empty>Nothing broken that we know of.</Empty>
         ) : (
-          data.openErrors.map((e) => (
+          d.openErrors.map((e) => (
             <Row key={e.id}>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-ink-900 break-words">{e.message}</p>
@@ -200,7 +201,7 @@ export default function AdminPage() {
       </Section>
 
       <Section title="Newest accounts">
-        {data.recentUsers.map((u) => (
+        {d.recentUsers.map((u) => (
           <Row key={u.id}>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-ink-900">{u.full_name || "No name"}</p>
