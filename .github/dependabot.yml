@@ -1,0 +1,47 @@
+version: 2
+
+updates:
+  # ---------------- web ----------------
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for patch and minor bumps instead of a dozen.
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # ---------------- mobile ----------------
+  - package-ecosystem: npm
+    directory: /mobile
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    ignore:
+      # The expo package pins the whole SDK. Bumping it on its own leaves
+      # react-native and every expo-* module on the previous SDK, which is
+      # what broke the iOS build (expo-modules-jsi against RN 0.81 produced
+      # a wall of Swift errors). SDK upgrades have to be done deliberately
+      # with `expo install --fix`, never as a lone dependency bump.
+      - dependency-name: expo
+
+      # These are versioned by the SDK, not independently. Same reasoning.
+      - dependency-name: react-native
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: expo-*
+
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # ---------------- github actions ----------------
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
