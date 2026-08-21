@@ -10,6 +10,13 @@ import { supabase } from '../lib/supabase'
 
 const WEB = 'https://ampliscore.app'
 
+type BillingDisclosure = {
+  hasActiveSubscription: boolean
+  amount: string | null
+  interval: string | null
+  unknown: boolean
+}
+
 export default function PrivacySecurityScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true)
   const [isPro, setIsPro] = useState(false)
@@ -24,6 +31,7 @@ export default function PrivacySecurityScreen({ navigation }: any) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleteText, setDeleteText] = useState('')
   const [deleting, setDeleting] = useState(false)
+  const [billing, setBilling] = useState<BillingDisclosure | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -89,6 +97,26 @@ export default function PrivacySecurityScreen({ navigation }: any) {
       { text: 'Sign out', style: 'destructive', onPress: () => supabase.auth.signOut() },
     ])
   }
+
+  // `is_pro` is not the same as paying. Beta testers are granted Pro without a
+  // subscription, so asking Stripe is the only way to avoid warning them about
+  // a charge that doesn't exist.
+  useEffect(() => {
+    if (!deleteOpen) return
+    setBilling(null)
+    ;(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) return
+        const res = await fetch(`${WEB}/api/account/delete`, {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        })
+        if (res.ok) setBilling(await res.json())
+      } catch {
+        // Leave it null and fall back to wording that claims nothing.
+      }
+    })()
+  }, [deleteOpen])
 
   async function deleteAccount() {
     if (deleteText !== 'DELETE') return
@@ -255,10 +283,19 @@ export default function PrivacySecurityScreen({ navigation }: any) {
               This permanently deletes your courses, assignments, grades, professor
               ratings, and profile. It cannot be undone.
             </Text>
-            {isPro ? (
+            {billing?.hasActiveSubscription ? (
               <Text style={styles.warnText}>
-                You have an active subscription. Cancel it first, or you may keep
-                being billed after the account is gone.
+                Your Pro subscription will be cancelled. You are paying $
+                {billing.amount} per {billing.interval === 'year' ? 'year' : 'month'}.
+                Deleting your account cancels it immediately, so you will not be
+                charged again. The rest of the period you have already paid for is
+                not refunded.
+              </Text>
+            ) : null}
+            {billing?.unknown ? (
+              <Text style={styles.warnText}>
+                We could not reach Stripe to check your billing status. If you have
+                Pro, it will still be cancelled as part of deleting your account.
               </Text>
             ) : null}
             <Text style={styles.label}>Type DELETE to confirm</Text>

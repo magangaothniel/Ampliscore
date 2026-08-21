@@ -1,7 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-
-const PRO_PRICE = 4.99;
+import { getStripeRevenue } from "@/lib/stripeRevenue";
 
 function admin() {
   return createClient(
@@ -111,10 +110,14 @@ export async function GET(req: NextRequest) {
     .order("created_at", { ascending: false })
     .limit(10);
 
+  // `pro` is how many accounts have Pro access, including comped beta testers.
+  // `subscribers` is how many are actually paying. They are not the same number
+  // and the dashboard should never conflate them again.
+  const { mrr, subscribers } = await getStripeRevenue();
+
   return NextResponse.json({
     stats: {
-      users, newUsers, pro,
-      mrr: (pro * PRO_PRICE).toFixed(2),
+      users, newUsers, pro, subscribers, mrr,
       courses, assignments, ratings, betaTesters, waitlist,
     },
     openErrors: openErrors ?? [],

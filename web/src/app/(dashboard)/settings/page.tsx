@@ -3,15 +3,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import DeleteAccountModal from "@/components/DeleteAccountModal";
 
 export default function SettingsPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
@@ -39,24 +38,6 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
-  const handleDeleteAccount = async () => {
-    if (deleteConfirm !== "DELETE") return;
-    setDeleting(true);
-    const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { setDeleting(false); return; }
-    const res = await fetch("/api/account/delete", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    });
-    if (res.ok) {
-      await supabase.auth.signOut();
-      router.push("/");
-    } else {
-      setDeleting(false);
-      alert("Account deletion failed. Please try again or contact support.");
-    }
-  };
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -176,29 +157,10 @@ export default function SettingsPage() {
         <p>© 2026 Ampliscore · Not affiliated with any university</p>
       </div>
 
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-            <h2 className="text-lg font-medium text-ink-900 mb-2">Close your account?</h2>
-            <p className="text-sm text-ink-600 mb-4">This will permanently delete your courses, grades, and ratings. This cannot be undone.</p>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-ink-900 mb-1.5">Type <span className="font-mono text-brand-600">DELETE</span> to confirm</label>
-              <input type="text" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-ink-200 text-sm focus:outline-none focus:border-brand-600 focus:ring-3 focus:ring-brand-100" />
-            </div>
-            <div className="flex gap-3">
-              <button onClick={() => { setShowDeleteModal(false); setDeleteConfirm(""); }}
-                className="flex-1 border border-ink-200 text-ink-900 h-11 rounded-lg text-sm font-medium hover:bg-brand-50">
-                Cancel
-              </button>
-              <button onClick={handleDeleteAccount} disabled={deleteConfirm !== "DELETE" || deleting}
-                className="flex-1 bg-brand-600 text-white h-11 rounded-lg text-sm font-medium hover:bg-brand-700 disabled:opacity-40 transition-colors">
-                {deleting ? "Closing..." : "Close account"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteAccountModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </main>
   );
 }

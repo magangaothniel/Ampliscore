@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { getStripeRevenue } from "@/lib/stripeRevenue";
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
 const ALERT_TO = "magangaothniel@gmail.com";
@@ -54,7 +55,7 @@ export async function GET(req: NextRequest) {
   const { count: proCount } = await db
     .from("profiles").select("*", { count: "exact", head: true }).eq("is_pro", true);
   const pro = proCount ?? 0;
-  const mrr = (pro * 4.99).toFixed(2);
+  const { mrr, subscribers } = await getStripeRevenue();
 
   // ---- usage ----
   const { data: predictionRows } = await db.from("profiles").select("ai_predictions_used");
@@ -94,8 +95,11 @@ export async function GET(req: NextRequest) {
   });
   checks.push({
     label: "Paying subscribers",
-    ok: pro > 0,
-    detail: `${pro} on Pro`,
+    ok: (subscribers ?? 0) > 0,
+    detail:
+      subscribers === null
+        ? "Stripe unavailable"
+        : `${subscribers} paying, ${pro} with Pro access`,
   });
 
   const delta = (newUsers ?? 0) - Math.max(0, (prevUsers ?? 0) - (newUsers ?? 0));
@@ -135,7 +139,7 @@ export async function GET(req: NextRequest) {
 
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;"><tr>
         ${statCard("Users", users ?? "?", `${newUsers ?? 0} new, ${arrow}`)}
-        ${statCard("Pro", pro, `$${mrr} MRR`)}
+        ${statCard("Pro", pro, mrr === null ? "MRR unavailable" : `${subscribers} paying &middot; $${mrr} MRR`)}
         ${statCard("Beta apps", betaTotal ?? "?")}
       </tr></table>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;"><tr>
@@ -177,7 +181,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    users, newUsers, pro, mrr, betaTotal, courses, assignments, ratings,
+    users, newUsers, pro, subscribers, mrr, betaTotal, courses, assignments, ratings,
     openErrors: errors?.length ?? 0, openReports: openReports ?? 0,
   });
 }

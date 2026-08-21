@@ -75,7 +75,12 @@ export default function AdminPage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
         <Stat label="Users" value={s.users} sub={`${s.newUsers} new this week`} />
-        <Stat label="Pro" value={s.pro} sub={`$${s.mrr} MRR`} accent />
+        <Stat
+          label="Pro"
+          value={s.pro}
+          sub={s.mrr === null ? "MRR unavailable" : `${s.subscribers} paying · $${s.mrr} MRR`}
+          accent
+        />
         <Stat label="Waitlist" value={s.waitlist} />
         <Stat label="Beta testers" value={s.betaTesters} />
         <Stat label="Courses" value={s.courses} />
