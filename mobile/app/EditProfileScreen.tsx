@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../lib/supabase'
+import { AVATAR_COLORS, avatarColor, avatarInitials } from '../lib/avatar'
 
 // year_of_study is an integer column, 1 through 5. Store the number, show the
 // label. Sending the label is what produced "invalid input syntax for type
@@ -23,6 +24,7 @@ export default function EditProfileScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [avatarHue, setAvatarHue] = useState<string | null>(null)
   const [email, setEmail] = useState('')
 
   const [fullName, setFullName] = useState('')
@@ -40,7 +42,7 @@ export default function EditProfileScreen({ navigation }: any) {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, university, major, year_of_study, avatar_url')
+        .select('full_name, university, major, year_of_study, avatar_url, avatar_color')
         .eq('id', user.id)
         .single()
 
@@ -51,6 +53,7 @@ export default function EditProfileScreen({ navigation }: any) {
         setMajor(data.major ?? '')
         setYear(data.year_of_study ?? null)
         setAvatarUrl(data.avatar_url ?? null)
+        setAvatarHue((data as any).avatar_color ?? null)
       }
     } finally {
       setLoading(false)
@@ -69,6 +72,7 @@ export default function EditProfileScreen({ navigation }: any) {
         university: university.trim(),
         major: major.trim(),
         year_of_study: year,
+        avatar_color: avatarHue,
       }).eq('id', user.id)
 
       if (error) return Alert.alert('Error', error.message)
@@ -105,9 +109,9 @@ export default function EditProfileScreen({ navigation }: any) {
           {avatarUrl ? (
             <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
           ) : (
-            <View style={styles.avatar}>
+            <View style={[styles.avatar, { backgroundColor: avatarColor({ avatar_color: avatarHue }) }]}>
               <Text style={styles.avatarText}>
-                {(fullName || email).charAt(0).toUpperCase()}
+                {avatarInitials({ full_name: fullName }, email)}
               </Text>
             </View>
           )}
@@ -120,6 +124,27 @@ export default function EditProfileScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
+
+        {!avatarUrl ? (
+          <View style={styles.hueCard}>
+            <Text style={styles.hueTitle}>Avatar colour</Text>
+            <View style={styles.hueRow}>
+              {AVATAR_COLORS.map(c => {
+                const active = avatarColor({ avatar_color: avatarHue }) === c
+                return (
+                  <TouchableOpacity
+                    key={c}
+                    onPress={() => setAvatarHue(c)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Use ${c} avatar`}
+                    style={[styles.hue, { backgroundColor: c }, active && styles.hueActive]}
+                  />
+                )
+              })}
+            </View>
+            <Text style={styles.avatarNote}>Saved when you tap Save.</Text>
+          </View>
+        ) : null}
 
         <Text style={styles.label}>Name</Text>
         <TextInput style={styles.input} value={fullName} onChangeText={setFullName} placeholder="Your name" placeholderTextColor="#C4B5FD" />
@@ -174,6 +199,11 @@ const styles = StyleSheet.create({
   avatarImage: { width: 62, height: 62, borderRadius: 31, backgroundColor: '#EDE9FE' },
   avatarText: { color: '#fff', fontSize: 24, fontWeight: '700' },
   avatarNote: { fontSize: 12.5, color: '#8E88A3', lineHeight: 18 },
+  hueCard: { backgroundColor: '#fff', borderRadius: 16, padding: 14, marginTop: 12 },
+  hueTitle: { fontSize: 14, fontWeight: '600', color: '#1E1333', marginBottom: 10 },
+  hueRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 8 },
+  hue: { width: 34, height: 34, borderRadius: 17 },
+  hueActive: { borderWidth: 3, borderColor: '#1E1333' },
   avatarLink: { fontSize: 13, color: '#7C3AED', fontWeight: '600', marginTop: 5 },
 
   label: { fontSize: 12, fontWeight: '700', color: '#7C3AED', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 7, marginTop: 20 },

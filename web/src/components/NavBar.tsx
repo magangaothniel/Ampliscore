@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { invalidateAll } from "@/lib/cache";
+import Avatar from "@/components/Avatar";
 
 function Logo() {
   return (
@@ -34,18 +35,6 @@ const NAV_LINKS = [
 ];
 
 const ADMIN_LINK = { label: "Admin", href: "/admin", id: "nav-admin" };
-
-function Avatar({ profile, size = "sm" }: { profile: any; size?: "sm" | "lg" }) {
-  const dim = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
-  if (profile?.avatar_url) {
-    return <img src={profile.avatar_url} alt="Profile" className={`${dim} rounded-full object-cover`} />;
-  }
-  return (
-    <div className={`${dim} rounded-full bg-purple-600 flex items-center justify-center text-white font-medium`}>
-      {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
-    </div>
-  );
-}
 
 export default function NavBar({ profile }: { profile: any }) {
   const links = profile?.is_admin ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
@@ -100,7 +89,7 @@ export default function NavBar({ profile }: { profile: any }) {
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-purple-100 shadow-lg z-50 overflow-hidden">
                 <div className="px-4 py-3 border-b border-purple-50 flex items-center gap-3">
-                  <Avatar profile={profile} size="lg" />
+                  <Avatar profile={profile} size={40} />
                   <div>
                     <div className="text-sm font-medium text-ink-900">{profile?.full_name || "Student"}</div>
                     <div className="text-xs text-ink-400 mt-0.5 truncate max-w-[140px]">{profile?.email}</div>
@@ -140,7 +129,7 @@ export default function NavBar({ profile }: { profile: any }) {
       {menuOpen && (
         <div className="md:hidden mt-4 pb-2 border-t border-purple-50 pt-4 space-y-1">
           <div className="flex items-center gap-3 px-2 pb-3 mb-2 border-b border-purple-50">
-            <Avatar profile={profile} size="lg" />
+            <Avatar profile={profile} size={40} />
             <div>
               <div className="text-sm font-medium text-ink-900">{profile?.full_name || "Student"}</div>
               <div className="text-xs text-ink-400">{profile?.university || "No university set"}</div>

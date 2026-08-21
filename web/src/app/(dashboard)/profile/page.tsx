@@ -3,6 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
+import Avatar from "@/components/Avatar";
+import { AVATAR_COLORS, avatarColor } from "@/lib/avatar";
 
 export default function ProfilePage() {
   const [referralCopied, setReferralCopied] = useState(false);
@@ -53,6 +55,38 @@ export default function ProfilePage() {
     await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", user.id);
     setProfile((prev: any) => ({ ...prev, avatar_url: avatarUrl }));
     setSuccessMsg("Profile picture updated!");
+    setUploadingAvatar(false);
+  };
+
+  const handleColorSelect = async (color: string) => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    setProfile((prev: any) => ({ ...prev, avatar_color: color }));
+    const { error } = await supabase.from("profiles").update({ avatar_color: color }).eq("id", user.id);
+    if (error) setErrorMsg("Could not save that colour. Please try again.");
+  };
+
+  const handleRemovePhoto = async () => {
+    setUploadingAvatar(true);
+    setErrorMsg(""); setSuccessMsg("");
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setUploadingAvatar(false); return; }
+
+    // The stored URL carries a cache-busting query string, so the object key is
+    // rebuilt from the path rather than parsed back out of the URL.
+    const { data: files } = await supabase.storage.from("avatars").list(user.id);
+    if (files?.length) {
+      await supabase.storage.from("avatars").remove(files.map(f => `${user.id}/${f.name}`));
+    }
+
+    const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+    if (error) setErrorMsg("Could not remove the photo. Please try again.");
+    else {
+      setProfile((prev: any) => ({ ...prev, avatar_url: null }));
+      setSuccessMsg("Photo removed.");
+    }
     setUploadingAvatar(false);
   };
 
@@ -111,13 +145,7 @@ export default function ProfilePage() {
         <h2 className="font-medium text-ink-900 mb-4">Profile picture</h2>
         <div className="flex items-center gap-5">
           <div className="relative">
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" className="w-20 h-20 rounded-full object-cover border-2 border-purple-100" />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-brand-600 flex items-center justify-center text-white text-2xl font-semibold">
-                {profile?.full_name?.charAt(0)?.toUpperCase() || "U"}
-              </div>
-            )}
+            <Avatar profile={profile} size={80} className="border-2 border-purple-100" />
             {uploadingAvatar && (
               <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -130,10 +158,37 @@ export default function ProfilePage() {
               className="px-4 py-2 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50">
               {uploadingAvatar ? "Uploading..." : "Upload photo"}
             </button>
+            {profile?.avatar_url && (
+              <button onClick={handleRemovePhoto} disabled={uploadingAvatar}
+                className="px-4 py-2 border border-ink-200 text-ink-900 text-sm font-medium rounded-lg hover:bg-brand-50 transition-colors disabled:opacity-50 ml-2">
+                Remove photo
+              </button>
+            )}
             <p className="text-xs text-ink-400">JPG, PNG or WebP · Max 2MB</p>
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleAvatarUpload} />
           </div>
         </div>
+
+        {!profile?.avatar_url && (
+          <div className="mt-5 pt-5 border-t border-ink-100">
+            <p className="text-sm font-medium text-ink-900 mb-3">Or pick a colour</p>
+            <div className="flex flex-wrap gap-2.5">
+              {AVATAR_COLORS.map(color => {
+                const active = avatarColor(profile) === color;
+                return (
+                  <button
+                    key={color}
+                    onClick={() => handleColorSelect(color)}
+                    aria-label={`Use ${color} avatar`}
+                    aria-pressed={active}
+                    style={{ backgroundColor: color }}
+                    className={`w-8 h-8 rounded-full transition-transform hover:scale-110 ${active ? "ring-2 ring-offset-2 ring-ink-900" : ""}`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Profile info */}

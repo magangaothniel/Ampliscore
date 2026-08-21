@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIn
 import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
+import { avatarColor, avatarInitials } from '../lib/avatar'
 
 type Profile = {
   full_name: string | null
@@ -74,10 +75,8 @@ export default function ProfileScreen({ navigation }: any) {
         {profile?.avatar_url ? (
           <Image source={{ uri: profile.avatar_url }} style={styles.avatarImage} />
         ) : (
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {profile?.full_name?.charAt(0)?.toUpperCase() || email.charAt(0).toUpperCase()}
-            </Text>
+          <View style={[styles.avatar, { backgroundColor: avatarColor(profile) }]}>
+            <Text style={styles.avatarText}>{avatarInitials(profile, email)}</Text>
           </View>
         )}
         <Text style={styles.name}>{profile?.full_name || 'Student'}</Text>
