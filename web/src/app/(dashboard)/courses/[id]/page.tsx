@@ -9,7 +9,10 @@ import AIGradePredictor from "@/components/AIGradePredictor";
 import { persistCourseGrade } from "@/lib/achievements";
 
 export default function CourseDetailPage() {
-  const { id } = useParams();
+  // useParams gives string | string[] | undefined. Every use here is a single
+  // dynamic segment, so narrow once rather than coercing at each call site.
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : (params.id ?? "");
   const router = useRouter();
   const [course, setCourse] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
