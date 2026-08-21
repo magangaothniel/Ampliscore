@@ -4,14 +4,18 @@ import { createClient } from "@/lib/supabase";
 import { cached, invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor, calculateGPA } from "@/lib/utils";
 import Link from "next/link";
+import { evaluateAchievements, touchWeeklyStreak, type Badge } from "@/lib/achievements";
+import BadgeShelf from "@/components/BadgeShelf";
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [courses, setCourses] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [newBadges, setNewBadges] = useState<Badge[]>([]);
 
   useEffect(() => {
+    // Newly earned badges, so the toast fires once rather than on every load.
     const fetchData = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -27,6 +31,16 @@ export default function DashboardPage() {
           (await supabase.from("grade_categories").select("*")).data),
       ]);
       setAssignments(assignData || []);
+
+      // Badges are a side quest. Wrapped so a failure can't stop the dashboard
+      // from rendering the thing the student actually came for.
+      try {
+        await touchWeeklyStreak(supabase, user.id);
+        const fresh = await evaluateAchievements(supabase, user.id);
+        if (fresh.length > 0) setNewBadges(fresh);
+      } catch {
+        // Silent by design.
+      }
       // Calculate real grades per course and update
       const updatedCourses = (coursesData || []).map((course: any) => {
         const cats = (catData || []).filter((c: any) => c.course_id === course.id);
@@ -255,6 +269,10 @@ export default function DashboardPage() {
               })}
             </div>
           )}
+        </div>
+
+        <div className="mt-6">
+          <BadgeShelf celebrate={newBadges} />
         </div>
       </div>
     </main>

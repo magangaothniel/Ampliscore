@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
 import * as SecureStore from 'expo-secure-store'
 import OnboardingTour from './OnboardingTour'
@@ -66,6 +67,22 @@ export default function DashboardScreen({ navigation }: any) {
         if (!profileRes.data.has_taken_tour) setShowTour(true)
       }
       setCourses(coursesRes.data ?? [])
+
+      // Badges are secondary. A failure here must never stop the dashboard.
+      try {
+        await touchWeeklyStreak(supabase, user.id)
+        const fresh = await evaluateAchievements(supabase, user.id)
+        if (fresh.length > 0) {
+          Alert.alert(
+            `${fresh[0].icon}  ${fresh[0].name}`,
+            fresh.length === 1
+              ? fresh[0].description
+              : `${fresh[0].description}\n\nPlus ${fresh.length - 1} more.`
+          )
+        }
+      } catch {
+        // Silent by design.
+      }
     } catch (e) {
       console.error(e)
     } finally {

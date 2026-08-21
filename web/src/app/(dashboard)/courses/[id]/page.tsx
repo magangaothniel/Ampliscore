@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import { invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor } from "@/lib/utils";
 import AIGradePredictor from "@/components/AIGradePredictor";
+import { persistCourseGrade } from "@/lib/achievements";
 
 export default function CourseDetailPage() {
   const { id } = useParams();
@@ -189,7 +190,7 @@ export default function CourseDetailPage() {
     invalidate("courses");
 
     const updatedGrade = calculateCourseGradeFrom([inserted, ...previous]);
-    await supabase.from("courses").update({ current_grade: updatedGrade }).eq("id", id);
+    await persistCourseGrade(supabase, id, updatedGrade);
   };
 
   const handleDeleteAssignment = async (assignId: string) => {
@@ -208,7 +209,7 @@ export default function CourseDetailPage() {
     invalidate("courses");
 
     const updatedGrade = calculateCourseGradeFrom(previous.filter((a) => a.id !== assignId));
-    await supabase.from("courses").update({ current_grade: updatedGrade }).eq("id", id);
+    await persistCourseGrade(supabase, id, updatedGrade);
   };
 
   const currentGrade = calculateCourseGrade();

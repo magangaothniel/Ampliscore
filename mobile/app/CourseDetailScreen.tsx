@@ -6,6 +6,7 @@ import {
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
+import { persistCourseGrade } from '../lib/achievements'
 import { getLetterGrade, getGradeTextColor, getGradeBarColor } from '../lib/grades'
 
 type Category = { id: string; course_id: string; name: string; weight: number }
@@ -106,8 +107,12 @@ export default function CourseDetailScreen({ route, navigation }: any) {
 
   async function persistGrade(rows: Assignment[], cats: Category[] = categories) {
     const updated = calcGrade(cats, rows)
-    const { error } = await supabase.from('courses').update({ current_grade: updated }).eq('id', courseId)
-    if (error) console.error('GRADE SAVE ERROR:', error.message)
+    // Also tracks lowest_grade, which the Comeback badge compares against.
+    try {
+      await persistCourseGrade(supabase, courseId, updated)
+    } catch (e: any) {
+      console.error('GRADE SAVE ERROR:', e?.message ?? e)
+    }
   }
 
   // ---------- categories ----------
