@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../lib/supabase'
+import { unregisterPush } from '../lib/notifications'
 
 const WEB = 'https://ampliscore.app'
 
@@ -94,7 +95,7 @@ export default function PrivacySecurityScreen({ navigation }: any) {
   function confirmSignOut() {
     Alert.alert('Sign out?', 'You can sign back in any time.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign out', style: 'destructive', onPress: () => supabase.auth.signOut() },
+      { text: 'Sign out', style: 'destructive', onPress: async () => { await unregisterPush(); supabase.auth.signOut() } },
     ])
   }
 

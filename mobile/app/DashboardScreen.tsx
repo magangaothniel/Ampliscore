@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
+import { askForPushAfterWin, unregisterPush } from '../lib/notifications'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
 import * as SecureStore from 'expo-secure-store'
 import OnboardingTour from './OnboardingTour'
@@ -73,11 +74,15 @@ export default function DashboardScreen({ navigation }: any) {
         await touchWeeklyStreak(supabase, user.id)
         const fresh = await evaluateAchievements(supabase, user.id)
         if (fresh.length > 0) {
+          // The permission prompt comes after they dismiss the badge, so the
+          // ask lands on a moment they already feel good about rather than
+          // stacking an OS dialog on top of the celebration.
           Alert.alert(
             `${fresh[0].icon}  ${fresh[0].name}`,
             fresh.length === 1
               ? fresh[0].description
-              : `${fresh[0].description}\n\nPlus ${fresh.length - 1} more.`
+              : `${fresh[0].description}\n\nPlus ${fresh.length - 1} more.`,
+            [{ text: 'Nice', onPress: () => { askForPushAfterWin().catch(() => {}) } }]
           )
         }
       } catch {
@@ -148,7 +153,7 @@ export default function DashboardScreen({ navigation }: any) {
           <Text style={styles.greeting}>Hey {firstName}</Text>
           <Text style={styles.subGreeting}>Here's how your semester is looking</Text>
         </View>
-        <TouchableOpacity onPress={() => supabase.auth.signOut()} style={styles.signOutBtn}>
+        <TouchableOpacity onPress={async () => { await unregisterPush(); supabase.auth.signOut() }} style={styles.signOutBtn}>
           <Text style={styles.signOutText}>Sign out</Text>
         </TouchableOpacity>
       </View>

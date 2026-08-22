@@ -11,7 +11,8 @@
       "bundleIdentifier": "com.othnielmaganga.ampliscore",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +39,27 @@
           "resizeMode": "contain",
           "backgroundColor": "#F5F3FF"
         }
-      ]
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#7C3AED"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Ampliscore uses your photos so you can set a profile picture."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Ampliscore uses Face ID to unlock your grades."
+        }
+      ],
+      "expo-apple-authentication"
     ],
     "scheme": "ampliscore",
     "extra": {
