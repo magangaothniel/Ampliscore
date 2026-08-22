@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, Animated } from 'react-native'
+import { View, Text, StyleSheet, Animated, Image } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 
 export default function LoadingScreen() {
@@ -17,10 +17,11 @@ export default function LoadingScreen() {
   return (
     <LinearGradient colors={['#F5F3FF', '#EDE9FE']} style={styles.container}>
       <View style={styles.logoWrap}>
-        <View style={styles.logoMark}>
-          <View style={styles.outerRing} />
-          <View style={styles.innerDot} />
-        </View>
+        <Image
+          source={require('../assets/icon.png')}
+          style={styles.logoMark}
+          resizeMode="contain"
+        />
         <Animated.Text style={[styles.wordmark, { opacity: pulse }]}>
           <Text style={styles.ampli}>ampli</Text>
           <Text style={styles.score}>score</Text>
@@ -34,9 +35,7 @@ export default function LoadingScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   logoWrap: { alignItems: 'center', marginBottom: 16 },
-  logoMark: { width: 64, height: 64, backgroundColor: '#EDE9FE', borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 2, borderColor: '#DDD6FE' },
-  outerRing: { position: 'absolute', width: 36, height: 36, borderRadius: 18, borderWidth: 2.5, borderColor: '#7C3AED' },
-  innerDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: '#7C3AED' },
+  logoMark: { width: 72, height: 72, borderRadius: 20, marginBottom: 16 },
   wordmark: { flexDirection: 'row', fontSize: 34, fontWeight: '700', letterSpacing: -0.5 },
   ampli: { color: '#1E1333', fontSize: 34, fontWeight: '700' },
   score: { color: '#7C3AED', fontSize: 34, fontWeight: '700' },

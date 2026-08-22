@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator
+  Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Image
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as WebBrowser from 'expo-web-browser'
@@ -112,10 +112,11 @@ export default function LoginScreen({ navigation }: any) {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled">
           <View style={styles.logoWrap}>
-            <View style={styles.logoMark}>
-              <View style={styles.outerRing} />
-              <View style={styles.innerDot} />
-            </View>
+            <Image
+              source={require('../assets/icon.png')}
+              style={styles.logoMark}
+              resizeMode="contain"
+            />
             <Text style={styles.wordmark}>
               <Text style={styles.ampli}>ampli</Text>
               <Text style={styles.score}>score</Text>
@@ -228,9 +229,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   inner: { flexGrow: 1, justifyContent: 'center', alignItems: 'stretch', paddingHorizontal: 24, paddingVertical: 60 },
   logoWrap: { alignItems: 'center', marginBottom: 36, width: '100%' },
-  logoMark: { width: 56, height: 56, backgroundColor: '#EDE9FE', borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 12, borderWidth: 2, borderColor: '#DDD6FE' },
-  outerRing: { position: 'absolute', width: 32, height: 32, borderRadius: 16, borderWidth: 2.5, borderColor: '#7C3AED' },
-  innerDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#7C3AED' },
+  logoMark: { width: 64, height: 64, borderRadius: 18, marginBottom: 12 },
   wordmark: { fontSize: 28, fontWeight: '700', letterSpacing: -0.5, marginBottom: 4, textAlign: 'center' },
   ampli: { color: '#1E1333' },
   score: { color: '#7C3AED' },

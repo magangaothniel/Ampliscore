@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
-import { askForPushAfterWin, unregisterPush } from '../lib/notifications'
+import { askForPushAfterWin } from '../lib/notifications'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
 import * as SecureStore from 'expo-secure-store'
 import OnboardingTour from './OnboardingTour'
@@ -153,9 +153,6 @@ export default function DashboardScreen({ navigation }: any) {
           <Text style={styles.greeting}>Hey {firstName}</Text>
           <Text style={styles.subGreeting}>Here's how your semester is looking</Text>
         </View>
-        <TouchableOpacity onPress={async () => { await unregisterPush(); supabase.auth.signOut() }} style={styles.signOutBtn}>
-          <Text style={styles.signOutText}>Sign out</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Stat cards */}
@@ -253,8 +250,6 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
   greeting: { fontSize: 24, fontWeight: '700', color: '#1E1333' },
   subGreeting: { fontSize: 14, color: '#A78BFA', marginTop: 2 },
-  signOutBtn: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, borderWidth: 1, borderColor: '#DDD6FE' },
-  signOutText: { fontSize: 12, color: '#7C3AED', fontWeight: '600' },
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 14 },
   statCard: { flex: 1, backgroundColor: '#fff', borderRadius: 12, padding: 14, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   atRiskCard: { borderWidth: 1, borderColor: '#fecaca' },
