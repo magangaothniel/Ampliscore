@@ -1,3 +1,4 @@
+import { NATIVE_BUILD_READY } from './nativeFeatures'
 import { Platform } from 'react-native'
 import { supabase } from './supabase'
 
@@ -18,6 +19,9 @@ let AppleAuthentication: any = null
 let loadFailed = false
 
 function loadNative(): boolean {
+  // The require itself can crash natively, so it must never run in a
+  // binary that lacks the module. This check comes first, always.
+  if (!NATIVE_BUILD_READY) return false
   if (AppleAuthentication) return true
   if (loadFailed) return false
   try {

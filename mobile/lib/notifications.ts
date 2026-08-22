@@ -1,3 +1,4 @@
+import { NATIVE_BUILD_READY } from './nativeFeatures'
 import { Platform } from 'react-native'
 import { supabase } from './supabase'
 
@@ -26,6 +27,9 @@ let loadFailed = false
 
 /** Returns true only when the native modules are actually usable. */
 function loadNative(): boolean {
+  // The require itself can crash natively, so it must never run in a
+  // binary that lacks the module. This check comes first, always.
+  if (!NATIVE_BUILD_READY) return false
   if (Notifications) return true
   if (loadFailed) return false
   try {

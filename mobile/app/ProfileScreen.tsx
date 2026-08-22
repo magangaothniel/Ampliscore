@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIn
 import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
-import { unregisterPush } from '../lib/notifications'
 import { avatarColor, avatarInitials } from '../lib/avatar'
 
 type Profile = {
@@ -33,16 +32,7 @@ export default function ProfileScreen({ navigation }: any) {
   async function signOut() {
     Alert.alert('Sign out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign out',
-        style: 'destructive',
-        onPress: async () => {
-          // Release this device's push token so the next person to use the
-          // phone doesn't receive the previous account's notifications.
-          await unregisterPush()
-          supabase.auth.signOut()
-        },
-      }
+      { text: 'Sign out', style: 'destructive', onPress: () => supabase.auth.signOut() }
     ])
   }
 
