@@ -5,9 +5,9 @@ import {
   ActivityIndicator, Alert, Image,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../lib/supabase'
 import { AVATAR_COLORS, avatarColor, avatarInitials } from '../lib/avatar'
+import { pickAndUploadAvatar, removeAvatar } from '../lib/avatarPhoto'
 
 // year_of_study is an integer column, 1 through 5. Store the number, show the
 // label. Sending the label is what produced "invalid input syntax for type
@@ -25,6 +25,7 @@ export default function EditProfileScreen({ navigation }: any) {
   const [saving, setSaving] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarHue, setAvatarHue] = useState<string | null>(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
   const [email, setEmail] = useState('')
 
   const [fullName, setFullName] = useState('')
@@ -88,6 +89,32 @@ export default function EditProfileScreen({ navigation }: any) {
     return <View style={styles.center}><ActivityIndicator size="large" color="#7C3AED" /></View>
   }
 
+  async function handleChangePhoto() {
+    setPhotoBusy(true)
+    const res = await pickAndUploadAvatar()
+    setPhotoBusy(false)
+    if (res.ok) setAvatarUrl(res.url)
+    // Backing out of the picker is a normal action, so stay quiet.
+    else if (!res.cancelled) Alert.alert('Could not update photo', res.message)
+  }
+
+  async function handleRemovePhoto() {
+    Alert.alert('Remove photo?', 'Your avatar goes back to a colour with your initials.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          setPhotoBusy(true)
+          const res = await removeAvatar()
+          setPhotoBusy(false)
+          if (res.ok) setAvatarUrl(null)
+          else Alert.alert('Could not remove photo', res.message ?? 'Please try again.')
+        },
+      },
+    ])
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -116,12 +143,22 @@ export default function EditProfileScreen({ navigation }: any) {
             </View>
           )}
           <View style={{ flex: 1 }}>
-            <Text style={styles.avatarNote}>
-              Photo uploads aren't in the app yet. You can change it on the web for now.
-            </Text>
-            <TouchableOpacity onPress={() => WebBrowser.openBrowserAsync('https://ampliscore.app/profile')}>
-              <Text style={styles.avatarLink}>Change photo on web</Text>
+            <TouchableOpacity
+              onPress={handleChangePhoto}
+              disabled={photoBusy}
+              style={[styles.photoBtn, photoBusy && styles.photoBtnDisabled]}
+            >
+              {photoBusy
+                ? <ActivityIndicator color="#7C3AED" />
+                : <Text style={styles.photoBtnText}>{avatarUrl ? 'Change photo' : 'Add photo'}</Text>}
             </TouchableOpacity>
+            {avatarUrl ? (
+              <TouchableOpacity onPress={handleRemovePhoto} disabled={photoBusy}>
+                <Text style={styles.avatarLink}>Remove photo</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.avatarNote}>JPG, PNG or WebP. Saved right away.</Text>
+            )}
           </View>
         </View>
 
@@ -199,6 +236,9 @@ const styles = StyleSheet.create({
   avatarImage: { width: 62, height: 62, borderRadius: 31, backgroundColor: '#EDE9FE' },
   avatarText: { color: '#fff', fontSize: 24, fontWeight: '700' },
   avatarNote: { fontSize: 12.5, color: '#8E88A3', lineHeight: 18 },
+  photoBtn: { borderWidth: 1.5, borderColor: '#DDD6FE', borderRadius: 12, paddingVertical: 10, alignItems: 'center', marginBottom: 8 },
+  photoBtnDisabled: { opacity: 0.5 },
+  photoBtnText: { color: '#7C3AED', fontWeight: '600', fontSize: 14 },
   hueCard: { backgroundColor: '#fff', borderRadius: 16, padding: 14, marginTop: 12 },
   hueTitle: { fontSize: 14, fontWeight: '600', color: '#1E1333', marginBottom: 10 },
   hueRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 8 },
