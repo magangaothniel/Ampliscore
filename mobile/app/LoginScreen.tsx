@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   Alert, KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator
@@ -7,6 +7,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import * as WebBrowser from 'expo-web-browser'
 import * as Linking from 'expo-linking'
 import { supabase } from '../lib/supabase'
+import * as AppleAuthentication from 'expo-apple-authentication'
+import { signInWithApple, isAppleSignInAvailable } from '../lib/appleAuth'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -20,6 +22,19 @@ export default function LoginScreen({ navigation }: any) {
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [appleReady, setAppleReady] = useState(false)
+
+  useEffect(() => {
+    isAppleSignInAvailable().then(setAppleReady)
+  }, [])
+
+  async function handleApple() {
+    setLoading(true)
+    const res = await signInWithApple()
+    setLoading(false)
+    // A cancelled sheet is the user changing their mind, so stay quiet.
+    if (!res.ok && !res.cancelled) Alert.alert('Apple sign in failed', res.message)
+  }
 
   async function signInEmail() {
     if (!email || !password) return Alert.alert('Missing fields', 'Please enter your email and password.')
@@ -176,6 +191,23 @@ export default function LoginScreen({ navigation }: any) {
             )}
           </View>
 
+          {appleReady && (
+            <View style={styles.appleWrap}>
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                cornerRadius={14}
+                style={styles.appleBtn}
+                onPress={handleApple}
+              />
+            </View>
+          )}
+
           <TouchableOpacity onPress={() => navigation.navigate('Register')} style={styles.footer}>
             <Text style={styles.footerText}>Don't have an account? <Text style={styles.footerLink}>Sign up free</Text></Text>
           </TouchableOpacity>
@@ -214,6 +246,11 @@ const styles = StyleSheet.create({
   otpInput: { fontSize: 24, textAlign: 'center', letterSpacing: 8, fontWeight: '700' },
   resendBtn: { alignItems: 'center', marginTop: 16 },
   resendText: { color: '#A78BFA', fontSize: 13 },
+  appleWrap: { marginTop: 20 },
+  appleBtn: { width: '100%', height: 50 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: '#DDD6FE' },
+  dividerText: { color: '#A78BFA', fontSize: 12, paddingHorizontal: 12, fontWeight: '600' },
   googleWrap: { alignItems: 'center', paddingVertical: 8 },
   googleSub: { fontSize: 13, color: '#A78BFA', textAlign: 'center', marginBottom: 20 },
   googleBtn: { backgroundColor: '#fff', borderRadius: 14, padding: 16, alignItems: 'center', width: '100%', borderWidth: 1.5, borderColor: '#DDD6FE' },
