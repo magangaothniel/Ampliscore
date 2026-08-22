@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AppState } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -99,21 +100,33 @@ export default function App() {
   const [loading, setLoading] = useState(true)
 
   // Updates land on the next launch by default, which means every change needs
-  // two force quits to show up. Check on mount instead and reload straight
-  // away, but only inside a short window after startup so a download that
-  // finishes late doesn't yank the app out from under someone mid-task.
+  // two force quits to show up.
+  //
+  // Fast path: if the download finishes while the splash is still up, reload
+  // immediately so the update is live in the same session.
+  //
+  // Slow path: on a bad connection the fetch can outlast that window. Rather
+  // than falling back to "next cold start", the update is applied the next
+  // time the app returns to the foreground. Leaving and coming back is enough,
+  // and reloading on return is safe because the user isn't mid-gesture.
   useEffect(() => {
     const startedAt = Date.now()
     const AUTO_RELOAD_WINDOW_MS = 10000
+    let pendingReload = false
+    let cancelled = false
 
     async function syncUpdates() {
       if (__DEV__ || !Updates.isEnabled) return
       try {
         const check = await Updates.checkForUpdateAsync()
-        if (!check.isAvailable) return
+        if (!check.isAvailable || cancelled) return
         await Updates.fetchUpdateAsync()
+        if (cancelled) return
+
         if (Date.now() - startedAt < AUTO_RELOAD_WINDOW_MS) {
           await Updates.reloadAsync()
+        } else {
+          pendingReload = true
         }
       } catch {
         // Offline, or the update server is unreachable. Keep running the
@@ -121,7 +134,21 @@ export default function App() {
       }
     }
 
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state !== 'active' || !pendingReload) return
+      // Cleared first so a rapid background/foreground cycle can't fire twice.
+      pendingReload = false
+      Updates.reloadAsync().catch(() => {
+        // If the reload fails, the update still applies on the next cold start.
+      })
+    })
+
     syncUpdates()
+
+    return () => {
+      cancelled = true
+      sub.remove()
+    }
   }, [])
 
   useEffect(() => {
