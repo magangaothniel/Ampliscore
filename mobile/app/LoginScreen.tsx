@@ -7,8 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import * as WebBrowser from 'expo-web-browser'
 import * as Linking from 'expo-linking'
 import { supabase } from '../lib/supabase'
-import * as AppleAuthentication from 'expo-apple-authentication'
-import { signInWithApple, isAppleSignInAvailable } from '../lib/appleAuth'
+import { signInWithApple, isAppleSignInAvailable, getAppleModule } from '../lib/appleAuth'
 
 WebBrowser.maybeCompleteAuthSession()
 
@@ -198,13 +197,21 @@ export default function LoginScreen({ navigation }: any) {
                 <Text style={styles.dividerText}>or</Text>
                 <View style={styles.dividerLine} />
               </View>
-              <AppleAuthentication.AppleAuthenticationButton
-                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                cornerRadius={14}
-                style={styles.appleBtn}
-                onPress={handleApple}
-              />
+              {(() => {
+                // Resolved at render, never at import, so a binary without the
+                // native module simply shows nothing instead of crashing.
+                const Apple = getAppleModule()
+                if (!Apple) return null
+                return (
+                  <Apple.AppleAuthenticationButton
+                    buttonType={Apple.AppleAuthenticationButtonType.SIGN_IN}
+                    buttonStyle={Apple.AppleAuthenticationButtonStyle.BLACK}
+                    cornerRadius={14}
+                    style={styles.appleBtn}
+                    onPress={handleApple}
+                  />
+                )
+              })()}
             </View>
           )}
 

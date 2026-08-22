@@ -1,5 +1,29 @@
-import * as ImagePicker from 'expo-image-picker'
 import { supabase } from './supabase'
+
+/**
+ * expo-image-picker is loaded lazily inside try/catch. A top-level import of a
+ * native module missing from the installed binary throws at import time, taking
+ * down the whole JS bundle and forcing an expo-updates rollback.
+ */
+let ImagePicker: any = null
+let loadFailed = false
+
+function loadNative(): boolean {
+  if (ImagePicker) return true
+  if (loadFailed) return false
+  try {
+    ImagePicker = require('expo-image-picker')
+    return true
+  } catch {
+    loadFailed = true
+    return false
+  }
+}
+
+/** True when photo picking is possible in this binary. */
+export function isPhotoPickerAvailable(): boolean {
+  return loadNative()
+}
 
 /**
  * Avatar photo handling for mobile.
@@ -34,6 +58,10 @@ function base64ToBytes(b64: string): Uint8Array {
 
 /** Opens the photo library, uploads the chosen image, saves it to the profile. */
 export async function pickAndUploadAvatar(): Promise<AvatarResult> {
+  if (!loadNative()) {
+    return { ok: false, cancelled: false, message: 'Photo upload needs the latest version of the app.' }
+  }
+
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
   if (!perm.granted) {
     return {

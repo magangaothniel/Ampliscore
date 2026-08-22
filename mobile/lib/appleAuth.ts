@@ -1,30 +1,48 @@
-import * as AppleAuthentication from 'expo-apple-authentication'
 import { Platform } from 'react-native'
 import { supabase } from './supabase'
 
 /**
  * Sign in with Apple.
  *
- * The critical detail: Apple returns the user's name ONLY on the very first
- * authorization for this Apple ID and app, and never again. Not on the next
- * sign in, not after deleting and reinstalling, not after signing out. If it
- * isn't captured in that one moment it is gone permanently and the student is
- * stuck as an initial-less avatar forever.
+ * Loaded lazily inside try/catch. A top-level import of a native module that
+ * isn't in the installed binary throws at import time, which takes down the
+ * whole JS bundle and makes expo-updates roll back to the embedded one.
  *
- * The email behaves differently: if they choose "Hide My Email", Apple issues a
- * @privaterelay.appleid.com address that forwards to them. It's stable, so it
- * works as an identifier, but mail sent to it can bounce if they later turn
- * forwarding off.
+ * The critical behaviour: Apple returns the user's name ONLY on the very first
+ * authorization for this Apple ID and app, and never again. Not on the next
+ * sign in, not after deleting and reinstalling. If it isn't captured in that
+ * one moment it is gone permanently.
  */
+
+let AppleAuthentication: any = null
+let loadFailed = false
+
+function loadNative(): boolean {
+  if (AppleAuthentication) return true
+  if (loadFailed) return false
+  try {
+    AppleAuthentication = require('expo-apple-authentication')
+    return true
+  } catch {
+    loadFailed = true
+    return false
+  }
+}
+
+/** Exposed so the login screen can render Apple's button only when it exists. */
+export function getAppleModule(): any | null {
+  return loadNative() ? AppleAuthentication : null
+}
 
 export type AppleSignInResult =
   | { ok: true }
   | { ok: false; cancelled: true }
   | { ok: false; cancelled: false; message: string }
 
-/** Whether the device can offer Apple sign in at all. iOS 13+ only. */
+/** Whether the device can offer Apple sign in. iOS 13+ with the module present. */
 export async function isAppleSignInAvailable(): Promise<boolean> {
   if (Platform.OS !== 'ios') return false
+  if (!loadNative()) return false
   try {
     return await AppleAuthentication.isAvailableAsync()
   } catch {
@@ -33,8 +51,11 @@ export async function isAppleSignInAvailable(): Promise<boolean> {
 }
 
 export async function signInWithApple(): Promise<AppleSignInResult> {
-  let credential: AppleAuthentication.AppleAuthenticationCredential
+  if (!loadNative()) {
+    return { ok: false, cancelled: false, message: 'Apple sign in is not available in this version.' }
+  }
 
+  let credential: any
   try {
     credential = await AppleAuthentication.signInAsync({
       requestedScopes: [
@@ -43,12 +64,12 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
       ],
     })
   } catch (e: any) {
-    // Backing out of the sheet is a normal action, not an error to shout about.
+    // Backing out of the sheet is normal, not an error to shout about.
     if (e?.code === 'ERR_REQUEST_CANCELED') return { ok: false, cancelled: true }
     return { ok: false, cancelled: false, message: e?.message ?? 'Apple sign in failed.' }
   }
 
-  if (!credential.identityToken) {
+  if (!credential?.identityToken) {
     return { ok: false, cancelled: false, message: 'Apple did not return a sign in token.' }
   }
 
@@ -56,7 +77,6 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
     provider: 'apple',
     token: credential.identityToken,
   })
-
   if (error) return { ok: false, cancelled: false, message: error.message }
 
   // Capture the name now or lose it for good.
@@ -72,8 +92,7 @@ export async function signInWithApple(): Promise<AppleSignInResult> {
         .eq('id', data.user.id)
         .single()
 
-      // Only fill a blank. Never overwrite a name the student chose themselves,
-      // which matters when an existing account signs in with Apple later.
+      // Only fill a blank. Never overwrite a name the student chose.
       const existing = String(profile?.full_name ?? '').trim()
       if (!existing) {
         await supabase.from('profiles').update({ full_name: name }).eq('id', data.user.id)
