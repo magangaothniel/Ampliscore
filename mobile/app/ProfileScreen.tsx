@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image, Share } from 'react-native'
 import * as WebBrowser from 'expo-web-browser'
 import { Ionicons } from '@expo/vector-icons'
+import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 import { avatarColor, avatarInitials } from '../lib/avatar'
 
@@ -18,14 +19,26 @@ export default function ProfileScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
 
-  useEffect(() => { fetchProfile() }, [])
+  // Screens stay mounted under React Navigation, so a mount-only fetch
+  // leaves stale numbers behind after edits on another tab. Refetch on
+  // focus instead: on demand, and free when nobody is looking.
+  const firstFocus = useRef(true)
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile(!firstFocus.current)
+      firstFocus.current = false
+    }, [])
+  )
 
-  async function fetchProfile() {
+  async function fetchProfile(silent = false) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     setEmail(user.email || '')
-    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-    if (data) setProfile(data)
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+    // `if (data)` alone silently swallows a null when the query fails, which
+    // makes a broken query look like an empty profile.
+    if (error) console.error('PROFILE ERROR:', error.message)
+    else if (data) setProfile(data)
     setLoading(false)
   }
 

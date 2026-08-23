@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native'
-import { useEffect, useState } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
 import { askForPushAfterWin } from '../lib/notifications'
@@ -46,11 +47,19 @@ export default function DashboardScreen({ navigation }: any) {
   const [showTour, setShowTour] = useState(false)
   const [showUpsell, setShowUpsell] = useState(false)
 
-  useEffect(() => {
-    fetchData()
-  }, [])
+  // Screens stay mounted under React Navigation, so a mount-only fetch
+  // leaves stale numbers behind after edits on another tab. Refetch on
+  // focus instead: on demand, and free when nobody is looking.
+  const badgesChecked = useRef(false)
+  const firstFocus = useRef(true)
+  useFocusEffect(
+    useCallback(() => {
+      fetchData(!firstFocus.current)
+      firstFocus.current = false
+    }, [])
+  )
 
-  async function fetchData() {
+  async function fetchData(silent = false) {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -70,7 +79,11 @@ export default function DashboardScreen({ navigation }: any) {
       setCourses(coursesRes.data ?? [])
 
       // Badges are secondary. A failure here must never stop the dashboard.
-      try {
+      // Evaluated once per app session rather than on every focus: it is four
+      // extra queries and nothing about switching tabs can change the result.
+      if (!badgesChecked.current) {
+        badgesChecked.current = true
+        try {
         await touchWeeklyStreak(supabase, user.id)
         const fresh = await evaluateAchievements(supabase, user.id)
         if (fresh.length > 0) {
@@ -85,8 +98,9 @@ export default function DashboardScreen({ navigation }: any) {
             [{ text: 'Nice', onPress: () => { askForPushAfterWin().catch(() => {}) } }]
           )
         }
-      } catch {
-        // Silent by design.
+        } catch {
+          // Silent by design.
+        }
       }
     } catch (e) {
       console.error(e)

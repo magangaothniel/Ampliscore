@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TextInput,
   TouchableOpacity, Modal, Alert, ActivityIndicator
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 
 type Rating = {
@@ -65,10 +66,19 @@ export default function ProfessorsScreen() {
   const [reportSending, setReportSending] = useState(false)
   const [reportDone, setReportDone] = useState(false)
 
-  useEffect(() => { fetchRatings() }, [])
+  // Screens stay mounted under React Navigation, so a mount-only fetch
+  // leaves stale numbers behind after edits on another tab. Refetch on
+  // focus instead: on demand, and free when nobody is looking.
+  const firstFocus = useRef(true)
+  useFocusEffect(
+    useCallback(() => {
+      fetchRatings(!firstFocus.current)
+      firstFocus.current = false
+    }, [])
+  )
 
-  async function fetchRatings() {
-    setLoading(true)
+  async function fetchRatings(silent = false) {
+    if (!silent) setLoading(true)
     // Web hides moderated reviews client-side; do it in the query here so
     // hidden rows never reach the device at all. Without this, reports get
     // actioned on web and the review still shows on mobile.

@@ -1,10 +1,11 @@
 import type React from 'react'
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal,
   TextInput, Switch, Alert, ActivityIndicator, Dimensions,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 
 const { width } = Dimensions.get('window')
@@ -54,10 +55,19 @@ export default function CalendarScreen() {
   const [aMax, setAMax] = useState('100')
   const [aIsExam, setAIsExam] = useState(false)
 
-  useEffect(() => { fetchAll() }, [])
+  // Screens stay mounted under React Navigation, so a mount-only fetch
+  // leaves stale numbers behind after edits on another tab. Refetch on
+  // focus instead: on demand, and free when nobody is looking.
+  const firstFocus = useRef(true)
+  useFocusEffect(
+    useCallback(() => {
+      fetchAll(!firstFocus.current)
+      firstFocus.current = false
+    }, [])
+  )
 
-  async function fetchAll() {
-    setLoading(true)
+  async function fetchAll(silent = false) {
+    if (!silent) setLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return

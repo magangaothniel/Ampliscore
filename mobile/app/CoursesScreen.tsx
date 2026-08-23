@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   TextInput, Modal, Alert, ActivityIndicator
 } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 import { getLetterGrade, getGradeTextColor, getGradeBarColor } from '../lib/grades'
 import ProUpsellModal from './ProUpsellModal'
@@ -35,12 +36,19 @@ export default function CoursesScreen({ navigation }: any) {
   const [isPro, setIsPro] = useState(false)
   const [showUpsell, setShowUpsell] = useState(false)
 
-  useEffect(() => {
-    fetchCourses()
-  }, [])
+  // Screens stay mounted under React Navigation, so a mount-only fetch
+  // leaves stale numbers behind after edits on another tab. Refetch on
+  // focus instead: on demand, and free when nobody is looking.
+  const firstFocus = useRef(true)
+  useFocusEffect(
+    useCallback(() => {
+      fetchCourses(!firstFocus.current)
+      firstFocus.current = false
+    }, [])
+  )
 
-  async function fetchCourses() {
-    setLoading(true)
+  async function fetchCourses(silent = false) {
+    if (!silent) setLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, InputAccessoryView, Keyboard, Platform } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 
 type Course = {
@@ -50,11 +51,18 @@ export default function GPAPlannerScreen() {
   const [targetGPA, setTargetGPA] = useState('3.5')
   const [targetGrades, setTargetGrades] = useState<Record<string, string>>({})
 
-  useEffect(() => {
-    fetchCourses()
-  }, [])
+  // Screens stay mounted under React Navigation, so a mount-only fetch
+  // leaves stale numbers behind after edits on another tab. Refetch on
+  // focus instead: on demand, and free when nobody is looking.
+  const firstFocus = useRef(true)
+  useFocusEffect(
+    useCallback(() => {
+      fetchCourses(!firstFocus.current)
+      firstFocus.current = false
+    }, [])
+  )
 
-  async function fetchCourses() {
+  async function fetchCourses(silent = false) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data } = await supabase
