@@ -18,6 +18,7 @@ export default function ProfileScreen({ navigation }: any) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
+  const [badgeCount, setBadgeCount] = useState(0)
 
   // Screens stay mounted under React Navigation, so a mount-only fetch
   // leaves stale numbers behind after edits on another tab. Refetch on
@@ -39,6 +40,13 @@ export default function ProfileScreen({ navigation }: any) {
     // makes a broken query look like an empty profile.
     if (error) console.error('PROFILE ERROR:', error.message)
     else if (data) setProfile(data)
+
+    // Count only; the shelf itself loads the detail when opened.
+    const { count } = await supabase
+      .from('achievements')
+      .select('code', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+    setBadgeCount(count ?? 0)
     setLoading(false)
   }
 
@@ -129,6 +137,12 @@ export default function ProfileScreen({ navigation }: any) {
           <Text style={styles.menuLabel}>Edit profile</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Badges')}>
+          <Ionicons name="ribbon-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
+          <Text style={styles.menuLabel}>Badges</Text>
+          {badgeCount > 0 ? <Text style={styles.menuCount}>{badgeCount}</Text> : null}
+          <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Notifications')}>
           <Ionicons name="notifications-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Notifications</Text>
@@ -183,6 +197,7 @@ const styles = StyleSheet.create({
   menuItem: { flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: '#F5F3FF' },
   menuIcon: { marginRight: 12 },
   menuLabel: { flex: 1, fontSize: 15, color: '#1E1333', fontWeight: '500' },
+  menuCount: { fontSize: 13, color: '#7C3AED', fontWeight: '700', marginRight: 8 },
   signOutBtn: { marginHorizontal: 20, backgroundColor: '#fff', borderRadius: 14, padding: 16, alignItems: 'center', borderWidth: 1.5, borderColor: '#FCA5A5' },
   signOutText: { color: '#dc2626', fontWeight: '700', fontSize: 15 },
 })

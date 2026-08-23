@@ -21,6 +21,7 @@ import SupportScreen from './app/SupportScreen'
 import CalendarScreen from './app/CalendarScreen'
 import AdminScreen from './app/AdminScreen'
 import EditProfileScreen from './app/EditProfileScreen'
+import BadgesScreen from './app/BadgesScreen'
 import NotificationsScreen from './app/NotificationsScreen'
 import PrivacySecurityScreen from './app/PrivacySecurityScreen'
 import LoadingScreen from './app/LoadingScreen'
@@ -184,6 +185,11 @@ export default function App() {
             <Stack.Screen
               name="EditProfile"
               component={EditProfileScreen}
+              options={{ animation: 'slide_from_right' }}
+            />
+            <Stack.Screen
+              name="Badges"
+              component={BadgesScreen}
               options={{ animation: 'slide_from_right' }}
             />
             <Stack.Screen
