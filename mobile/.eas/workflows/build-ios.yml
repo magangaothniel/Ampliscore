@@ -1,0 +1,30 @@
+name: Build iOS
+
+# Triggered by pushing to the `build` branch, because eas-cli cannot run on
+# this machine (Big Sur, Node too old — the same reason web builds go to
+# Vercel). To start a build:
+#
+#   git push origin main:build --force
+#
+# That copies main onto the build branch and fires this workflow. workflow_dispatch
+# is also here so it can be started from the EAS dashboard or CLI if either
+# becomes available.
+on:
+  push:
+    branches: ['build']
+  workflow_dispatch: {}
+
+concurrency:
+  cancel_in_progress: true
+  group: ${{ workflow.filename }}
+
+jobs:
+  build_ios:
+    name: Build iOS (preview channel)
+    type: build
+    params:
+      platform: ios
+      # MUST stay `preview`. The publish-update workflow sends OTA updates to
+      # the preview channel, so a production build would stop receiving them
+      # entirely and every future JS change would silently never arrive.
+      profile: preview
