@@ -23,4 +23,4 @@
  * Flipping it before that build ships will crash the app on sign out, on
  * earning a badge, and on opening the login screen.
  */
-export const NATIVE_BUILD_READY = false
+export const NATIVE_BUILD_READY = true
