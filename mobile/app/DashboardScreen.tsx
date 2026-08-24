@@ -3,11 +3,12 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
-import { askForPushAfterWin } from '../lib/notifications'
+import { canAskForPush, isPushSupported } from '../lib/notifications'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
 import * as SecureStore from 'expo-secure-store'
 import OnboardingTour from './OnboardingTour'
 import ProUpsellModal from './ProUpsellModal'
+import NotificationPrimer from './NotificationPrimer'
 
 type Course = {
   id: string
@@ -26,6 +27,10 @@ type Profile = {
 
 const UPSELL_SEEN_KEY = 'pro_upsell_last_shown'
 const UPSELL_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000
+// Asking again after two weeks is a reminder. Asking every launch is nagging,
+// and a student who taps Don't Allow on the iOS dialog is gone for good.
+const PUSH_PRIMER_KEY = 'push_primer_last_shown'
+const PUSH_PRIMER_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000
 
 function getGPA(pct: number): number {
   if (pct >= 93) return 4.0
@@ -50,6 +55,7 @@ export default function DashboardScreen({ navigation }: any) {
   // Screens stay mounted under React Navigation, so a mount-only fetch
   // leaves stale numbers behind after edits on another tab. Refetch on
   // focus instead: on demand, and free when nobody is looking.
+  const [showPushPrimer, setShowPushPrimer] = useState(false)
   const badgesChecked = useRef(false)
   const firstFocus = useRef(true)
   useFocusEffect(
@@ -95,7 +101,7 @@ export default function DashboardScreen({ navigation }: any) {
             fresh.length === 1
               ? fresh[0].description
               : `${fresh[0].description}\n\nPlus ${fresh.length - 1} more.`,
-            [{ text: 'Nice', onPress: () => { askForPushAfterWin().catch(() => {}) } }]
+            [{ text: 'Nice', onPress: () => { maybePrimePush().catch(() => {}) } }]
           )
         }
         } catch {
@@ -120,6 +126,9 @@ export default function DashboardScreen({ navigation }: any) {
       console.error('TOUR FLAG ERROR:', e)
     }
     maybeShowUpsell()
+    // Only once they have a course. A brand new account has no reason to care
+    // about notifications yet, and that's the ask most likely to be refused.
+    if (courses.length > 0) maybePrimePush()
   }
 
   // Soft prompt only. Pro users never see it, and it's capped to once a week
@@ -133,6 +142,24 @@ export default function DashboardScreen({ navigation }: any) {
       setShowUpsell(true)
     } catch (e) {
       // SecureStore unavailable; skip rather than nag on every open.
+    }
+  }
+
+  /**
+   * Shows the primer only when asking is still possible and worthwhile.
+   * canAskForPush is false once the student has granted or denied at the OS
+   * level, so this never appears to someone who already decided.
+   */
+  async function maybePrimePush() {
+    if (!isPushSupported()) return
+    if (!(await canAskForPush())) return
+    try {
+      const last = await SecureStore.getItemAsync(PUSH_PRIMER_KEY)
+      if (last && Date.now() - Number(last) < PUSH_PRIMER_COOLDOWN_MS) return
+      await SecureStore.setItemAsync(PUSH_PRIMER_KEY, String(Date.now()))
+      setShowPushPrimer(true)
+    } catch {
+      // SecureStore unavailable; skip rather than risk nagging every open.
     }
   }
 
@@ -253,6 +280,7 @@ export default function DashboardScreen({ navigation }: any) {
     </ScrollView>
 
     <OnboardingTour visible={showTour} onDone={finishTour} />
+    <NotificationPrimer visible={showPushPrimer} onDone={() => setShowPushPrimer(false)} />
     <ProUpsellModal visible={showUpsell} reason="intro" onClose={() => setShowUpsell(false)} />
     </>
   )
