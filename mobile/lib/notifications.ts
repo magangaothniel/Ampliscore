@@ -144,6 +144,36 @@ export async function askForPushAfterWin(): Promise<boolean> {
   return registerForPush()
 }
 
+/**
+ * Whether this device currently has a push token stored. This is what the
+ * settings toggle reflects: OS permission can't be revoked programmatically,
+ * so turning notifications "off" means deleting the token and no longer
+ * sending, not withdrawing the OS grant.
+ */
+export async function isDeviceRegistered(): Promise<boolean> {
+  if (!loadNative()) return false
+  try {
+    if (!Device.isDevice) return false
+    if (!(await hasPushPermission())) return false
+
+    const projectId =
+      Constants?.expoConfig?.extra?.eas?.projectId ??
+      Constants?.easConfig?.projectId
+    if (!projectId) return false
+
+    const res = await Notifications.getExpoPushTokenAsync({ projectId })
+    const { data } = await supabase
+      .from('push_tokens')
+      .select('token')
+      .eq('token', res.data)
+      .maybeSingle()
+
+    return !!data
+  } catch {
+    return false
+  }
+}
+
 /** Drops this device's token so pushes don't follow the account after sign out. */
 export async function unregisterPush(): Promise<void> {
   if (!loadNative()) return
