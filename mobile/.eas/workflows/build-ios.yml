@@ -28,3 +28,7 @@ jobs:
       # the preview channel, so a production build would stop receiving them
       # entirely and every future JS change would silently never arrive.
       profile: preview
+      # Required for internal distribution in CI. EAS cannot create or repair an
+      # ad-hoc provisioning profile without authenticating to Apple, and it can
+      # only do that non-interactively using the App Store Connect API Key.
+      refresh_ad_hoc_provisioning_profile: true
