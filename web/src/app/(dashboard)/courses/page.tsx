@@ -1,4 +1,5 @@
 "use client";
+import { courseGrade } from "@/lib/gpa";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -66,16 +67,8 @@ export default function CoursesPage() {
       const cats = (cData || []).filter((c: any) => c.course_id === course.id);
       const cas = (aData || []).filter((a: any) => a.course_id === course.id && a.completed);
       if (!cats.length || !cas.length) return { ...course, live_grade: null };
-      let w = 0, tw = 0;
-      for (const cat of cats) {
-        const ca = cas.filter((a: any) => a.category_id === cat.id);
-        if (ca.length) {
-          const e = ca.reduce((s: number, a: any) => s + (a.grade || 0), 0);
-          const p = ca.reduce((s: number, a: any) => s + (a.max_grade || 100), 0);
-          w += (e / p) * 100 * cat.weight; tw += cat.weight;
-        }
-      }
-      return { ...course, live_grade: tw > 0 ? Math.round((w / tw) * 10) / 10 : null };
+      const g = courseGrade(cats, cas);
+      return { ...course, live_grade: g > 0 ? g : null };
     });
     setCourses(enriched);
     setLoading(false);

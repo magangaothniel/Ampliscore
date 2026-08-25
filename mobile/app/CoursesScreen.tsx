@@ -5,6 +5,7 @@ import {
 } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
+import { courseGrade } from '../lib/gpa'
 import { getLetterGrade, getGradeTextColor, getGradeBarColor } from '../lib/grades'
 import ProUpsellModal from './ProUpsellModal'
 
@@ -53,19 +54,35 @@ export default function CoursesScreen({ navigation }: any) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const [coursesRes, profileRes] = await Promise.all([
+      // Recomputed from assignments, matching web. Reading the stored column
+      // here while web recomputed is what let the two show different grades.
+      const [coursesRes, profileRes, catsRes, assignsRes] = await Promise.all([
         supabase
           .from('courses')
           .select('id, name, code, professor, credits, current_grade, color')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
         supabase.from('profiles').select('is_pro').eq('id', user.id).single(),
+        supabase.from('grade_categories').select('id, course_id, weight'),
+        supabase.from('assignments').select('course_id, category_id, grade, max_grade, completed').eq('user_id', user.id),
       ])
 
       if (coursesRes.error) console.error('COURSES ERROR:', coursesRes.error.message)
       if (profileRes.error) console.error('PROFILE ERROR:', profileRes.error.message)
+      if (catsRes.error) console.error('CATEGORIES ERROR:', catsRes.error.message)
+      if (assignsRes.error) console.error('ASSIGNMENTS ERROR:', assignsRes.error.message)
 
-      setCourses(coursesRes.data ?? [])
+      const allCats = catsRes.data ?? []
+      const allAssigns = assignsRes.data ?? []
+      setCourses(
+        (coursesRes.data ?? []).map(c => {
+          const g = courseGrade(
+            allCats.filter(k => k.course_id === c.id),
+            allAssigns.filter(a => a.course_id === c.id)
+          )
+          return { ...c, current_grade: g > 0 ? g : null }
+        })
+      )
       setIsPro(!!profileRes.data?.is_pro)
     } finally {
       setLoading(false)

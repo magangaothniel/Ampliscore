@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, InputAccessoryView, Keyboard, Platform } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
-import { gradePoints, semesterGpa, cumulativeGpa, formatGpa } from '../lib/gpa'
+import { gradePoints, semesterGpa, cumulativeGpa, formatGpa, courseGrade } from '../lib/gpa'
 
 type Course = {
   id: string
@@ -55,14 +55,27 @@ export default function GPAPlannerScreen() {
   async function fetchCourses(silent = false) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data } = await supabase
-      .from('courses')
-      .select('id, name, credits, current_grade')
-      .eq('user_id', user.id)
-    if (data) {
-      setCourses(data)
+    // Recomputed from assignments, matching every other screen. Reading the
+    // stored column here would put the planner out of step with the dashboard.
+    const [coursesRes, catsRes, assignsRes] = await Promise.all([
+      supabase.from('courses').select('id, name, credits, current_grade').eq('user_id', user.id),
+      supabase.from('grade_categories').select('id, course_id, weight'),
+      supabase.from('assignments').select('course_id, category_id, grade, max_grade, completed').eq('user_id', user.id),
+    ])
+
+    if (coursesRes.data) {
+      const allCats = catsRes.data ?? []
+      const allAssigns = assignsRes.data ?? []
+      const rows = coursesRes.data.map(c => {
+        const g = courseGrade(
+          allCats.filter(k => k.course_id === c.id),
+          allAssigns.filter(a => a.course_id === c.id)
+        )
+        return { ...c, current_grade: g > 0 ? g : null }
+      })
+      setCourses(rows)
       const initial: Record<string, string> = {}
-      data.forEach(c => {
+      rows.forEach(c => {
         initial[c.id] = c.current_grade ? String(Math.round(c.current_grade)) : '85'
       })
       setTargetGrades(initial)

@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
 import { canAskForPush, isPushSupported } from '../lib/notifications'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
-import { semesterGpa, cumulativeGpa, formatGpa } from '../lib/gpa'
+import { semesterGpa, cumulativeGpa, formatGpa, courseGrade } from '../lib/gpa'
 import * as SecureStore from 'expo-secure-store'
 import OnboardingTour from './OnboardingTour'
 import ProUpsellModal from './ProUpsellModal'
@@ -64,13 +64,22 @@ export default function DashboardScreen({ navigation }: any) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const [profileRes, coursesRes] = await Promise.all([
+      // Grades are recomputed here from the same rows the web dashboard uses,
+      // rather than read from courses.current_grade. Reading the stored column
+      // on one platform while the other recomputed meant the two disagreed
+      // whenever the stored value lagged, which is exactly what happened.
+      // Recomputing on both sides cannot drift, and it self-heals.
+      const [profileRes, coursesRes, catsRes, assignsRes] = await Promise.all([
         supabase.from('profiles').select('full_name, is_pro, has_taken_tour, gpa_prompt_seen, prior_gpa, prior_credits').eq('id', user.id).single(),
-        supabase.from('courses').select('id, name, code, professor, credits, current_grade').eq('user_id', user.id).order('created_at', { ascending: false })
+        supabase.from('courses').select('id, name, code, professor, credits, current_grade').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('grade_categories').select('id, course_id, weight'),
+        supabase.from('assignments').select('course_id, category_id, grade, max_grade, completed').eq('user_id', user.id),
       ])
 
       if (profileRes.error) console.error('PROFILE ERROR:', profileRes.error.message)
       if (coursesRes.error) console.error('COURSES ERROR:', coursesRes.error.message)
+      if (catsRes.error) console.error('CATEGORIES ERROR:', catsRes.error.message)
+      if (assignsRes.error) console.error('ASSIGNMENTS ERROR:', assignsRes.error.message)
 
       if (profileRes.data) {
         setProfile(profileRes.data)
@@ -78,7 +87,17 @@ export default function DashboardScreen({ navigation }: any) {
         // Only after the tour, and only once. Skipping counts as answering.
         else if (!profileRes.data.gpa_prompt_seen) setShowGpaPrompt(true)
       }
-      setCourses(coursesRes.data ?? [])
+      const allCats = catsRes.data ?? []
+      const allAssigns = assignsRes.data ?? []
+      setCourses(
+        (coursesRes.data ?? []).map(c => ({
+          ...c,
+          current_grade: courseGrade(
+            allCats.filter(k => k.course_id === c.id),
+            allAssigns.filter(a => a.course_id === c.id)
+          ),
+        }))
+      )
 
       // Badges are secondary. A failure here must never stop the dashboard.
       // Evaluated once per app session rather than on every focus: it is four
