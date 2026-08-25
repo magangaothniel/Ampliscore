@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
 import { AVATAR_COLORS, avatarColor, avatarInitials } from '../lib/avatar'
 import { pickAndUploadAvatar, removeAvatar } from '../lib/avatarPhoto'
+import { isValidPriorGpa, isValidPriorCredits } from '../lib/gpa'
 
 // year_of_study is an integer column, 1 through 5. Store the number, show the
 // label. Sending the label is what produced "invalid input syntax for type
@@ -26,6 +27,8 @@ export default function EditProfileScreen({ navigation }: any) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarHue, setAvatarHue] = useState<string | null>(null)
   const [photoBusy, setPhotoBusy] = useState(false)
+  const [priorGpa, setPriorGpa] = useState('')
+  const [priorCredits, setPriorCredits] = useState('')
   const [email, setEmail] = useState('')
 
   const [fullName, setFullName] = useState('')
@@ -43,7 +46,7 @@ export default function EditProfileScreen({ navigation }: any) {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('full_name, university, major, year_of_study, avatar_url, avatar_color')
+        .select('full_name, university, major, year_of_study, avatar_url, avatar_color, prior_gpa, prior_credits')
         .eq('id', user.id)
         .single()
 
@@ -55,6 +58,10 @@ export default function EditProfileScreen({ navigation }: any) {
         setYear(data.year_of_study ?? null)
         setAvatarUrl(data.avatar_url ?? null)
         setAvatarHue((data as any).avatar_color ?? null)
+        const pg = (data as any).prior_gpa
+        const pc = (data as any).prior_credits
+        setPriorGpa(pg === null || pg === undefined ? '' : String(pg))
+        setPriorCredits(pc === null || pc === undefined ? '' : String(pc))
       }
     } finally {
       setLoading(false)
@@ -74,6 +81,8 @@ export default function EditProfileScreen({ navigation }: any) {
         major: major.trim(),
         year_of_study: year,
         avatar_color: avatarHue,
+        prior_gpa: bothPriorFieldsValid ? Number(priorGpa) : null,
+        prior_credits: bothPriorFieldsValid ? Number(priorCredits) : null,
       }).eq('id', user.id)
 
       if (error) return Alert.alert('Error', error.message)
@@ -88,6 +97,11 @@ export default function EditProfileScreen({ navigation }: any) {
   if (loading) {
     return <View style={styles.center}><ActivityIndicator size="large" color="#7C3AED" /></View>
   }
+
+  // Empty is a valid state: it means "not provided", which clears both.
+  const bothPriorBlank = priorGpa.trim() === '' && priorCredits.trim() === ''
+  const bothPriorFieldsValid = isValidPriorGpa(priorGpa) && isValidPriorCredits(priorCredits)
+  const priorFieldsOk = bothPriorBlank || bothPriorFieldsValid
 
   async function handleChangePhoto() {
     setPhotoBusy(true)
@@ -213,7 +227,47 @@ export default function EditProfileScreen({ navigation }: any) {
           ))}
         </View>
 
-        <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={save} disabled={saving}>
+        <Text style={styles.label}>Starting GPA</Text>
+        <Text style={styles.fieldNote}>
+          What you were carrying into this semester. Ampliscore blends it with
+          your current classes so the GPA on your dashboard is your real one.
+          Leave both blank if you'd rather not.
+        </Text>
+        <View style={styles.gpaRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.subLabel}>GPA</Text>
+            <TextInput
+              value={priorGpa}
+              onChangeText={setPriorGpa}
+              placeholder="3.42"
+              placeholderTextColor="#C4B5FD"
+              keyboardType="decimal-pad"
+              style={[styles.input, priorGpa !== '' && !isValidPriorGpa(priorGpa) && styles.inputBad]}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.subLabel}>Credits earned</Text>
+            <TextInput
+              value={priorCredits}
+              onChangeText={setPriorCredits}
+              placeholder="45"
+              placeholderTextColor="#C4B5FD"
+              keyboardType="number-pad"
+              style={[styles.input, priorCredits !== '' && !isValidPriorCredits(priorCredits) && styles.inputBad]}
+            />
+          </View>
+        </View>
+        {!priorFieldsOk ? (
+          <Text style={styles.fieldError}>
+            GPA and credits are needed together. Credits are what weight the GPA.
+          </Text>
+        ) : null}
+
+        <TouchableOpacity
+          style={[styles.saveBtn, (saving || !priorFieldsOk) && { opacity: 0.6 }]}
+          onPress={save}
+          disabled={saving || !priorFieldsOk}
+        >
           {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save changes</Text>}
         </TouchableOpacity>
       </ScrollView>
@@ -258,6 +312,11 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13.5, color: '#5B5470' },
   chipTextActive: { color: '#fff', fontWeight: '600' },
 
+  fieldNote: { fontSize: 12.5, color: '#8E88A3', lineHeight: 18, marginBottom: 10, marginTop: -4 },
+  subLabel: { fontSize: 11, fontWeight: '700', color: '#A78BFA', letterSpacing: 0.5, marginBottom: 5 },
+  gpaRow: { flexDirection: 'row', gap: 12 },
+  inputBad: { borderColor: '#FCA5A5' },
+  fieldError: { fontSize: 12.5, color: '#dc2626', marginTop: 8 },
   saveBtn: { backgroundColor: '#7C3AED', borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 32 },
   saveBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 })

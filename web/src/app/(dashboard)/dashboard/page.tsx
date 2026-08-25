@@ -2,10 +2,12 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { cached, invalidate } from "@/lib/cache";
-import { getLetterGrade, getGradeColor, calculateGPA } from "@/lib/utils";
+import { getLetterGrade, getGradeColor } from "@/lib/utils";
 import Link from "next/link";
 import { evaluateAchievements, touchWeeklyStreak, type Badge } from "@/lib/achievements";
 import BadgeShelf from "@/components/BadgeShelf";
+import InitialGpaPrompt from "@/components/InitialGpaPrompt";
+import { semesterGpa, cumulativeGpa, formatGpa } from "@/lib/gpa";
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -13,6 +15,7 @@ export default function DashboardPage() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newBadges, setNewBadges] = useState<Badge[]>([]);
+  const [showGpaPrompt, setShowGpaPrompt] = useState(false);
 
   useEffect(() => {
     // Newly earned badges, so the toast fires once rather than on every load.
@@ -60,6 +63,9 @@ export default function DashboardPage() {
         return { ...course, current_grade: grade };
       });
       setProfile({ ...profileData, email: user.email });
+
+      // Skipping counts as answering, so this only ever appears once.
+      if (profileData && !profileData.gpa_prompt_seen) setShowGpaPrompt(true);
       setCourses(updatedCourses);
       setLoading(false);
     };
@@ -86,7 +92,11 @@ export default function DashboardPage() {
   const dueLabel = (d: number) =>
     d < 0 ? `${Math.abs(d)}d overdue` : d === 0 ? "Due today" : d === 1 ? "Due tomorrow" : `In ${d} days`;
 
-  const gpa = calculateGPA(courses.map(c => ({ grade: c.current_grade || 0, credits: c.credits || 3 })));
+  // Semester GPA is always shown. Cumulative appears only once the student has
+  // told us what they were carrying in, because without prior credits there is
+  // nothing to weight against.
+  const semester = semesterGpa(courses);
+  const cumulative = cumulativeGpa(semester, profile?.prior_gpa, profile?.prior_credits);
 
   if (loading) return (
     <main className="min-h-screen bg-brand-50">
@@ -150,14 +160,20 @@ export default function DashboardPage() {
           {(() => {
             const atRisk = courses.filter(c => (c.current_grade || 0) < 70 && (c.current_grade || 0) > 0).length;
             return [
-              { label: "Current GPA", value: gpa.toFixed(2), color: "text-brand-600" },
-              { label: "Active courses", value: courses.length, color: "text-ink-900" },
-              { label: "At risk", value: atRisk, color: atRisk > 0 ? "text-bad" : "text-good" },
+              {
+                label: cumulative !== null ? "Cumulative GPA" : "Current GPA",
+                value: formatGpa(cumulative !== null ? cumulative : semester.gpa),
+                color: "text-brand-600",
+                sub: cumulative !== null ? `${formatGpa(semester.gpa)} this term` : null,
+              },
+              { label: "Active courses", value: courses.length, color: "text-ink-900", sub: null },
+              { label: "At risk", value: atRisk, color: atRisk > 0 ? "text-bad" : "text-good", sub: null },
             ];
           })().map((stat) => (
             <div key={stat.label} className="bg-white rounded-xl p-4 md:p-5 border border-ink-200 shadow-card">
               <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">{stat.label}</div>
               <div className={`font-display text-3xl md:text-4xl font-bold tnum ${stat.color}`}>{stat.value}</div>
+              {stat.sub && <div className="text-xs text-ink-400 font-medium mt-0.5 tnum">{stat.sub}</div>}
             </div>
           ))}
         </div>
@@ -274,6 +290,17 @@ export default function DashboardPage() {
         <div className="mt-6">
           <BadgeShelf celebrate={newBadges} />
         </div>
+
+        <InitialGpaPrompt
+          open={showGpaPrompt}
+          onDone={(saved) => {
+            setShowGpaPrompt(false);
+            // Mirror locally so the GPA card updates immediately. The prompt
+            // already wrote to the database; refetching just to redraw one
+            // number would be a wasted round trip.
+            if (saved) setProfile((p: any) => ({ ...p, ...saved }));
+          }}
+        />
       </div>
     </main>
   );

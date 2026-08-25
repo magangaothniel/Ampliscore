@@ -5,10 +5,12 @@ import { supabase } from '../lib/supabase'
 import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
 import { canAskForPush, isPushSupported } from '../lib/notifications'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
+import { semesterGpa, cumulativeGpa, formatGpa } from '../lib/gpa'
 import * as SecureStore from 'expo-secure-store'
 import OnboardingTour from './OnboardingTour'
 import ProUpsellModal from './ProUpsellModal'
 import NotificationPrimer from './NotificationPrimer'
+import InitialGpaPrompt from './InitialGpaPrompt'
 
 type Course = {
   id: string
@@ -23,6 +25,9 @@ type Profile = {
   full_name: string | null
   is_pro: boolean
   has_taken_tour: boolean | null
+  gpa_prompt_seen: boolean | null
+  prior_gpa: number | null
+  prior_credits: number | null
 }
 
 const UPSELL_SEEN_KEY = 'pro_upsell_last_shown'
@@ -32,18 +37,6 @@ const UPSELL_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000
 const PUSH_PRIMER_KEY = 'push_primer_last_shown'
 const PUSH_PRIMER_COOLDOWN_MS = 14 * 24 * 60 * 60 * 1000
 
-function getGPA(pct: number): number {
-  if (pct >= 93) return 4.0
-  if (pct >= 90) return 3.7
-  if (pct >= 87) return 3.3
-  if (pct >= 83) return 3.0
-  if (pct >= 80) return 2.7
-  if (pct >= 77) return 2.3
-  if (pct >= 73) return 2.0
-  if (pct >= 70) return 1.7
-  if (pct >= 60) return 1.0
-  return 0.0
-}
 
 export default function DashboardScreen({ navigation }: any) {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -56,6 +49,7 @@ export default function DashboardScreen({ navigation }: any) {
   // leaves stale numbers behind after edits on another tab. Refetch on
   // focus instead: on demand, and free when nobody is looking.
   const [showPushPrimer, setShowPushPrimer] = useState(false)
+  const [showGpaPrompt, setShowGpaPrompt] = useState(false)
   const badgesChecked = useRef(false)
   const firstFocus = useRef(true)
   useFocusEffect(
@@ -71,7 +65,7 @@ export default function DashboardScreen({ navigation }: any) {
       if (!user) return
 
       const [profileRes, coursesRes] = await Promise.all([
-        supabase.from('profiles').select('full_name, is_pro, has_taken_tour').eq('id', user.id).single(),
+        supabase.from('profiles').select('full_name, is_pro, has_taken_tour, gpa_prompt_seen, prior_gpa, prior_credits').eq('id', user.id).single(),
         supabase.from('courses').select('id, name, code, professor, credits, current_grade').eq('user_id', user.id).order('created_at', { ascending: false })
       ])
 
@@ -81,6 +75,8 @@ export default function DashboardScreen({ navigation }: any) {
       if (profileRes.data) {
         setProfile(profileRes.data)
         if (!profileRes.data.has_taken_tour) setShowTour(true)
+        // Only after the tour, and only once. Skipping counts as answering.
+        else if (!profileRes.data.gpa_prompt_seen) setShowGpaPrompt(true)
       }
       setCourses(coursesRes.data ?? [])
 
@@ -163,13 +159,11 @@ export default function DashboardScreen({ navigation }: any) {
     }
   }
 
-  function calcGPA(): string {
-    const graded = courses.filter(c => c.current_grade !== null && c.credits)
-    if (!graded.length) return '—'
-    const totalPoints = graded.reduce((sum, c) => sum + getGPA(c.current_grade!) * c.credits, 0)
-    const totalCredits = graded.reduce((sum, c) => sum + c.credits, 0)
-    return (totalPoints / totalCredits).toFixed(2)
-  }
+  // Semester GPA is always shown. Cumulative appears only once the student has
+  // told us what they were carrying in, because without prior credits there is
+  // nothing to weight against.
+  const semester = semesterGpa(courses)
+  const cumulative = cumulativeGpa(semester, profile?.prior_gpa, profile?.prior_credits)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
   const atRisk = courses.filter(c => c.current_grade !== null && c.current_grade < 70).length
@@ -199,8 +193,13 @@ export default function DashboardScreen({ navigation }: any) {
       {/* Stat cards */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <Text style={styles.statLabel}>Current GPA</Text>
-          <Text style={[styles.statValue, { color: '#7C3AED' }]}>{calcGPA()}</Text>
+          <Text style={styles.statLabel}>{cumulative !== null ? 'Cumulative GPA' : 'Current GPA'}</Text>
+          <Text style={[styles.statValue, { color: '#7C3AED' }]}>
+            {formatGpa(cumulative !== null ? cumulative : semester.gpa)}
+          </Text>
+          {cumulative !== null ? (
+            <Text style={styles.statSub}>{formatGpa(semester.gpa)} this term</Text>
+          ) : null}
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Courses</Text>
@@ -280,6 +279,10 @@ export default function DashboardScreen({ navigation }: any) {
     </ScrollView>
 
     <OnboardingTour visible={showTour} onDone={finishTour} />
+    <InitialGpaPrompt
+      visible={showGpaPrompt}
+      onDone={() => { setShowGpaPrompt(false); fetchData(true) }}
+    />
     <NotificationPrimer visible={showPushPrimer} onDone={() => setShowPushPrimer(false)} />
     <ProUpsellModal visible={showUpsell} reason="intro" onClose={() => setShowUpsell(false)} />
     </>
@@ -295,6 +298,7 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 10, marginBottom: 14 },
   statCard: { flex: 1, backgroundColor: '#fff', borderRadius: 12, padding: 14, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   atRiskCard: { borderWidth: 1, borderColor: '#fecaca' },
+  statSub: { fontSize: 10.5, color: '#A78BFA', marginTop: 2, fontWeight: '600' },
   statLabel: { fontSize: 11, color: '#A78BFA', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
   statValue: { fontSize: 26, fontWeight: '700', color: '#1E1333' },
   avgBanner: { marginHorizontal: 20, backgroundColor: '#fff', borderRadius: 12, padding: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, shadowColor: '#7C3AED', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },

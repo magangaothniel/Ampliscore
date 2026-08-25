@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase";
 import DeleteAccountModal from "@/components/DeleteAccountModal";
 import Avatar from "@/components/Avatar";
 import { AVATAR_COLORS, avatarColor } from "@/lib/avatar";
+import { isValidPriorGpa, isValidPriorCredits } from "@/lib/gpa";
 
 export default function ProfilePage() {
   const [referralCopied, setReferralCopied] = useState(false);
@@ -17,7 +18,7 @@ export default function ProfilePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [form, setForm] = useState({ full_name: "", university: "", major: "", year_of_study: "" });
+  const [form, setForm] = useState({ full_name: "", university: "", major: "", year_of_study: "", prior_gpa: "", prior_credits: "" });
   const [passwordForm, setPasswordForm] = useState({ newPassword: "", confirmPassword: "" });
 
   useEffect(() => { fetchProfile(); }, []);
@@ -33,6 +34,8 @@ export default function ProfilePage() {
       university: data?.university || "",
       major: data?.major || "",
       year_of_study: data?.year_of_study?.toString() || "",
+      prior_gpa: data?.prior_gpa != null ? String(data.prior_gpa) : "",
+      prior_credits: data?.prior_credits != null ? String(data.prior_credits) : "",
     });
     setLoading(false);
   };
@@ -90,6 +93,11 @@ export default function ProfilePage() {
     setUploadingAvatar(false);
   };
 
+  // Empty is a valid state: it means "not provided", which clears both.
+  const priorBothBlank = form.prior_gpa.trim() === "" && form.prior_credits.trim() === "";
+  const priorPairValid = isValidPriorGpa(form.prior_gpa) && isValidPriorCredits(form.prior_credits);
+  const priorOk = priorBothBlank || priorPairValid;
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -101,6 +109,10 @@ export default function ProfilePage() {
       university: form.university,
       major: form.major,
       year_of_study: form.year_of_study ? parseInt(form.year_of_study) : null,
+      // Both or neither: a GPA with no credit count can't be weighted, so a
+      // half-filled pair is stored as absent rather than silently ignored.
+      prior_gpa: priorPairValid ? Number(form.prior_gpa) : null,
+      prior_credits: priorPairValid ? Number(form.prior_credits) : null,
     }).eq("id", user!.id);
     if (error) setErrorMsg("Failed to save. Please try again.");
     else setSuccessMsg("Profile updated successfully!");
@@ -229,7 +241,43 @@ export default function ProfilePage() {
               </select>
             </div>
           </div>
-          <button type="submit" disabled={saving}
+
+          <div>
+            <label className="block text-sm font-medium text-ink-900 mb-1.5">Starting GPA</label>
+            <p className="text-xs text-ink-400 leading-relaxed mb-2">
+              What you were carrying into this semester. Ampliscore blends it with
+              your current classes so the GPA on your dashboard is your real one.
+              Leave both blank if you&apos;d rather not.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                value={form.prior_gpa}
+                onChange={e => setForm(f => ({ ...f, prior_gpa: e.target.value }))}
+                inputMode="decimal"
+                placeholder="GPA, e.g. 3.42"
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-3 focus:ring-brand-100 ${
+                  form.prior_gpa !== "" && !isValidPriorGpa(form.prior_gpa)
+                    ? "border-bad" : "border-ink-200 focus:border-brand-600"
+                }`}
+              />
+              <input
+                value={form.prior_credits}
+                onChange={e => setForm(f => ({ ...f, prior_credits: e.target.value }))}
+                inputMode="numeric"
+                placeholder="Credits, e.g. 45"
+                className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-3 focus:ring-brand-100 ${
+                  form.prior_credits !== "" && !isValidPriorCredits(form.prior_credits)
+                    ? "border-bad" : "border-ink-200 focus:border-brand-600"
+                }`}
+              />
+            </div>
+            {!priorOk && (
+              <p className="text-xs text-bad mt-2">
+                GPA and credits are needed together. Credits are what weight the GPA.
+              </p>
+            )}
+          </div>
+          <button type="submit" disabled={saving || !priorOk}
             className="w-full py-2.5 bg-brand-600 text-white text-sm font-medium rounded-lg hover:bg-brand-700 transition-colors disabled:opacity-50">
             {saving ? "Saving..." : "Save changes"}
           </button>

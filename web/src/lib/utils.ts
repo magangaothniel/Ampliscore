@@ -1,3 +1,4 @@
+import { gradePoints } from "./gpa";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -34,19 +35,10 @@ export function getLetterGrade(grade: number): string {
   return "F";
 }
 
+// Delegates to the shared scale so there is exactly one definition of what a
+// percentage is worth. Kept as a named export because course pages import it.
 export function getGradePoints(grade: number): number {
-  if (grade >= 93) return 4.0;
-  if (grade >= 90) return 3.7;
-  if (grade >= 87) return 3.3;
-  if (grade >= 83) return 3.0;
-  if (grade >= 80) return 2.7;
-  if (grade >= 77) return 2.3;
-  if (grade >= 73) return 2.0;
-  if (grade >= 70) return 1.7;
-  if (grade >= 67) return 1.3;
-  if (grade >= 63) return 1.0;
-  if (grade >= 60) return 0.7;
-  return 0.0;
+  return gradePoints(grade);
 }
 
 export function calculateGPA(courses: { grade: number; credits: number }[]): number {

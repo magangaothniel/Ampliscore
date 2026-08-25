@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, InputAccessoryView, Keyboard, Platform } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
+import { gradePoints } from '../lib/gpa'
 
 type Course = {
   id: string
@@ -10,18 +11,6 @@ type Course = {
   current_grade: number | null
 }
 
-function getGPA(pct: number): number {
-  if (pct >= 93) return 4.0
-  if (pct >= 90) return 3.7
-  if (pct >= 87) return 3.3
-  if (pct >= 83) return 3.0
-  if (pct >= 80) return 2.7
-  if (pct >= 77) return 2.3
-  if (pct >= 73) return 2.0
-  if (pct >= 70) return 1.7
-  if (pct >= 60) return 1.0
-  return 0.0
-}
 
 function getLetterGrade(pct: number): string {
   if (pct >= 93) return 'A'
@@ -83,7 +72,7 @@ export default function GPAPlannerScreen() {
   function calcCurrentGPA(): number {
     const graded = courses.filter(c => c.current_grade !== null && c.credits)
     if (!graded.length) return 0
-    const totalPoints = graded.reduce((s, c) => s + getGPA(c.current_grade!) * c.credits, 0)
+    const totalPoints = graded.reduce((s, c) => s + gradePoints(c.current_grade!) * c.credits, 0)
     const totalCredits = graded.reduce((s, c) => s + c.credits, 0)
     return totalPoints / totalCredits
   }
@@ -92,7 +81,7 @@ export default function GPAPlannerScreen() {
     if (!courses.length) return 0
     const totalPoints = courses.reduce((s, c) => {
       const grade = parseFloat(targetGrades[c.id] || '85')
-      return s + getGPA(grade) * (c.credits || 3)
+      return s + gradePoints(grade) * (c.credits || 3)
     }, 0)
     const totalCredits = courses.reduce((s, c) => s + (c.credits || 3), 0)
     return totalPoints / totalCredits
@@ -175,7 +164,7 @@ export default function GPAPlannerScreen() {
                   <Text style={[styles.gradeLetter, { color: getGradeColor(grade) }]}>
                     {getLetterGrade(grade)}
                   </Text>
-                  <Text style={styles.gpaPoints}>{getGPA(grade).toFixed(1)} pts</Text>
+                  <Text style={styles.gpaPoints}>{gradePoints(grade).toFixed(1)} pts</Text>
                 </View>
                 <View style={styles.inputRow}>
                   {[60, 70, 77, 83, 87, 90, 93].map(val => (

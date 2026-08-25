@@ -9,6 +9,8 @@
  * move to a server route first.
  */
 
+import { gradePoints } from './gpa';
+
 export type Badge = {
   code: string;
   name: string;
@@ -149,21 +151,6 @@ export async function persistCourseGrade(
   await supabase.from("courses").update(patch).eq("id", courseId);
 }
 
-/** 4.0-scale points for a percentage. Mirrors getGradePoints in utils. */
-function points(grade: number): number {
-  if (grade >= 93) return 4.0;
-  if (grade >= 90) return 3.7;
-  if (grade >= 87) return 3.3;
-  if (grade >= 83) return 3.0;
-  if (grade >= 80) return 2.7;
-  if (grade >= 77) return 2.3;
-  if (grade >= 73) return 2.0;
-  if (grade >= 70) return 1.7;
-  if (grade >= 67) return 1.3;
-  if (grade >= 63) return 1.0;
-  if (grade >= 60) return 0.7;
-  return 0.0;
-}
 
 /**
  * Works out which badges the user now qualifies for and inserts the new ones.
@@ -194,7 +181,7 @@ export async function evaluateAchievements(
   if (scored.length > 0) {
     const credits = scored.reduce((s: number, c: any) => s + (c.credits || 3), 0);
     const quality = scored.reduce(
-      (s: number, c: any) => s + points(c.current_grade) * (c.credits || 3),
+      (s: number, c: any) => s + gradePoints(c.current_grade) * (c.credits || 3),
       0
     );
     if (credits > 0 && quality / credits >= 3.5) qualified.push("deans_list");
