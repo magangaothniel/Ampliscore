@@ -6,6 +6,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 import { courseGrade } from '../lib/gpa'
+import { TERMS, currentTerm, defaultYearFor, yearsForTerm, formatTerm, type Term } from '../lib/terms'
 import { getLetterGrade, getGradeTextColor, getGradeBarColor } from '../lib/grades'
 import ProUpsellModal from './ProUpsellModal'
 
@@ -31,8 +32,8 @@ export default function CoursesScreen({ navigation }: any) {
   const [code, setCode] = useState('')
   const [professor, setProfessor] = useState('')
   const [credits, setCredits] = useState('3')
-  const [semester, setSemester] = useState('Fall')
-  const [year, setYear] = useState('2026')
+  const [semester, setSemester] = useState<Term>(currentTerm())
+  const [year, setYear] = useState(String(defaultYearFor(currentTerm())))
 
   const [isPro, setIsPro] = useState(false)
   const [showUpsell, setShowUpsell] = useState(false)
@@ -153,7 +154,7 @@ export default function CoursesScreen({ navigation }: any) {
   }
 
   function resetForm() {
-    setName(''); setCode(''); setProfessor(''); setCredits('3'); setSemester('Fall'); setYear('2026')
+    setName(''); setCode(''); setProfessor(''); setCredits('3'); setSemester(currentTerm()); setYear(String(defaultYearFor(currentTerm())))
   }
 
   return (
@@ -259,9 +260,34 @@ export default function CoursesScreen({ navigation }: any) {
             <TextInput style={styles.input} placeholder="3" placeholderTextColor="#C4B5FD" value={credits} onChangeText={setCredits} keyboardType="number-pad" />
 
             <Text style={styles.label}>Semester</Text>
-            <View style={styles.termRow}>
-              <TextInput style={[styles.input, styles.termField]} placeholder="Fall" placeholderTextColor="#C4B5FD" value={semester} onChangeText={setSemester} />
-              <TextInput style={[styles.input, styles.yearField]} placeholder="2026" placeholderTextColor="#C4B5FD" value={year} onChangeText={setYear} keyboardType="number-pad" maxLength={4} />
+            <View style={styles.chipRow}>
+              {TERMS.map(t => (
+                <TouchableOpacity
+                  key={t}
+                  style={[styles.termChip, semester === t && styles.termChipOn]}
+                  onPress={() => {
+                    setSemester(t)
+                    // Switching term can leave a year that no longer applies.
+                    const valid = yearsForTerm(t).map(String)
+                    if (!valid.includes(year)) setYear(String(defaultYearFor(t)))
+                  }}
+                >
+                  <Text style={[styles.termChipText, semester === t && styles.termChipTextOn]}>{t}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.label}>Year</Text>
+            <View style={styles.chipRow}>
+              {yearsForTerm(semester).map(y => (
+                <TouchableOpacity
+                  key={y}
+                  style={[styles.termChip, year === String(y) && styles.termChipOn]}
+                  onPress={() => setYear(String(y))}
+                >
+                  <Text style={[styles.termChipText, year === String(y) && styles.termChipTextOn]}>{y}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
 
             <TouchableOpacity style={[styles.saveBtn, saving && { opacity: 0.6 }]} onPress={addCourse} disabled={saving}>
@@ -281,9 +307,11 @@ export default function CoursesScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  termRow: { flexDirection: 'row', gap: 10 },
-  termField: { flex: 2 },
-  yearField: { flex: 1 },
+  chipRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
+  termChip: { flex: 1, paddingVertical: 13, borderRadius: 12, borderWidth: 1.5, borderColor: '#EDE9FE', backgroundColor: '#F5F3FF', alignItems: 'center' },
+  termChipOn: { borderColor: '#7C3AED', backgroundColor: '#EDE9FE' },
+  termChipText: { fontSize: 15, fontWeight: '600', color: '#8E88A3' },
+  termChipTextOn: { color: '#7C3AED' },
   container: { flex: 1, backgroundColor: '#F5F3FF' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20 },
   title: { fontSize: 24, fontWeight: '700', color: '#1E1333' },

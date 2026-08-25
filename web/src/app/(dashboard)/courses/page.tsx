@@ -1,5 +1,6 @@
 "use client";
 import { courseGrade } from "@/lib/gpa";
+import { TERMS, currentTerm, defaultYearFor, yearsForTerm, formatTerm, type Term } from "@/lib/terms";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,7 +43,7 @@ export default function CoursesPage() {
   const [userId, setUserId] = useState<string>("");
   const [form, setForm] = useState({
     name: "", code: "", professor: "", credits: "3",
-    semester: "Fall", year: "2026", color: "#7C3AED",
+    semester: currentTerm(), year: String(defaultYearFor(currentTerm())), color: "#7C3AED",
   });
 
   useEffect(() => { fetchCourses(); }, []);
@@ -97,7 +98,7 @@ export default function CoursesPage() {
     invalidate("courses");
     if (!error) {
       setShowModal(false);
-      setForm({ name: "", code: "", professor: "", credits: "3", semester: "Fall", year: "2026", color: "#7C3AED" });
+      setForm({ name: "", code: "", professor: "", credits: "3", semester: currentTerm(), year: String(defaultYearFor(currentTerm())), color: "#7C3AED" });
       fetchCourses();
     }
     setSaving(false);
@@ -217,7 +218,7 @@ export default function CoursesPage() {
                       <div className="w-3 h-3 rounded-full flex-shrink-0 mt-1" style={{ background: course.color }} />
                       <div>
                         <h3 className="font-medium text-ink-900">{course.name}</h3>
-                        <p className="text-xs text-ink-400">{course.code} · {course.semester} {course.year}</p>
+                        <p className="text-xs text-ink-400">{[course.code, formatTerm(course.semester, course.year)].filter(Boolean).join(" · ")}</p>
                       </div>
                     </div>
                     <button onClick={() => handleDelete(course.id)} aria-label="Delete course" title="Delete course" className="text-ink-400 hover:text-bad transition-colors text-lg leading-none">×</button>
@@ -331,16 +332,27 @@ export default function CoursesPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-ink-900 mb-1.5">Semester</label>
-                  <select value={form.semester} onChange={(e) => setForm({ ...form, semester: e.target.value })}
+                  <select
+                    value={form.semester}
+                    onChange={(e) => {
+                      const term = e.target.value as Term;
+                      const valid = yearsForTerm(term);
+                      // Switching term can leave a year that no longer applies,
+                      // so snap to the nearest valid one.
+                      const year = valid.includes(Number(form.year))
+                        ? form.year
+                        : String(defaultYearFor(term));
+                      setForm({ ...form, semester: term, year });
+                    }}
                     className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
-                    {["Fall","Spring","Summer","Winter"].map(s => <option key={s} value={s}>{s}</option>)}
+                    {TERMS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-ink-900 mb-1.5">Year</label>
                   <select value={form.year} onChange={(e) => setForm({ ...form, year: e.target.value })}
                     className="w-full px-4 py-2.5 rounded-xl border border-purple-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-purple-50/30">
-                    {["2024","2025","2026"].map(y => <option key={y} value={y}>{y}</option>)}
+                    {yearsForTerm(form.semester as Term).map(y => <option key={y} value={String(y)}>{y}</option>)}
                   </select>
                 </div>
               </div>
