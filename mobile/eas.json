@@ -13,12 +13,19 @@
       "distribution": "internal",
       "channel": "preview"
     },
+    "testflight": {
+      "autoIncrement": true,
+      "channel": "preview"
+    },
     "production": {
       "autoIncrement": true,
       "channel": "production"
     }
   },
   "submit": {
+    "testflight": {
+      "ios": {}
+    },
     "production": {}
   }
 }

@@ -1,0 +1,46 @@
+name: TestFlight
+
+# Triggered by pushing to the `testflight` branch, for the same reason as
+# build-ios.yml: eas-cli cannot run on this machine (Big Sur, Node too old).
+# To start a TestFlight build:
+#
+#   git push origin main:testflight --force
+#
+# This differs from build-ios.yml in one way that matters. That workflow uses
+# the `preview` profile, which is `distribution: internal`, meaning an ad-hoc
+# build installed directly on registered devices. Ad-hoc builds cannot be
+# uploaded to App Store Connect, so they can never reach TestFlight. The
+# `testflight` profile uses store distribution instead, which can.
+on:
+  push:
+    branches: ['testflight']
+  workflow_dispatch: {}
+
+concurrency:
+  cancel_in_progress: true
+  group: ${{ workflow.filename }}
+
+jobs:
+  build:
+    name: Build iOS (App Store distribution)
+    type: build
+    params:
+      platform: ios
+      # The `testflight` profile deliberately sits on the `preview` channel,
+      # not `production`. publish-update.yml sends OTA updates to `preview`, so
+      # a build on any other channel would be frozen at whatever JS it shipped
+      # with and would silently never receive another update. Testers would be
+      # stuck on old code with no visible sign of it.
+      #
+      # runtimeVersion follows appVersion (1.0.0), so this build and the
+      # existing ad-hoc preview build share a runtime and both take the same
+      # updates.
+      profile: testflight
+
+  submit:
+    name: Upload to TestFlight
+    needs: [build]
+    type: submit
+    params:
+      build_id: ${{ needs.build.outputs.build_id }}
+      profile: testflight
