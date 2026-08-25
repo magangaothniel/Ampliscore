@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase'
 import { persistCourseGrade } from '../lib/achievements'
 import { courseGrade } from '../lib/gpa'
 import { getLetterGrade, getGradeTextColor, getGradeBarColor } from '../lib/grades'
+import AIGradePredictor from './AIGradePredictor'
 
 type Category = { id: string; course_id: string; name: string; weight: number }
 type Assignment = {
@@ -313,6 +314,14 @@ export default function CourseDetailScreen({ route, navigation }: any) {
             </>
           )}
         </View>
+
+        {course && (
+          <AIGradePredictor
+            course={course}
+            categories={categories}
+            assignments={assignments}
+          />
+        )}
 
         <View style={styles.sectionHead}>
           <Text style={styles.sectionTitle}>Grade categories</Text>
