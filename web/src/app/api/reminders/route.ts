@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { sendPushNotifications, dueTomorrowMessage } from "@/lib/expoPush";
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_build_placeholder");
 
@@ -127,15 +128,24 @@ export async function GET(req: NextRequest) {
   const userIds = [...byUser.keys()];
   const courseIds = [...new Set(due.map((d: any) => d.course_id).filter(Boolean))];
 
-  const [{ data: profiles }, { data: courses }] = await Promise.all([
+  const [{ data: profiles }, { data: courses }, { data: tokens }] = await Promise.all([
     admin.from("profiles").select("id, email, full_name, digest_enabled").in("id", userIds),
     courseIds.length
       ? admin.from("courses").select("id, name, color").in("id", courseIds)
       : Promise.resolve({ data: [] as any[] }),
+    admin.from("push_tokens").select("token, user_id").in("user_id", userIds),
   ]);
 
+  // A student can have more than one device registered.
+  const tokensByUser = new Map<string, string[]>();
+  for (const row of tokens || []) {
+    const list = tokensByUser.get(row.user_id) || [];
+    list.push(row.token);
+    tokensByUser.set(row.user_id, list);
+  }
+
   const courseById = new Map((courses || []).map((c: any) => [c.id, c]));
-  const results: { user: string; status: string; count: number }[] = [];
+  const results: { user: string; status: string; count: number; pushed?: number }[] = [];
 
   if (dryRun) {
     return NextResponse.json({
@@ -144,22 +154,16 @@ export async function GET(req: NextRequest) {
       assignments: due.length,
       preview: (profiles || []).map((p: any) => ({
         email: p.email,
+        devices: (tokensByUser.get(p.id) || []).length,
         items: (byUser.get(p.id) || []).map((a: any) => a.name),
       })),
     });
   }
 
+  const deadTokens: string[] = [];
+
   for (const profile of profiles || []) {
     const rows = byUser.get(profile.id) || [];
-
-    if (!profile.email) {
-      results.push({ user: profile.id, status: "no email", count: rows.length });
-      continue;
-    }
-    if (profile.digest_enabled === false) {
-      results.push({ user: profile.id, status: "unsubscribed", count: rows.length });
-      continue;
-    }
 
     const items = rows.map((a: any) => {
       const c: any = courseById.get(a.course_id);
@@ -170,6 +174,41 @@ export async function GET(req: NextRequest) {
         isExam: !!a.is_exam,
       };
     });
+
+    // Push is opted into separately: having a token means notifications are on
+    // in the app. digest_enabled only governs email, so an unsubscribed student
+    // still gets the phone reminder they explicitly turned on.
+    let pushed = 0;
+    const deviceTokens = tokensByUser.get(profile.id) || [];
+    if (deviceTokens.length > 0) {
+      const { title, body } = dueTomorrowMessage(items);
+      const outcome = await sendPushNotifications(
+        deviceTokens.map((t) => ({ to: t, title, body, data: { screen: "Calendar" } }))
+      );
+      pushed = outcome.sent;
+      deadTokens.push(...outcome.deadTokens);
+    }
+
+    // Email is skipped when there's no address or they've unsubscribed, but a
+    // successful push still counts as having warned them.
+    const emailAllowed = !!profile.email && profile.digest_enabled !== false;
+
+    if (!emailAllowed) {
+      if (pushed > 0) {
+        await admin
+          .from("assignments")
+          .update({ reminder_sent_at: new Date().toISOString() })
+          .in("id", rows.map((a: any) => a.id));
+        results.push({ user: profile.id, status: "pushed only", count: items.length });
+      } else {
+        results.push({
+          user: profile.id,
+          status: profile.email ? "unsubscribed, no device" : "no email, no device",
+          count: rows.length,
+        });
+      }
+      continue;
+    }
 
     const sig = createHmac("sha256", process.env.DIGEST_SECRET || "")
       .update(profile.id)
@@ -198,17 +237,34 @@ export async function GET(req: NextRequest) {
         .update({ reminder_sent_at: new Date().toISOString() })
         .in("id", rows.map((a: any) => a.id));
 
-      results.push({ user: profile.id, status: "sent", count: items.length });
+      results.push({ user: profile.id, status: "sent", count: items.length, pushed });
     } catch (e: any) {
       console.error("Reminder failed for", profile.email, e?.message);
-      results.push({ user: profile.id, status: "failed", count: items.length });
+
+      // The email failed but the push may have landed. Stamping avoids sending
+      // the same reminder to their phone again tomorrow.
+      if (pushed > 0) {
+        await admin
+          .from("assignments")
+          .update({ reminder_sent_at: new Date().toISOString() })
+          .in("id", rows.map((a: any) => a.id));
+      }
+      results.push({ user: profile.id, status: "email failed", count: items.length, pushed });
     }
 
     await new Promise((r) => setTimeout(r, 600));
   }
 
+  // Tokens Apple rejected as dead. Removing them keeps future runs from
+  // wasting calls on phones that uninstalled the app.
+  if (deadTokens.length > 0) {
+    await admin.from("push_tokens").delete().in("token", deadTokens);
+  }
+
   return NextResponse.json({
     sent: results.filter((r) => r.status === "sent").length,
+    pushed: results.reduce((n, r) => n + (r.pushed || 0), 0),
+    prunedTokens: deadTokens.length,
     assignments: due.length,
     results,
   });
