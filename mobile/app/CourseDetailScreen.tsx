@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
 import { persistCourseGrade } from '../lib/achievements'
+import { courseGrade } from '../lib/gpa'
 import { getLetterGrade, getGradeTextColor, getGradeBarColor } from '../lib/grades'
 
 type Category = { id: string; course_id: string; name: string; weight: number }
@@ -34,22 +35,6 @@ type Course = {
 // Web's detail page separately displays an average-of-percentages figure, which
 // disagrees with the stored value; this uses the one that's saved so mobile
 // matches the dashboard.
-function calcGrade(categories: Category[], rows: Assignment[]): number {
-  if (categories.length === 0) return 0
-  let weighted = 0
-  let totalWeight = 0
-  for (const cat of categories) {
-    const catRows = rows.filter(a => a.category_id === cat.id && a.completed)
-    if (catRows.length === 0) continue
-    const earned = catRows.reduce((s, a) => s + (a.grade || 0), 0)
-    const possible = catRows.reduce((s, a) => s + (a.max_grade || 100), 0)
-    if (possible > 0) {
-      weighted += (earned / possible) * 100 * cat.weight
-      totalWeight += cat.weight
-    }
-  }
-  return totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0
-}
 
 export default function CourseDetailScreen({ route, navigation }: any) {
   const courseId: string = route?.params?.courseId
@@ -83,7 +68,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
     setLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) return null
       setUserId(user.id)
 
       // grade_categories is keyed by course_id, not user_id.
@@ -100,13 +85,20 @@ export default function CourseDetailScreen({ route, navigation }: any) {
       setCourse(courseRes.data ?? null)
       setCategories(catRes.data ?? [])
       setAssignments(assignRes.data ?? [])
+
+      // Returned so callers can recalculate against fresh data rather than the
+      // state values, which React has not applied yet at this point.
+      return {
+        categories: (catRes.data ?? []) as Category[],
+        assignments: (assignRes.data ?? []) as Assignment[],
+      }
     } finally {
       setLoading(false)
     }
   }
 
   async function persistGrade(rows: Assignment[], cats: Category[] = categories) {
-    const updated = calcGrade(cats, rows)
+    const updated = courseGrade(cats, rows)
     // Also tracks lowest_grade, which the Comeback badge compares against.
     try {
       await persistCourseGrade(supabase, courseId, updated)
@@ -143,7 +135,11 @@ export default function CourseDetailScreen({ route, navigation }: any) {
         if (error) return Alert.alert('Error', error.message)
       }
       setCatModal(false)
-      await fetchAll()
+      const fresh = await fetchAll()
+      // Changing a category's weight changes the course grade, so the stored
+      // value has to be rewritten. Without this it goes stale and the
+      // dashboards disagree with the course page.
+      if (fresh) await persistGrade(fresh.assignments, fresh.categories)
     } finally {
       setSaving(false)
     }
@@ -263,7 +259,7 @@ export default function CourseDetailScreen({ route, navigation }: any) {
 
   // ---------- derived ----------
 
-  const grade = calcGrade(categories, assignments)
+  const grade = courseGrade(categories, assignments)
   const hasGrades = assignments.some(a => a.completed)
   const totalWeight = categories.reduce((s, c) => s + (c.weight || 0), 0)
 

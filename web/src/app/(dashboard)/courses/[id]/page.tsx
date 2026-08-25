@@ -7,6 +7,7 @@ import { invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor } from "@/lib/utils";
 import AIGradePredictor from "@/components/AIGradePredictor";
 import { persistCourseGrade } from "@/lib/achievements";
+import { courseGrade } from "@/lib/gpa";
 
 export default function CourseDetailPage() {
   // useParams gives string | string[] | undefined. Every use here is a single
@@ -50,38 +51,21 @@ export default function CourseDetailPage() {
 
   // Same maths as calculateCourseGrade, but takes the rows explicitly so it
   // can run against a list that has not been committed to state yet.
-  const calculateCourseGradeFrom = (rows: any[]) => {
-    if (categories.length === 0) return 0;
-    let weighted = 0;
-    let totalWeight = 0;
-    for (const cat of categories) {
-      const catA = rows.filter((a: any) => a.category_id === cat.id && a.completed);
-      if (catA.length > 0) {
-        const earned = catA.reduce((sm: number, a: any) => sm + (a.grade || 0), 0);
-        const possible = catA.reduce((sm: number, a: any) => sm + (a.max_grade || 100), 0);
-        if (possible > 0) {
-          weighted += (earned / possible) * 100 * cat.weight;
-          totalWeight += cat.weight;
-        }
-      }
-    }
-    return totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0;
-  };
+  const calculateCourseGradeFrom = (rows: any[]) => courseGrade(categories, rows);
 
-  const calculateCourseGrade = () => {
-    if (categories.length === 0) return 0;
-    let totalWeight = 0;
-    let weightedScore = 0;
-    for (const cat of categories) {
-      const catAssignments = assignments.filter(a => a.category_id === cat.id && a.completed);
-      if (catAssignments.length > 0) {
-        const avg = catAssignments.reduce((sum, a) => sum + (a.grade / a.max_grade) * 100, 0) / catAssignments.length;
-        weightedScore += avg * cat.weight;
-        totalWeight += cat.weight;
-      }
-    }
-    if (totalWeight === 0) return 0;
-    return Math.round((weightedScore / totalWeight) * 10) / 10;
+  const calculateCourseGrade = () => courseGrade(categories, assignments);
+
+  // Category weights change the course grade, so the stored value has to be
+  // rewritten. Reading back from the database rather than using state, which
+  // React has not applied yet at this point.
+  const recalcAndPersist = async () => {
+    const supabase = createClient();
+    const [catsRes, rowsRes] = await Promise.all([
+      supabase.from("grade_categories").select("*").eq("course_id", id),
+      supabase.from("assignments").select("*").eq("course_id", id),
+    ]);
+    await persistCourseGrade(supabase, id, courseGrade(catsRes.data ?? [], rowsRes.data ?? []));
+    invalidate("courses");
   };
 
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -95,6 +79,7 @@ export default function CourseDetailPage() {
     });
     setCatForm({ name: "", weight: "" });
     setShowCatModal(false);
+    await recalcAndPersist();
     fetchAll();
     setSaving(false);
   };
@@ -108,6 +93,7 @@ export default function CourseDetailPage() {
       weight: parseFloat(editCatForm.weight),
     }).eq("id", editingCat.id);
     setEditingCat(null);
+    await recalcAndPersist();
     fetchAll();
     setSaving(false);
   };
@@ -117,6 +103,7 @@ export default function CourseDetailPage() {
     const supabase = createClient();
     await supabase.from("assignments").delete().eq("category_id", catId);
     await supabase.from("grade_categories").delete().eq("id", catId);
+    await recalcAndPersist();
     fetchAll();
   };
 

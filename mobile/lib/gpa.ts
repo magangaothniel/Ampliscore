@@ -74,6 +74,50 @@ export function cumulativeGpa(
   return (pg * pc + semester.qualityPoints) / totalCredits
 }
 
+export type GradeCategory = { id: string; weight: number }
+export type GradeAssignment = {
+  /** Nullable in the schema: an assignment can exist before it's categorised. */
+  category_id: string | null
+  grade: number | null
+  max_grade: number | null
+  completed: boolean
+}
+
+/**
+ * A course's current percentage, weighted by category.
+ *
+ * This existed in four places with two different algorithms: a points-based
+ * one that persisted to courses.current_grade, and an average-of-percentages
+ * one used for display. They disagreed, so the same course showed different
+ * grades depending on the screen, and the dashboards then disagreed about GPA.
+ * This is the single definition.
+ *
+ * Only completed assignments count. Categories with no completed work are
+ * excluded entirely rather than counted as zero, so an untouched final exam
+ * doesn't drag the grade down before it has been taken.
+ */
+export function courseGrade(
+  categories: GradeCategory[],
+  assignments: GradeAssignment[]
+): number {
+  if (categories.length === 0) return 0
+  let weighted = 0
+  let totalWeight = 0
+
+  for (const cat of categories) {
+    const rows = assignments.filter(a => a.category_id === cat.id && a.completed)
+    if (rows.length === 0) continue
+    const earned = rows.reduce((s, a) => s + (a.grade || 0), 0)
+    const possible = rows.reduce((s, a) => s + (a.max_grade || 100), 0)
+    if (possible > 0) {
+      weighted += (earned / possible) * 100 * cat.weight
+      totalWeight += cat.weight
+    }
+  }
+
+  return totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0
+}
+
 /** Formats a GPA for display, or an em dash when there isn't one yet. */
 export function formatGpa(value: number | null): string {
   return value === null ? '—' : value.toFixed(2)

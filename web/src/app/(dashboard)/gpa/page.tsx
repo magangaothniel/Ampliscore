@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { cached, invalidate } from "@/lib/cache";
-import { getLetterGrade, getGradeColor, calculateGPA, getGradePoints } from "@/lib/utils";
+import { getLetterGrade, getGradeColor, getGradePoints } from "@/lib/utils";
+import { semesterGpa, cumulativeGpa, formatGpa, courseGrade } from "@/lib/gpa";
 
 function Logo() {
   return (
@@ -34,6 +35,7 @@ export default function GPAPage() {
   const [whatIfGrades, setWhatIfGrades] = useState<Record<string, number>>({});
   const [newCourse, setNewCourse] = useState({ name: "", credits: "3", grade: "85" });
   const [hypothetical, setHypothetical] = useState<any[]>([]);
+  const [prior, setPrior] = useState<{ gpa: number | null; credits: number | null }>({ gpa: null, credits: null });
 
   useEffect(() => { fetchCourses(); }, []);
 
@@ -49,22 +51,16 @@ export default function GPAPage() {
       cached(`categories:${user.id}`, async () =>
         (await supabase.from("grade_categories").select("*")).data),
     ]);
+
+    // The planner was computing semester-only figures while the dashboard
+    // showed cumulative, so the same student saw two different GPAs.
+    const { data: profileRow } = await supabase
+      .from("profiles").select("prior_gpa, prior_credits").eq("id", user.id).single();
+    setPrior({ gpa: profileRow?.prior_gpa ?? null, credits: profileRow?.prior_credits ?? null });
     const liveCourses = (data || []).map((course: any) => {
       const cats = (catData || []).filter((c: any) => c.course_id === course.id);
       const courseAssigns = (assignData || []).filter((a: any) => a.course_id === course.id && a.completed);
-      if (cats.length === 0) return { ...course, current_grade: 0 };
-      let weighted = 0, totalWeight = 0;
-      for (const cat of cats) {
-        const catA = courseAssigns.filter((a: any) => a.category_id === cat.id);
-        if (catA.length > 0) {
-          const earned = catA.reduce((s: number, a: any) => s + (a.grade || 0), 0);
-          const possible = catA.reduce((s: number, a: any) => s + (a.max_grade || 100), 0);
-          weighted += (earned / possible) * 100 * cat.weight;
-          totalWeight += cat.weight;
-        }
-      }
-      const grade = totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0;
-      return { ...course, current_grade: grade };
+      return { ...course, current_grade: courseGrade(cats, courseAssigns) };
     });
     setCourses(liveCourses);
     const initial: Record<string, number> = {};
@@ -73,11 +69,22 @@ export default function GPAPage() {
     setLoading(false);
   };
 
-  const currentGPA = calculateGPA(
+  // Each figure blends with what the student was carrying in, so the planner
+  // agrees with the dashboard. With no prior data these fall back to
+  // semester-only, which is what they always were.
+  const blend = (rows: { grade: number; credits: number }[]) => {
+    const sem = semesterGpa(rows.map(r => ({ current_grade: r.grade, credits: r.credits })));
+    const cum = cumulativeGpa(sem, prior.gpa, prior.credits);
+    return cum !== null ? cum : sem.gpa;
+  };
+
+  const hasPrior = prior.gpa !== null && prior.credits !== null && prior.credits > 0;
+
+  const currentGPA = blend(
     courses.map(c => ({ grade: c.current_grade || 0, credits: c.credits || 3 }))
   );
 
-  const whatIfGPA = calculateGPA(
+  const whatIfGPA = blend(
     courses.map(c => ({ grade: whatIfGrades[c.id] ?? c.current_grade ?? 0, credits: c.credits || 3 }))
   );
 
@@ -85,7 +92,7 @@ export default function GPAPage() {
     ...courses.map(c => ({ name: c.name, credits: c.credits || 3, grade: whatIfGrades[c.id] ?? c.current_grade ?? 0 })),
     ...hypothetical,
   ];
-  const combinedGPA = calculateGPA(allCourses.map(c => ({ grade: c.grade, credits: c.credits })));
+  const combinedGPA = blend(allCourses.map(c => ({ grade: c.grade, credits: c.credits })));
 
   const neededPerCourse = () => {
     if (hypothetical.length === 0 && courses.length === 0) return null;
@@ -93,7 +100,15 @@ export default function GPAPage() {
     const currentCredits = courses.reduce((sum, c) => sum + (c.credits || 3), 0);
     const hypCredits = hypothetical.reduce((sum, c) => sum + c.credits, 0);
     if (hypCredits === 0) return null;
-    const needed = (targetGPA * (currentCredits + hypCredits) - currentPoints) / hypCredits;
+
+    // Prior credits count toward the target too. Without them the answer is
+    // badly wrong for anyone past their first semester: a 2.0 across 45 credits
+    // takes far more than a good term to pull up to a 3.5.
+    const priorCredits = hasPrior ? (prior.credits as number) : 0;
+    const priorPoints = hasPrior ? (prior.gpa as number) * priorCredits : 0;
+
+    const needed =
+      (targetGPA * (priorCredits + currentCredits + hypCredits) - priorPoints - currentPoints) / hypCredits;
     return Math.min(4.0, Math.max(0, needed));
   };
 
@@ -131,21 +146,21 @@ export default function GPAPage() {
         {/* GPA Summary */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-2xl p-5 border border-purple-100">
-            <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Current GPA</div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">{hasPrior ? "Cumulative GPA" : "Current GPA"}</div>
             <div className="font-display text-3xl md:text-4xl font-bold tnum text-brand-600">
-              {currentGPA.toFixed(2)}
+              {formatGpa(currentGPA)}
             </div>
           </div>
           <div className="bg-white rounded-2xl p-5 border border-purple-100">
             <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">What-if GPA</div>
             <div className="font-display text-3xl md:text-4xl font-bold tnum text-ink-900">
-              {whatIfGPA.toFixed(2)}
+              {formatGpa(whatIfGPA)}
             </div>
           </div>
           <div className="bg-white rounded-2xl p-5 border border-purple-100">
             <div className="text-xs font-semibold uppercase tracking-wide text-ink-400 mb-1.5">Combined GPA</div>
             <div className="font-display text-3xl md:text-4xl font-bold tnum text-ink-900">
-              {combinedGPA.toFixed(2)}
+              {formatGpa(combinedGPA)}
             </div>
           </div>
         </div>

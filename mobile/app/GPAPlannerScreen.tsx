@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, InputAccessoryView, Keyboard, Platform } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
-import { gradePoints } from '../lib/gpa'
+import { gradePoints, semesterGpa, cumulativeGpa, formatGpa } from '../lib/gpa'
 
 type Course = {
   id: string
@@ -36,6 +36,7 @@ const ACCESSORY_ID = 'gpaTargetDone'
 
 export default function GPAPlannerScreen() {
   const [courses, setCourses] = useState<Course[]>([])
+  const [prior, setPrior] = useState<{ gpa: number | null; credits: number | null }>({ gpa: null, credits: null })
   const [loading, setLoading] = useState(true)
   const [targetGPA, setTargetGPA] = useState('3.5')
   const [targetGrades, setTargetGrades] = useState<Record<string, string>>({})
@@ -66,31 +67,41 @@ export default function GPAPlannerScreen() {
       })
       setTargetGrades(initial)
     }
+
+    // The planner showed semester-only figures while the dashboard showed
+    // cumulative, so the same student saw two different GPAs.
+    const { data: profileRow } = await supabase
+      .from('profiles')
+      .select('prior_gpa, prior_credits')
+      .eq('id', user.id)
+      .single()
+    setPrior({
+      gpa: (profileRow as any)?.prior_gpa ?? null,
+      credits: (profileRow as any)?.prior_credits ?? null,
+    })
     setLoading(false)
   }
 
-  function calcCurrentGPA(): number {
-    const graded = courses.filter(c => c.current_grade !== null && c.credits)
-    if (!graded.length) return 0
-    const totalPoints = graded.reduce((s, c) => s + gradePoints(c.current_grade!) * c.credits, 0)
-    const totalCredits = graded.reduce((s, c) => s + c.credits, 0)
-    return totalPoints / totalCredits
+  // Both figures blend with what the student was carrying in, so the planner
+  // agrees with the dashboard. With no prior data they fall back to
+  // semester-only, which is what they always were.
+  function blend(rows: { current_grade: number | null; credits: number | null }[]): number | null {
+    const sem = semesterGpa(rows)
+    const cum = cumulativeGpa(sem, prior.gpa, prior.credits)
+    return cum !== null ? cum : sem.gpa
   }
 
-  function calcProjectedGPA(): number {
-    if (!courses.length) return 0
-    const totalPoints = courses.reduce((s, c) => {
-      const grade = parseFloat(targetGrades[c.id] || '85')
-      return s + gradePoints(grade) * (c.credits || 3)
-    }, 0)
-    const totalCredits = courses.reduce((s, c) => s + (c.credits || 3), 0)
-    return totalPoints / totalCredits
-  }
+  const hasPrior = prior.gpa !== null && prior.credits !== null && prior.credits > 0
 
-  const currentGPA = calcCurrentGPA()
-  const projectedGPA = calcProjectedGPA()
+  const currentGPA = blend(courses)
+  const projectedGPA = blend(
+    courses.map(c => ({
+      current_grade: parseFloat(targetGrades[c.id] || '85'),
+      credits: c.credits || 3,
+    }))
+  )
   const target = parseFloat(targetGPA) || 3.5
-  const onTrack = projectedGPA >= target
+  const onTrack = (projectedGPA ?? 0) >= target
 
   if (loading) return (
     <View style={styles.center}>
@@ -113,13 +124,13 @@ export default function GPAPlannerScreen() {
       {/* GPA cards */}
       <View style={styles.gpaRow}>
         <View style={styles.gpaCard}>
-          <Text style={styles.gpaLabel}>Current GPA</Text>
-          <Text style={[styles.gpaVal, { color: '#7C3AED' }]}>{currentGPA.toFixed(2)}</Text>
+          <Text style={styles.gpaLabel}>{hasPrior ? 'Cumulative' : 'Current GPA'}</Text>
+          <Text style={[styles.gpaVal, { color: '#7C3AED' }]}>{formatGpa(currentGPA)}</Text>
         </View>
         <View style={styles.arrow}><Text style={styles.arrowText}>→</Text></View>
         <View style={styles.gpaCard}>
           <Text style={styles.gpaLabel}>Projected</Text>
-          <Text style={[styles.gpaVal, { color: onTrack ? '#16a34a' : '#dc2626' }]}>{projectedGPA.toFixed(2)}</Text>
+          <Text style={[styles.gpaVal, { color: onTrack ? '#16a34a' : '#dc2626' }]}>{formatGpa(projectedGPA)}</Text>
         </View>
       </View>
 

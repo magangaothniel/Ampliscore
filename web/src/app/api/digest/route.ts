@@ -1,3 +1,4 @@
+import { courseGrade } from "@/lib/gpa";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createHmac } from "crypto";
@@ -15,21 +16,12 @@ function getAdminClient() {
   );
 }
 
+// Uses the shared calculation so the email can never quote a different grade
+// than the app shows for the same course.
 function computeLiveGrade(course: any, allCats: any[], allAssigns: any[]) {
   const cats = allCats.filter((c) => c.course_id === course.id);
-  const assigns = allAssigns.filter((a) => a.course_id === course.id && a.completed);
-  if (cats.length === 0) return 0;
-  let weighted = 0, totalWeight = 0;
-  for (const cat of cats) {
-    const catA = assigns.filter((a) => a.category_id === cat.id);
-    if (catA.length > 0) {
-      const earned = catA.reduce((s: number, a: any) => s + (a.grade || 0), 0);
-      const possible = catA.reduce((s: number, a: any) => s + (a.max_grade || 100), 0);
-      weighted += (earned / possible) * 100 * cat.weight;
-      totalWeight += cat.weight;
-    }
-  }
-  return totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0;
+  const assigns = allAssigns.filter((a) => a.course_id === course.id);
+  return courseGrade(cats, assigns);
 }
 
 export async function POST(req: NextRequest) {

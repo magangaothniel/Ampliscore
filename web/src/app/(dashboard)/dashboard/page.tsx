@@ -7,7 +7,7 @@ import Link from "next/link";
 import { evaluateAchievements, touchWeeklyStreak, type Badge } from "@/lib/achievements";
 import BadgeShelf from "@/components/BadgeShelf";
 import InitialGpaPrompt from "@/components/InitialGpaPrompt";
-import { semesterGpa, cumulativeGpa, formatGpa } from "@/lib/gpa";
+import { semesterGpa, cumulativeGpa, formatGpa, courseGrade } from "@/lib/gpa";
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -48,19 +48,7 @@ export default function DashboardPage() {
       const updatedCourses = (coursesData || []).map((course: any) => {
         const cats = (catData || []).filter((c: any) => c.course_id === course.id);
         const courseAssigns = (assignData || []).filter((a: any) => a.course_id === course.id && a.completed);
-        if (cats.length === 0) return { ...course, current_grade: 0 };
-        let weighted = 0, totalWeight = 0;
-        for (const cat of cats) {
-          const catA = courseAssigns.filter((a: any) => a.category_id === cat.id);
-          if (catA.length > 0) {
-            const earned = catA.reduce((s: number, a: any) => s + (a.grade || 0), 0);
-            const possible = catA.reduce((s: number, a: any) => s + (a.max_grade || 100), 0);
-            weighted += (earned / possible) * 100 * cat.weight;
-            totalWeight += cat.weight;
-          }
-        }
-        const grade = totalWeight > 0 ? Math.round((weighted / totalWeight) * 10) / 10 : 0;
-        return { ...course, current_grade: grade };
+        return { ...course, current_grade: courseGrade(cats, courseAssigns) };
       });
       setProfile({ ...profileData, email: user.email });
 
