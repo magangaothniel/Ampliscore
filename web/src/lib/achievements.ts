@@ -10,6 +10,7 @@
  */
 
 import { gradePoints } from './gpa';
+import { isCurrentTerm } from './terms';
 
 export type Badge = {
   code: string;
@@ -165,7 +166,7 @@ export async function evaluateAchievements(
   const [{ data: earnedRows }, { data: courses }, { data: assignments }, { data: profile }] =
     await Promise.all([
       supabase.from("achievements").select("code").eq("user_id", userId),
-      supabase.from("courses").select("id, credits, current_grade, lowest_grade").eq("user_id", userId),
+      supabase.from("courses").select("id, credits, current_grade, lowest_grade, semester, year").eq("user_id", userId),
       supabase.from("assignments").select("id, course_id, grade, created_at").eq("user_id", userId),
       supabase.from("profiles").select("week_streak").eq("id", userId).single(),
     ]);
@@ -177,7 +178,11 @@ export async function evaluateAchievements(
   if (graded.length > 0) qualified.push("first_blood");
 
   // Dean's List: credit-weighted GPA across courses that have a grade.
-  const scored = (courses ?? []).filter((c: any) => (c.current_grade ?? 0) > 0);
+  // Dean's List is a semester award, so it counts the term in progress only.
+  // Blending finished terms would hand it out for work already graded.
+  const scored = (courses ?? []).filter(
+    (c: any) => (c.current_grade ?? 0) > 0 && isCurrentTerm(c.semester, c.year)
+  );
   if (scored.length > 0) {
     const credits = scored.reduce((s: number, c: any) => s + (c.credits || 3), 0);
     const quality = scored.reduce(

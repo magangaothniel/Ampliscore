@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import { cached, invalidate } from "@/lib/cache";
 import { getLetterGrade, getGradeColor, getGradePoints } from "@/lib/utils";
 import { semesterGpa, cumulativeGpa, formatGpa, courseGrade } from "@/lib/gpa";
+import { isCurrentTerm } from "@/lib/terms";
 
 function Logo() {
   return (
@@ -57,7 +58,11 @@ export default function GPAPage() {
     const { data: profileRow } = await supabase
       .from("profiles").select("prior_gpa, prior_credits").eq("id", user.id).single();
     setPrior({ gpa: profileRow?.prior_gpa ?? null, credits: profileRow?.prior_credits ?? null });
-    const liveCourses = (data || []).map((course: any) => {
+    // Matches the dashboard: planning is about the term in progress, so a
+    // finished course shouldn't sit in the what-if sliders.
+    const liveCourses = (data || [])
+      .filter((course: any) => isCurrentTerm(course.semester, course.year))
+      .map((course: any) => {
       const cats = (catData || []).filter((c: any) => c.course_id === course.id);
       const courseAssigns = (assignData || []).filter((a: any) => a.course_id === course.id && a.completed);
       return { ...course, current_grade: courseGrade(cats, courseAssigns) };

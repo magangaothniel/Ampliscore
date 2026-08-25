@@ -6,6 +6,7 @@ import { evaluateAchievements, touchWeeklyStreak } from '../lib/achievements'
 import { canAskForPush, isPushSupported } from '../lib/notifications'
 import { getLetterGrade, getGradeTextColor } from '../lib/grades'
 import { semesterGpa, cumulativeGpa, formatGpa, courseGrade } from '../lib/gpa'
+import { isCurrentTerm, currentTermLabel } from '../lib/terms'
 import * as SecureStore from 'expo-secure-store'
 import OnboardingTour from './OnboardingTour'
 import ProUpsellModal from './ProUpsellModal'
@@ -19,6 +20,8 @@ type Course = {
   professor: string
   credits: number
   current_grade: number | null
+  semester: string | null
+  year: number | null
 }
 
 type Profile = {
@@ -71,7 +74,7 @@ export default function DashboardScreen({ navigation }: any) {
       // Recomputing on both sides cannot drift, and it self-heals.
       const [profileRes, coursesRes, catsRes, assignsRes] = await Promise.all([
         supabase.from('profiles').select('full_name, is_pro, has_taken_tour, gpa_prompt_seen, prior_gpa, prior_credits').eq('id', user.id).single(),
-        supabase.from('courses').select('id, name, code, professor, credits, current_grade').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('courses').select('id, name, code, professor, credits, current_grade, semester, year').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('grade_categories').select('id, course_id, weight'),
         supabase.from('assignments').select('course_id, category_id, grade, max_grade, completed').eq('user_id', user.id),
       ])
@@ -178,14 +181,19 @@ export default function DashboardScreen({ navigation }: any) {
     }
   }
 
+  // Only this term counts toward the semester figure. A course from a past
+  // term is finished work; folding it in would make "this term" meaningless
+  // the moment a student has two semesters of courses.
+  const termCourses = courses.filter(c => isCurrentTerm(c.semester, c.year))
+
   // Semester GPA is always shown. Cumulative appears only once the student has
   // told us what they were carrying in, because without prior credits there is
   // nothing to weight against.
-  const semester = semesterGpa(courses)
+  const semester = semesterGpa(termCourses)
   const cumulative = cumulativeGpa(semester, profile?.prior_gpa, profile?.prior_credits)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
-  const atRisk = courses.filter(c => c.current_grade !== null && c.current_grade < 70).length
+  const atRisk = termCourses.filter(c => c.current_grade !== null && c.current_grade < 70).length
   const avgGrade = courses.length
     ? Math.round(courses.filter(c => c.current_grade !== null).reduce((s, c) => s + (c.current_grade || 0), 0) / courses.filter(c => c.current_grade !== null).length)
     : null
@@ -205,7 +213,7 @@ export default function DashboardScreen({ navigation }: any) {
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Hey {firstName}</Text>
-          <Text style={styles.subGreeting}>Here's how your semester is looking</Text>
+          <Text style={styles.subGreeting}>{currentTermLabel()}</Text>
         </View>
       </View>
 
@@ -222,7 +230,7 @@ export default function DashboardScreen({ navigation }: any) {
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Courses</Text>
-          <Text style={styles.statValue}>{courses.length}</Text>
+          <Text style={styles.statValue}>{termCourses.length}</Text>
         </View>
         <View style={[styles.statCard, atRisk > 0 && styles.atRiskCard]}>
           <Text style={styles.statLabel}>At-risk</Text>
@@ -249,16 +257,24 @@ export default function DashboardScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
 
-        {courses.length === 0 ? (
+        {termCourses.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No courses yet</Text>
-            <Text style={styles.emptySub}>Add your first course to start tracking your grades</Text>
+            {/* Someone whose only courses are from a past term would otherwise
+                see a bare empty state and think their work disappeared. */}
+            <Text style={styles.emptyTitle}>
+              {courses.length > 0 ? `Nothing in ${currentTermLabel()} yet` : 'No courses yet'}
+            </Text>
+            <Text style={styles.emptySub}>
+              {courses.length > 0
+                ? 'Your earlier courses are still under Courses.'
+                : 'Add your first course to start tracking your grades'}
+            </Text>
             <TouchableOpacity style={styles.emptyBtn} onPress={() => navigation.navigate('Courses')}>
               <Text style={styles.emptyBtnText}>Add a course</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          courses.map(course => (
+          termCourses.map(course => (
             <TouchableOpacity
               key={course.id}
               style={styles.courseCard}

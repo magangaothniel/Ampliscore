@@ -9,7 +9,7 @@
  * Keep identical to the copy on the other platform.
  */
 
-export const TERMS = ['Fall', 'Spring'] as const
+export const TERMS = ['Fall', 'Spring', 'Summer'] as const
 export type Term = typeof TERMS[number]
 
 /**
@@ -35,23 +35,25 @@ export function availableYears(now: Date = new Date()): number[] {
 /** Whichever term the student is most likely adding a course for right now. */
 export function currentTerm(now: Date = new Date()): Term {
   const m = now.getMonth()
-  // January through May is Spring. June and July default to Fall, since that's
-  // what students are registering for over the summer.
-  return m >= 0 && m <= 4 ? 'Spring' : 'Fall'
+  if (m <= 4) return 'Spring'   // January through May
+  if (m <= 6) return 'Summer'   // June and July
+  return 'Fall'                 // August through December
 }
 
 /** The year that pairs with a term inside the current academic year. */
 export function defaultYearFor(term: Term, now: Date = new Date()): number {
   const start = academicStartYear(now)
+  // Fall opens the academic year; Spring and Summer both fall in the calendar
+  // year after it. Summer 2027 belongs to the year that began Fall 2026.
   return term === 'Fall' ? start : start + 1
 }
 
 /** Years valid for a given term, so Spring can't be paired with a past year. */
 export function yearsForTerm(term: Term, now: Date = new Date()): number[] {
   const start = academicStartYear(now)
-  // Fall belongs to the start year, Spring to the one after. Offering both
-  // years for both terms would let someone create "Spring 2026", a term that
-  // has already finished.
+  // Fall belongs to the start year; Spring and Summer to the one after.
+  // Offering both years for every term would let someone create "Spring 2026",
+  // a term that has already finished.
   return term === 'Fall' ? [start, start + 1] : [start + 1, start + 2]
 }
 
@@ -61,4 +63,28 @@ export function formatTerm(semester?: string | null, year?: number | null): stri
   if (!semester) return String(year)
   if (!year) return semester
   return `${semester} ${year}`
+}
+
+
+/**
+ * Whether a course belongs to the term being shown right now.
+ *
+ * A course with no term set counts as current. Existing rows were backfilled,
+ * so in practice this only covers anything created between that backfill and
+ * this code shipping, and counting it is safer than silently dropping a
+ * student's course out of their GPA.
+ */
+export function isCurrentTerm(
+  semester?: string | null,
+  year?: number | null,
+  now: Date = new Date()
+): boolean {
+  if (!semester && !year) return true
+  return semester === currentTerm(now) && year === defaultYearFor(currentTerm(now), now)
+}
+
+/** "Fall 2026", for labelling which term a figure covers. */
+export function currentTermLabel(now: Date = new Date()): string {
+  const t = currentTerm(now)
+  return `${t} ${defaultYearFor(t, now)}`
 }

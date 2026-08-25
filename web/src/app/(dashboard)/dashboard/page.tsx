@@ -8,6 +8,7 @@ import { evaluateAchievements, touchWeeklyStreak, type Badge } from "@/lib/achie
 import BadgeShelf from "@/components/BadgeShelf";
 import InitialGpaPrompt from "@/components/InitialGpaPrompt";
 import { semesterGpa, cumulativeGpa, formatGpa, courseGrade } from "@/lib/gpa";
+import { isCurrentTerm, currentTermLabel } from "@/lib/terms";
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -83,7 +84,11 @@ export default function DashboardPage() {
   // Semester GPA is always shown. Cumulative appears only once the student has
   // told us what they were carrying in, because without prior credits there is
   // nothing to weight against.
-  const semester = semesterGpa(courses);
+  // Only this term counts toward the semester figure. A course from a past
+  // term is finished work; folding it in would make "this term" meaningless
+  // the moment a student has two semesters of courses.
+  const termCourses = courses.filter((c: any) => isCurrentTerm(c.semester, c.year));
+  const semester = semesterGpa(termCourses);
   const cumulative = cumulativeGpa(semester, profile?.prior_gpa, profile?.prior_credits);
 
   if (loading) return (
@@ -141,12 +146,12 @@ export default function DashboardPage() {
           <h1 className="font-display text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">
             Hey {profile?.full_name?.split(" ")[0] || "there"}
           </h1>
-          <p className="text-ink-600 text-sm mt-1">Here is where your semester stands right now.</p>
+          <p className="text-ink-600 text-sm mt-1">Here is where {currentTermLabel()} stands right now.</p>
         </div>
 
         <div className="grid grid-cols-3 gap-3 md:gap-4 mb-6 md:mb-8">
           {(() => {
-            const atRisk = courses.filter(c => (c.current_grade || 0) < 70 && (c.current_grade || 0) > 0).length;
+            const atRisk = termCourses.filter((c: any) => (c.current_grade || 0) < 70 && (c.current_grade || 0) > 0).length;
             return [
               {
                 label: cumulative !== null ? "Cumulative GPA" : "Current GPA",
@@ -154,7 +159,7 @@ export default function DashboardPage() {
                 color: "text-brand-600",
                 sub: cumulative !== null ? `${formatGpa(semester.gpa)} this term` : null,
               },
-              { label: "Active courses", value: courses.length, color: "text-ink-900", sub: null },
+              { label: "Active courses", value: termCourses.length, color: "text-ink-900", sub: null },
               { label: "At risk", value: atRisk, color: atRisk > 0 ? "text-bad" : "text-good", sub: null },
             ];
           })().map((stat) => (
@@ -228,17 +233,25 @@ export default function DashboardPage() {
             <h2 className="font-display font-bold text-ink-900">Your courses</h2>
             <Link href="/courses" className="text-sm text-brand-600 font-medium hover:text-brand-700">Add course</Link>
           </div>
-          {courses.length === 0 ? (
+          {termCourses.length === 0 ? (
             <div className="py-14 text-center px-4">
-              <p className="text-ink-900 font-medium mb-1">No courses yet</p>
-              <p className="text-ink-600 text-sm mb-5">Add your first course to see where you stand.</p>
+              {/* Someone whose only courses are from a past term would otherwise
+                  see a bare empty state and think their work disappeared. */}
+              <p className="text-ink-900 font-medium mb-1">
+                {courses.length > 0 ? `Nothing in ${currentTermLabel()} yet` : "No courses yet"}
+              </p>
+              <p className="text-ink-600 text-sm mb-5">
+                {courses.length > 0
+                  ? "Your earlier courses are still on the Courses page."
+                  : "Add your first course to see where you stand."}
+              </p>
               <Link href="/courses" className="inline-block bg-brand-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-brand-700 transition-colors">
                 Add a course
               </Link>
             </div>
           ) : (
             <div className="divide-y divide-ink-100">
-              {courses.map((course) => {
+              {termCourses.map((course: any) => {
                 const grade = course.current_grade || 0;
                 const hasGrade = grade > 0;
                 return (

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Activi
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 import { gradePoints, semesterGpa, cumulativeGpa, formatGpa, courseGrade } from '../lib/gpa'
+import { isCurrentTerm } from '../lib/terms'
 
 type Course = {
   id: string
@@ -58,7 +59,7 @@ export default function GPAPlannerScreen() {
     // Recomputed from assignments, matching every other screen. Reading the
     // stored column here would put the planner out of step with the dashboard.
     const [coursesRes, catsRes, assignsRes] = await Promise.all([
-      supabase.from('courses').select('id, name, credits, current_grade').eq('user_id', user.id),
+      supabase.from('courses').select('id, name, credits, current_grade, semester, year').eq('user_id', user.id),
       supabase.from('grade_categories').select('id, course_id, weight'),
       supabase.from('assignments').select('course_id, category_id, grade, max_grade, completed').eq('user_id', user.id),
     ])
@@ -66,7 +67,11 @@ export default function GPAPlannerScreen() {
     if (coursesRes.data) {
       const allCats = catsRes.data ?? []
       const allAssigns = assignsRes.data ?? []
-      const rows = coursesRes.data.map(c => {
+      // Matches the dashboard: planning is about the term in progress, so a
+      // finished course shouldn't sit in the what-if sliders.
+      const rows = coursesRes.data
+        .filter((c: any) => isCurrentTerm(c.semester, c.year))
+        .map(c => {
         const g = courseGrade(
           allCats.filter(k => k.course_id === c.id),
           allAssigns.filter(a => a.course_id === c.id)
