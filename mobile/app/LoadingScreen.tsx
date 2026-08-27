@@ -22,6 +22,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#F5F3FF',
   },
-  // 240 matches imageWidth in app.json; height keeps the asset's 848x675 ratio.
-  lockup: { width: 240, height: 191 },
+  // 240 matches imageWidth in app.json; height keeps the asset's 748x719 ratio.
+  lockup: { width: 240, height: 231 },
 })
