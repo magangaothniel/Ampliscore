@@ -165,11 +165,7 @@ export default function AIGradePredictor({ course, categories, assignments }: Pr
     <View style={styles.card}>
       <TouchableOpacity
         style={styles.header}
-        onPress={() => {
-          const next = !open
-          setOpen(next)
-          if (next && !result && !noCategories) run()
-        }}
+        onPress={() => setOpen(!open)}
       >
         <Ionicons name="sparkles" size={18} color="#7C3AED" />
         <Text style={styles.headerTitle}>AI Grade Predictor</Text>
@@ -207,10 +203,17 @@ export default function AIGradePredictor({ course, categories, assignments }: Pr
                   disabled={loading || limitReached}
                 >
                   <Text style={styles.runBtnText}>
-                    {loading ? 'Analyzing' : 'Recalculate'}
+                    {loading ? 'Analyzing' : result === '' ? 'Calculate' : 'Recalculate'}
                   </Text>
                 </TouchableOpacity>
               </View>
+
+              {result === '' && !loading && error === '' && !limitReached && (
+                <Text style={styles.hint}>
+                  Set your target, then tap Calculate. Claude reads the grades
+                  you have entered for this course.
+                </Text>
+              )}
 
               {limit && !limitReached && (
                 <Text style={styles.meta}>
@@ -313,6 +316,7 @@ const styles = StyleSheet.create({
   runBtnOff: { opacity: 0.5 },
   runBtnText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   meta: { fontSize: 12, color: '#9CA3AF', marginTop: 12 },
+  hint: { fontSize: 13, color: '#6B7280', lineHeight: 19, marginTop: 14 },
   empty: { fontSize: 14, color: '#6B7280', lineHeight: 20 },
   loading: {
     flexDirection: 'row',
