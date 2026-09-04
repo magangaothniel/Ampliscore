@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       await supabase.from("profiles").update({
         is_pro: true,
         stripe_customer_id: customerId,
+        pro_source: "stripe",
       }).eq("id", userId);
     }
   }
@@ -41,7 +42,13 @@ export async function POST(req: NextRequest) {
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription;
     const customerId = subscription.customer as string;
-    await supabase.from("profiles").update({ is_pro: false }).eq("stripe_customer_id", customerId);
+    // Scoped to Stripe-sourced Pro so a user who cancelled here but now
+    // subscribes through the App Store keeps their access.
+    await supabase
+      .from("profiles")
+      .update({ is_pro: false, pro_source: null })
+      .eq("stripe_customer_id", customerId)
+      .eq("pro_source", "stripe");
   }
 
   return NextResponse.json({ received: true });

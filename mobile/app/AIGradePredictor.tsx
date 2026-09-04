@@ -3,11 +3,10 @@ import {
   View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../lib/supabase'
+import ProUpsellModal from './ProUpsellModal'
 
 const ENDPOINT = 'https://ampliscore.app/api/predict'
-const UPGRADE = 'https://ampliscore.app/upgrade'
 
 type Category = { id: string; name: string; weight: number }
 type Assignment = {
@@ -37,6 +36,7 @@ export default function AIGradePredictor({ course, categories, assignments }: Pr
   const [targetGrade, setTargetGrade] = useState('90')
   const [limit, setLimit] = useState<{ used: number; cap: number } | null>(null)
   const [limitReached, setLimitReached] = useState(false)
+  const [upsellVisible, setUpsellVisible] = useState(false)
 
   // Access is decided by the same two columns the endpoint checks, so the card
   // a student sees matches what the server will actually allow.
@@ -151,10 +151,16 @@ export default function AIGradePredictor({ course, categories, assignments }: Pr
         </Text>
         <TouchableOpacity
           style={styles.upsellBtn}
-          onPress={() => WebBrowser.openBrowserAsync(UPGRADE)}
+          onPress={() => setUpsellVisible(true)}
         >
           <Text style={styles.upsellBtnText}>Upgrade to Pro · $4.99/mo</Text>
         </TouchableOpacity>
+        <ProUpsellModal
+          visible={upsellVisible}
+          reason="ai_limit"
+          onClose={() => setUpsellVisible(false)}
+          onPurchased={() => setAccess(true)}
+        />
       </View>
     )
   }

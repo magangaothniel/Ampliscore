@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect } from '@react-navigation/native'
 import { supabase } from '../lib/supabase'
 import { avatarColor, avatarInitials } from '../lib/avatar'
+import { restorePro } from '../lib/purchases'
+import ProUpsellModal from './ProUpsellModal'
 
 type Profile = {
   full_name: string | null
@@ -19,6 +21,8 @@ export default function ProfileScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const [badgeCount, setBadgeCount] = useState(0)
+  const [upsellVisible, setUpsellVisible] = useState(false)
+  const [restoring, setRestoring] = useState(false)
 
   // Screens stay mounted under React Navigation, so a mount-only fetch
   // leaves stale numbers behind after edits on another tab. Refetch on
@@ -48,6 +52,24 @@ export default function ProfileScreen({ navigation }: any) {
       .eq('user_id', user.id)
     setBadgeCount(count ?? 0)
     setLoading(false)
+  }
+
+  // Apple requires a restore path that works without a purchase flow, for
+  // users reinstalling or moving to a new device.
+  async function handleRestore() {
+    setRestoring(true)
+    const result = await restorePro()
+    setRestoring(false)
+    if (result.status === 'purchased') {
+      await fetchProfile(true)
+      Alert.alert('Pro restored', 'Your subscription is active on this device.')
+    } else if (result.status === 'error') {
+      Alert.alert('Nothing to restore', result.message)
+    }
+  }
+
+  async function manageSubscription() {
+    await WebBrowser.openBrowserAsync('https://apps.apple.com/account/subscriptions')
   }
 
   async function signOut() {
@@ -124,7 +146,7 @@ export default function ProfileScreen({ navigation }: any) {
       </View>
 
       {!profile?.is_pro && (
-        <TouchableOpacity style={styles.upgradeBanner} onPress={() => openWeb('/upgrade')}>
+        <TouchableOpacity style={styles.upgradeBanner} onPress={() => setUpsellVisible(true)}>
           <Text style={styles.upgradeTitle}>✦ Upgrade to Pro</Text>
           <Text style={styles.upgradeSub}>AI grade predictor, unlimited courses & more</Text>
           <Text style={styles.upgradePrice}>$4.99/month</Text>
@@ -153,12 +175,37 @@ export default function ProfileScreen({ navigation }: any) {
           <Text style={styles.menuLabel}>Privacy & security</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={openSupport}>
+        <TouchableOpacity style={styles.menuItem} onPress={openSupport}>
           <Ionicons name="help-circle-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
           <Text style={styles.menuLabel}>Help & support</Text>
           <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
         </TouchableOpacity>
+        {profile?.is_pro ? (
+          <TouchableOpacity style={styles.menuItem} onPress={manageSubscription}>
+            <Ionicons name="card-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
+            <Text style={styles.menuLabel}>Manage subscription</Text>
+            <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />
+          </TouchableOpacity>
+        ) : null}
+        <TouchableOpacity
+          style={[styles.menuItem, { borderBottomWidth: 0 }]}
+          onPress={handleRestore}
+          disabled={restoring}
+        >
+          <Ionicons name="refresh-outline" size={20} color="#7C3AED" style={styles.menuIcon} />
+          <Text style={styles.menuLabel}>Restore purchases</Text>
+          {restoring
+            ? <ActivityIndicator size="small" color="#7C3AED" />
+            : <Ionicons name="chevron-forward" size={18} color="#C4B5FD" />}
+        </TouchableOpacity>
       </View>
+
+      <ProUpsellModal
+        visible={upsellVisible}
+        reason="intro"
+        onClose={() => setUpsellVisible(false)}
+        onPurchased={() => fetchProfile(true)}
+      />
 
       <TouchableOpacity style={styles.signOutBtn} onPress={signOut}>
         <Text style={styles.signOutText}>Sign out</Text>

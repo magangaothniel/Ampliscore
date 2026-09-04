@@ -45,12 +45,6 @@ const PRO_FEATURES = [
   { text: "Priority support", included: true },
 ];
 
-const TESTIMONIALS = [
-  { name: "Marcus T.", university: "University of Michigan", text: "The grade predictor told me I needed a 71% on my final to keep my B. I studied exactly right and hit 74%. Literally saved my GPA." },
-  { name: "Priya S.", university: "UCLA", text: "I was failing Orgo and didn't even know it. Ampliscore flagged it 3 weeks before finals. I had time to fix it." },
-  { name: "Jordan K.", university: "Georgia Tech", text: "RateMyProfessor is outdated. Ampliscore shows me who's actually teaching my classes this semester with real recent reviews." },
-];
-
 export default function UpgradePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -137,22 +131,6 @@ export default function UpgradePage() {
                 <div className="text-2xl mb-3">{f.icon}</div>
                 <h3 className="font-medium text-ink-900 mb-2 text-sm">{f.title}</h3>
                 <p className="text-xs text-ink-600 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-16">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-ink-900 text-center mb-8">What students are saying</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className="bg-white rounded-xl border border-ink-200 shadow-card p-5">
-                <div className="text-amber-400 mb-3 text-sm">★★★★★</div>
-                <p className="text-sm text-ink-600 leading-relaxed mb-4">"{t.text}"</p>
-                <div>
-                  <div className="text-sm font-medium text-ink-900">{t.name}</div>
-                  <div className="text-xs text-ink-400">{t.university}</div>
-                </div>
               </div>
             ))}
           </div>

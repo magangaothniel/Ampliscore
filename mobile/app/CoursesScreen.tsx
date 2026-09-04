@@ -301,6 +301,7 @@ export default function CoursesScreen({ navigation }: any) {
         visible={showUpsell}
         reason="course_limit"
         onClose={() => setShowUpsell(false)}
+        onPurchased={() => fetchCourses(true)}
       />
     </View>
   )

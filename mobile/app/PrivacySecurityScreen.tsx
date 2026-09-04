@@ -7,6 +7,8 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 import * as WebBrowser from 'expo-web-browser'
 import { supabase } from '../lib/supabase'
+import { hasAppleSubscription } from '../lib/purchases'
+import ProUpsellModal from './ProUpsellModal'
 
 const WEB = 'https://ampliscore.app'
 
@@ -20,6 +22,7 @@ type BillingDisclosure = {
 export default function PrivacySecurityScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true)
   const [isPro, setIsPro] = useState(false)
+  const [upsellVisible, setUpsellVisible] = useState(false)
   const [termsAt, setTermsAt] = useState<string | null>(null)
 
   const [newPassword, setNewPassword] = useState('')
@@ -70,6 +73,13 @@ export default function PrivacySecurityScreen({ navigation }: any) {
   async function manageSubscription() {
     setPortalBusy(true)
     try {
+      // Apple subscribers can only cancel through Apple. Sending them to the
+      // Stripe portal would show an empty page and strand them.
+      if (await hasAppleSubscription()) {
+        await WebBrowser.openBrowserAsync('https://apps.apple.com/account/subscriptions')
+        return
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         return Alert.alert('Signed out', 'Please sign in again.')
@@ -210,7 +220,7 @@ export default function PrivacySecurityScreen({ navigation }: any) {
               <Text style={styles.planSub}>{isPro ? '$4.99/month · billed monthly' : 'Up to 4 courses'}</Text>
             </View>
             {!isPro ? (
-              <TouchableOpacity style={styles.upgradeBtn} onPress={() => WebBrowser.openBrowserAsync(`${WEB}/upgrade`)}>
+              <TouchableOpacity style={styles.upgradeBtn} onPress={() => setUpsellVisible(true)}>
                 <Text style={styles.upgradeBtnText}>Upgrade</Text>
               </TouchableOpacity>
             ) : null}
@@ -269,6 +279,13 @@ export default function PrivacySecurityScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <ProUpsellModal
+        visible={upsellVisible}
+        reason="intro"
+        onClose={() => setUpsellVisible(false)}
+        onPurchased={() => setIsPro(true)}
+      />
 
       <Modal visible={deleteOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setDeleteOpen(false)}>
         <View style={styles.modal}>

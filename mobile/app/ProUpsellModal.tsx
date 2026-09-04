@@ -1,7 +1,9 @@
 import type React from 'react'
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions } from 'react-native'
+import { useEffect, useState } from 'react'
+import { View, Text, StyleSheet, Modal, TouchableOpacity, Dimensions, ActivityIndicator, Alert } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import * as WebBrowser from 'expo-web-browser'
+import type { PurchasesPackage } from 'react-native-purchases'
+import { getProPackage, purchasePro, restorePro, purchasesAvailable } from '../lib/purchases'
 
 const { width } = Dimensions.get('window')
 
@@ -35,19 +37,66 @@ export default function ProUpsellModal({
   visible,
   reason = 'intro',
   onClose,
+  onPurchased,
 }: {
   visible: boolean
   reason?: UpsellReason
   onClose: () => void
+  onPurchased?: () => void
 }) {
   const copy = HEADLINES[reason]
+  const [pkg, setPkg] = useState<PurchasesPackage | null>(null)
+  const [busy, setBusy] = useState(false)
 
-  function openUpgrade() {
-    // External checkout is permitted on the US storefront without an
-    // entitlement (guideline 3.1.1(a), revised May 2025). App Store
-    // availability must stay US-only for this to remain compliant.
-    WebBrowser.openBrowserAsync('https://ampliscore.app/upgrade')
-    onClose()
+  // Offerings are fetched per-open rather than once at mount so a user who
+  // buys, refunds, or changes storefront mid-session sees the right price.
+  useEffect(() => {
+    if (!visible) return
+    let active = true
+    getProPackage().then(p => { if (active) setPkg(p) })
+    return () => { active = false }
+  }, [visible])
+
+  // Falls back to the hardcoded price until StoreKit answers, so the paywall
+  // never renders a blank price row.
+  const priceLabel = pkg?.product.priceString ?? '$4.99'
+
+  async function handleUpgrade() {
+    if (!purchasesAvailable()) {
+      Alert.alert('Not available', 'In-app purchases are not available on this device yet.')
+      return
+    }
+    if (!pkg) {
+      Alert.alert('One moment', 'Still loading pricing from the App Store. Try again in a second.')
+      return
+    }
+
+    setBusy(true)
+    const result = await purchasePro(pkg)
+    setBusy(false)
+
+    if (result.status === 'purchased') {
+      onPurchased?.()
+      onClose()
+      Alert.alert('You’re Pro', 'Unlimited courses and AI predictions are unlocked.')
+    } else if (result.status === 'error') {
+      Alert.alert('Purchase failed', result.message)
+    }
+    // 'cancelled' is silent — the user closed the Apple sheet on purpose.
+  }
+
+  async function handleRestore() {
+    setBusy(true)
+    const result = await restorePro()
+    setBusy(false)
+
+    if (result.status === 'purchased') {
+      onPurchased?.()
+      onClose()
+      Alert.alert('Pro restored', 'Your subscription is active again on this device.')
+    } else if (result.status === 'error') {
+      Alert.alert('Nothing to restore', result.message)
+    }
   }
 
   return (
@@ -76,16 +125,28 @@ export default function ProUpsellModal({
           </View>
 
           <View style={styles.priceRow}>
-            <Text style={styles.price}>$4.99</Text>
+            <Text style={styles.price}>{priceLabel}</Text>
             <Text style={styles.per}>/month</Text>
           </View>
-          <Text style={styles.cancel}>Cancel anytime.</Text>
+          <Text style={styles.cancel}>
+            Auto-renews monthly. Cancel anytime in your Apple ID settings.
+          </Text>
 
-          <TouchableOpacity style={styles.cta} onPress={openUpgrade}>
-            <Text style={styles.ctaText}>Upgrade to Pro</Text>
+          <TouchableOpacity
+            style={[styles.cta, busy && styles.ctaDisabled]}
+            onPress={handleUpgrade}
+            disabled={busy}
+          >
+            {busy
+              ? <ActivityIndicator color="#fff" />
+              : <Text style={styles.ctaText}>Upgrade to Pro</Text>}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={onClose} style={styles.later}>
+          <TouchableOpacity onPress={handleRestore} disabled={busy} style={styles.restore}>
+            <Text style={styles.restoreText}>Restore purchases</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={onClose} disabled={busy} style={styles.later}>
             <Text style={styles.laterText}>Not now</Text>
           </TouchableOpacity>
         </View>
@@ -110,7 +171,10 @@ const styles = StyleSheet.create({
   per: { fontSize: 15, color: '#8E88A3' },
   cancel: { fontSize: 13, color: '#8E88A3', marginTop: 2, marginBottom: 20 },
   cta: { backgroundColor: '#7C3AED', borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
+  ctaDisabled: { opacity: 0.6 },
   ctaText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  later: { alignItems: 'center', paddingTop: 14 },
+  restore: { alignItems: 'center', paddingTop: 14 },
+  restoreText: { fontSize: 14, color: '#7C3AED', fontWeight: '600' },
+  later: { alignItems: 'center', paddingTop: 10 },
   laterText: { fontSize: 15, color: '#8E88A3' },
 })

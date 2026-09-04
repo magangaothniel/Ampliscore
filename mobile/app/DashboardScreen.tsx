@@ -319,7 +319,12 @@ export default function DashboardScreen({ navigation }: any) {
       onDone={() => { setShowGpaPrompt(false); fetchData(true) }}
     />
     <NotificationPrimer visible={showPushPrimer} onDone={() => setShowPushPrimer(false)} />
-    <ProUpsellModal visible={showUpsell} reason="intro" onClose={() => setShowUpsell(false)} />
+    <ProUpsellModal
+      visible={showUpsell}
+      reason="intro"
+      onClose={() => setShowUpsell(false)}
+      onPurchased={() => fetchData(true)}
+    />
     </>
   )
 }

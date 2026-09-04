@@ -9,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import * as Updates from 'expo-updates'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from './lib/supabase'
+import { initPurchases, resetPurchasesUser } from './lib/purchases'
 import LoginScreen from './app/LoginScreen'
 import RegisterScreen from './app/RegisterScreen'
 import DashboardScreen from './app/DashboardScreen'
@@ -157,9 +158,14 @@ export default function App() {
       setSession(session)
       setLoading(false)
       SplashScreen.hideAsync()
+      // RevenueCat is keyed by Supabase user id so a purchase made on one
+      // device resolves to the same account everywhere.
+      if (session?.user) initPurchases(session.user.id)
     })
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
+      if (session?.user) initPurchases(session.user.id)
+      else resetPurchasesUser()
     })
   }, [])
 
