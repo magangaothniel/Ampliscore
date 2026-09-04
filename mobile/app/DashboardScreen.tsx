@@ -304,7 +304,7 @@ export default function DashboardScreen({ navigation }: any) {
 
       {/* Pro upsell if not pro */}
       {!profile?.is_pro && (
-        <TouchableOpacity style={styles.proBanner}>
+        <TouchableOpacity style={styles.proBanner} onPress={() => setShowUpsell(true)}>
           <Text style={styles.proTitle}>✦ Upgrade to Pro</Text>
           <Text style={styles.proSub}>AI grade predictor, unlimited courses & more · $4.99/mo</Text>
         </TouchableOpacity>

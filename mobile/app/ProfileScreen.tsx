@@ -87,6 +87,8 @@ export default function ProfileScreen({ navigation }: any) {
 
   const WEB = 'https://ampliscore.app'
 
+  // Kept for non-purchase web links (support, legal). Upgrade flows go
+  // through the native paywall now — never a browser.
   function openWeb(path: string) {
     WebBrowser.openBrowserAsync(`${WEB}${path}`)
   }
