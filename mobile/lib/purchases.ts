@@ -6,7 +6,7 @@ import { supabase } from './supabase'
 // RevenueCat public SDK key. Safe to ship in the client — it can only read
 // offerings and start purchases, never issue entitlements. Grab it from
 // app.revenuecat.com → Project → API keys → "Public app-specific" (iOS).
-const REVENUECAT_IOS_KEY = 'appl_REPLACE_ME'
+const REVENUECAT_IOS_KEY = 'appl_dUFtJnoVSNdVuRhcRbahQZNGfYK'
 
 // Entitlement identifier configured in the RevenueCat dashboard. Every Pro
 // product (monthly today, annual later) maps to this one entitlement, so the
